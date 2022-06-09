@@ -20,9 +20,11 @@ ENV DB_PASSWORD=
 ENV DB_DATABASE="steam_invite"
 
 
-ADD ./code /main
-WORKDIR /main
+WORKDIR /tmp
+ADD ./requirements.txt /tmp
 RUN pip3 install -r ./requirements.txt --user
+
+ADD ./code /main
 WORKDIR /main
 RUN chmod +x ./main.py
 CMD ["python3","-u","/main/main.py"]
