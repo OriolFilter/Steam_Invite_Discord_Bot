@@ -64,14 +64,14 @@ class CustomBot(commands.Bot):
 
     def add_commands(self):
         @self.command()
-        async def discord_invite(ctx):
+        async def bot_invite(ctx):
             """
             In case someone wants to add this bot to their server use the link provided by this command
             :param ctx:
             :return:
             """
             await ctx.reply(
-                f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot))',
+                f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
                 mention_author=False)
 
         @self.command()
