@@ -1,5 +1,5 @@
 FROM python:alpine
-ARG VERSION="0.9"
+ARG VERSION="1.0"
 LABEL "author"="Oriol Filter Anson"
 LABEL "version"="${VERSION}"
 LABEL "description"="Discord bot mainly used to post Steam's lobby link"

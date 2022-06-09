@@ -25,8 +25,7 @@ class CustomBot(commands.Bot):
         print('Logged as')
         print(self.user.name)
         print(self.user.id)
-        print(
-            f'invite me with: https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot')
+        print(f'invite me with: {self.invite_url}')
         print('------')
 
     def __init__(self, *args, **kwargs):
@@ -40,7 +39,8 @@ class CustomBot(commands.Bot):
         _: {Exception: Embed} = {
             dberrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
             DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_no_steam_id_set,
-            commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found
+            commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
+            OperationalError: lambda: self._embed_error_no_db_connection,
         }
 
         if hasattr(exception, "original"):
@@ -54,9 +54,10 @@ class CustomBot(commands.Bot):
             if isinstance(original_err_class, key):
                 embed = value
         if embed:
-            await ctx.send(embed=embed())
+            await ctx.reply(embed=embed(), mention_author=True)
         else:
-            await ctx.send("Unknown error, contact the administrator.")
+            print(f'Caught error {original_err_class}')
+            await ctx.reply("Unknown error, contact the administrator.", mention_author=True)
 
     def run(self, *args, **kwargs):
         super(commands.Bot, self).run(self.configuration.token, *args, **kwargs)
@@ -69,8 +70,8 @@ class CustomBot(commands.Bot):
             :param ctx:
             :return:
             """
-            await ctx.send(
-                f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot))')
+            await ctx.reply(
+                f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot))', mention_author=False)
 
         @self.command()
         async def link(ctx: Context, vanity_url: str = None):
@@ -81,17 +82,17 @@ class CustomBot(commands.Bot):
             :return:
             """
             if not vanity_url:
-                await ctx.send(
-                    f"You need to insert a vanity url, for further information uppon it's usage type '{self.command_prefix}help' (not added yet)")
+                await ctx.reply(
+                    f"You need to insert a vanity url, for further information regarding it's usage type '{self.command_prefix}vanity' ")
             else:
                 try:
                     steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
                     middleware.set_steam_id(discord_id=ctx.author.id,
                                             steam_id=steam_id)
-                    await ctx.send(f"Just linked up your account, please verify the following account is "
-                                   f"yours.\nhttps://www.steamidfinder.com/signature/{steam_id}.png")
+                    await ctx.reply(f"Just linked up your account, please verify the following account is "
+                                   f"yours.\nhttps://www.steamidfinder.com/signature/{steam_id}.png", mention_author=False)
                 except Steam.VanityUrlNotFound:
-                    await ctx.send("Vanity URL couldn't be found, please check the syntax again")
+                    await ctx.reply("Vanity URL couldn't be found, please check the syntax again", mention_author=False)
 
         @self.command()
         async def unlink(ctx):
@@ -100,24 +101,24 @@ class CustomBot(commands.Bot):
             :return:
             """
             middleware.unset_steam_id(discord_id=ctx.author.id)
-            await ctx.send("Successfully removed the entry")
+            await ctx.reply("Successfully removed the entry", mention_author=False)
 
-        @self.command()
-        async def status(ctx: Context, user: discord.User = None):
-            """
-            Placeholder, it does be mad ugly
-            Returns the status of the specified player
-            :param ctx:
-            :param user:
-            :return:
-            """
-            if user:
-                steam_id = middleware.get_steam_id_from_discord_id(user.id)
-            else:
-                steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
-            summary = middleware.get_steam_summary(steam_id=steam_id)
-            embed = self._embed_simple_player(summary)
-            await ctx.send(embed=embed)
+        # @self.command()
+        # async def status(ctx: Context, user: discord.User = None):
+        #     """
+        #     Placeholder, it does be mad ugly
+        #     Returns the status of the specified player
+        #     :param ctx:
+        #     :param user:
+        #     :return:
+        #     """
+        #     if user:
+        #         steam_id = middleware.get_steam_id_from_discord_id(user.id)
+        #     else:
+        #         steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
+        #     summary = middleware.get_steam_summary(steam_id=steam_id)
+        #     embed = self._embed_player_simple(summary)
+        #     await ctx.send(embed=embed)
 
         @self.command()
         async def lobby(ctx: Context, *members: discord.Member):
@@ -137,19 +138,20 @@ class CustomBot(commands.Bot):
                 embed = self._embed_error_no_lobby(summary)
 
             if not any(members):
-                await ctx.send(embed=embed)
+                await ctx.reply(embed=embed, mention_author=False)
             elif len(members) > 4:
-                await ctx.send("Sorry, max allowed players to invite are 4")
+                await ctx.reply("Sorry, max allowed players to invite are 4", mention_author=True)
             else:
                 mail_list = []
                 for member in list(set(members)):
                     if isinstance(member, discord.Member):
                         mail_list.append(member)
                     else:
-                        await ctx.send("There was an error with the users given, ensure you @ed correctly the users ")
+                        await ctx.reply("There was an error with the users given, ensure you @ed correctly the users ",
+                                        mention_author=True)
                 for member in mail_list:
                     await member.send(embed=embed)
-                await ctx.send("Sent an invite to the specified user(s)!")
+                await ctx.reply("Sent an invite to the specified user(s)!", mention_author=False)
 
         @self.command()
         async def vanity(ctx: Context):
@@ -158,7 +160,7 @@ class CustomBot(commands.Bot):
             :param ctx:
             :return:
             """
-            await ctx.send(f"ie:  `{self.command_prefix}link SavageBidoof`\nhttps://i.imgur.com/VHdVEj8.png")
+            await ctx.reply(f"ie:  `{self.command_prefix}link SavageBidoof`\nhttps://i.imgur.com/VHdVEj8.png", mention_author=False)
 
         @self.command()
         async def profile(ctx: Context, user: discord.User = None):
@@ -172,7 +174,7 @@ class CustomBot(commands.Bot):
                 steam_id = middleware.get_steam_id_from_discord_id(user.id)
             else:
                 steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
-            await ctx.send(f'https://www.steamidfinder.com/signature/{steam_id}.png')
+            await ctx.reply(f'https://www.steamidfinder.com/signature/{steam_id}.png', mention_author=False)
 
         @self.command()
         async def version(ctx: Context):
@@ -181,12 +183,16 @@ class CustomBot(commands.Bot):
             :param ctx:
             :return:
             """
-            await ctx.send(embed=self._embed_version)
+            await ctx.reply(embed=self._embed_version, mention_author=False)
+
+    @property
+    def invite_url(self) -> str:
+        return f"https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot"
 
     @property
     def _embed_version(self) -> Embed:
         embed = Embed(title="Github Repository", url="https://github.com/OriolFilter/Steam_Invite_Discord",
-                              description="Discord bot mainly used to get users's lobby link", color=0xababab)
+                      description="Discord bot mainly used to get users's lobby link", color=0xababab)
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
         embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=False)
@@ -199,8 +205,9 @@ class CustomBot(commands.Bot):
         :return:
         """
         # Be able to enable/disable on the guild
-        return Embed(title="Command not found placeholder.")
-        # return None
+        embed = Embed(title="Error", description="Specified Command not found", color=0xff5c5c)
+        embed.set_footer(text="https://github.com/OriolFilter")
+        return embed
 
     @property
     def _embed_error_no_steam_id_set(self) -> Embed:
@@ -211,7 +218,20 @@ class CustomBot(commands.Bot):
         embed = Embed(title="Error",
                       description=f"The discord user currently has no SteamID configured, to add an account use {self.command_prefix}link <vanity_url>",
                       color=0xff5c5c)
-        embed.set_footer(text=f"use {self.command_prefix}vanity for more information regarding what is vanity url")
+        embed.add_field(name=f"What is a vanity url?",
+                        value=f"To learn more regarding the vanity rul, use: `{self.command_prefix}vanity`")
+        embed.set_footer(text="https://github.com/OriolFilter")
+        return embed
+
+    @property
+    def _embed_error_no_db_connection(self):
+        """
+        Embed used when cannot communicate to the database
+        :return:
+        """
+        embed = Embed(title="Error",
+                      description=f"Cannot communicate to the database, contact an administrator.",
+                      color=0xff5c5c)
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
@@ -231,7 +251,7 @@ class CustomBot(commands.Bot):
     #     embed.set_footer(text="https://github.com/OriolFilter")
     #     return embed
 
-    def _embed_simple_player(self, player_summary: PlayerSummary) -> Embed:
+    def _embed_player_simple(self, player_summary: PlayerSummary) -> Embed:
         """
         Expand.
         :param player_summary:
