@@ -19,6 +19,9 @@ ENV DB_USERNAME=
 ENV DB_PASSWORD=
 ENV DB_DATABASE="steam_invite"
 
+RUN apk update --no-cache \
+&& apk add build-base postgresql-dev libpq
+
 
 WORKDIR /tmp
 ADD ./requirements.txt /tmp
