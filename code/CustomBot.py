@@ -71,7 +71,8 @@ class CustomBot(commands.Bot):
             :return:
             """
             await ctx.reply(
-                f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot))', mention_author=False)
+                f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot))',
+                mention_author=False)
 
         @self.command()
         async def link(ctx: Context, vanity_url: str = None):
@@ -90,7 +91,8 @@ class CustomBot(commands.Bot):
                     middleware.set_steam_id(discord_id=ctx.author.id,
                                             steam_id=steam_id)
                     await ctx.reply(f"Just linked up your account, please verify the following account is "
-                                   f"yours.\nhttps://www.steamidfinder.com/signature/{steam_id}.png", mention_author=False)
+                                    f"yours.\nhttps://www.steamidfinder.com/signature/{steam_id}.png",
+                                    mention_author=False)
                 except Steam.VanityUrlNotFound:
                     await ctx.reply("Vanity URL couldn't be found, please check the syntax again", mention_author=False)
 
@@ -132,26 +134,26 @@ class CustomBot(commands.Bot):
             """
             steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
             summary = middleware.get_steam_summary(steam_id=steam_id)
-            if summary.has_lobby:
-                embed = self._embed_player_lobby(summary)
-            else:
+            if not summary.has_lobby:
                 embed = self._embed_error_no_lobby(summary)
-
-            if not any(members):
-                await ctx.reply(embed=embed, mention_author=False)
-            elif len(members) > 4:
-                await ctx.reply("Sorry, max allowed players to invite are 4", mention_author=True)
+                await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=True)
             else:
-                mail_list = []
-                for member in list(set(members)):
-                    if isinstance(member, discord.Member):
-                        mail_list.append(member)
-                    else:
-                        await ctx.reply("There was an error with the users given, ensure you @ed correctly the users ",
-                                        mention_author=True)
-                for member in mail_list:
-                    await member.send(embed=embed)
-                await ctx.reply("Sent an invite to the specified user(s)!", mention_author=False)
+                embed = self._embed_player_lobby(summary)
+                if not any(members):
+                    await ctx.reply(embed=embed, mention_author=False)
+                elif len(members) > 4:
+                    await ctx.reply("Sorry, max allowed players to invite are 4", mention_author=True)
+                else:
+                    mail_list = []
+                    for member in list(set(members)):
+                        if isinstance(member, discord.Member):
+                            mail_list.append(member)
+                        else:
+                            await ctx.reply("There was an error with the users given, ensure you @ed correctly the users ",
+                                            mention_author=True)
+                    for member in mail_list:
+                        await member.send(embed=embed)
+                    await ctx.reply("Sent an invite to the specified user(s)!", mention_author=False)
 
         @self.command()
         async def vanity(ctx: Context):
@@ -160,7 +162,8 @@ class CustomBot(commands.Bot):
             :param ctx:
             :return:
             """
-            await ctx.reply(f"ie:  `{self.command_prefix}link SavageBidoof`\nhttps://i.imgur.com/VHdVEj8.png", mention_author=False)
+            await ctx.reply(f"ie:  `{self.command_prefix}link SavageBidoof`\nhttps://i.imgur.com/VHdVEj8.png",
+                            mention_author=False)
 
         @self.command()
         async def profile(ctx: Context, user: discord.User = None):
