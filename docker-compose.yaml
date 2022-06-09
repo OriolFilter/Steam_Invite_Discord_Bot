@@ -14,14 +14,18 @@ services:
       context: .
       dockerfile: Bot.Dockerfile
     environment:
+      STEAM_TOKEN:
+
       DISCORD_TOKEN:
-      DISCORD_PREFIX: "s."
+      DISCORD_PREFIX: s.
       DISCORD_DESCRIPTION: "Welcome welcome, I'm a bot"
-      DB_DATABASE: 127.0.0.1
-      DB_USERNAME:
-      DB_PASSWORD:
+
+      DB_PORT: 5432
       DB_HOST: steam_invite_db
-      DB_PORT:5432
+      DB_USERNAME: username
+      DB_PASSWORD: password
+      DB_DATABASE: steam_invite
+
     networks:
       steam_invite_network:
     depends_on:
