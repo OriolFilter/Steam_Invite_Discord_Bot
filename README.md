@@ -35,18 +35,41 @@ Finally, we can start the containers.
 docker-compose up -d
 ```
 
+### Update container to a newer version
+
+Set the `latest` tag to automatically pull the latest version, 
+```yaml
+service_name:
+  image:  <dockerimage>:latest
+```
+
+Afterwards, proceed to download the last version of the image using `docker-compose` command
+
+```shell
+docker-compose pull
+```
+
+Finally relaunch the containers with the last downloaded image and let `docker-compose` deal with the containers for you
+
+```shell
+docker-compose up -d
+```
+
+
+
+
 ## Configuration
 
 ### Environments
 
-| Environment         | Default Value              | Description                                              |
-|---------------------|----------------------------|----------------------------------------------------------|
-| STEAM_TOKEN         | \<Null\>                   | Steam API token.                                         |
-| DISCORD_TOKEN       | \<Null\>                   | Discord bot token.                                       |
-| DISCORD_PREFIX      | s.                         | Prefix for the discord bot to read the commands.         |
-| DISCORD_DESCRIPTION | Welcome welcome, I'm a bot | Description for the bot.                                 |
-| DB_HOST             | 127.0.0.1                  | Hostname/IP to connect to the database server/container. |
-| DB_PORT             | 5432                       | Port used to authenticate to the database server.        |
-| DB_USERNAME         | \<Null\>                   | Username used to authenticate to the database server.    |
-| DB_PASSWORD         | \<Null\>                   | Password used to authenticate to the database server.    |
-| DB_DATABASE         | steam_invite               | Database used to connect                                 |
+| Environment         | Default Value                                                               | Description                                              |
+|---------------------|-----------------------------------------------------------------------------|----------------------------------------------------------|
+| STEAM_TOKEN         | \<Null\>                                                                    | Steam API token.                                         |
+| DISCORD_TOKEN       | \<Null\>                                                                    | Discord bot token.                                       |
+| DISCORD_PREFIX      | s.                                                                          | Prefix for the discord bot to read the commands.         |
+| DISCORD_DESCRIPTION | Hi, I'm a Bot! <br> use {prefix}help for a list of the available commands.  | Description for the bot.                                 |
+| DB_HOST             | 127.0.0.1                                                                   | Hostname/IP to connect to the database server/container. |
+| DB_PORT             | 5432                                                                        | Port used to authenticate to the database server.        |
+| DB_USERNAME         | \<Null\>                                                                    | Username used to authenticate to the database server.    |
+| DB_PASSWORD         | \<Null\>                                                                    | Password used to authenticate to the database server.    |
+| DB_DATABASE         | steam_invite                                                                | Database used to connect                                 |

@@ -18,7 +18,7 @@ services:
 
       DISCORD_TOKEN:
       DISCORD_PREFIX: s.
-      DISCORD_DESCRIPTION: "Welcome welcome, I'm a bot"
+      DISCORD_DESCRIPTION:
 
       DB_PORT: 5432
       DB_HOST: steam_invite_db
