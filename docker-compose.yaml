@@ -1,0 +1,42 @@
+networks:
+  steam_invite_network:
+    external: False
+volumes:
+  db_vol:
+    external: False
+
+services:
+  steam_invite_discord_bot:
+    image: steam_invite_discord_bot:latest
+    container_name: steam_invite_discord_bot
+    restart: always
+    build:
+      context: .
+      dockerfile: Bot.Dockerfile
+    environment:
+      DISCORD_TOKEN:
+      DISCORD_PREFIX: "s."
+      DISCORD_DESCRIPTION: "Welcome welcome, I'm a bot"
+      DB_DATABASE: 127.0.0.1
+      DB_USERNAME:
+      DB_PASSWORD:
+      DB_HOST: steam_invite_db
+      DB_PORT:5432
+    networks:
+      steam_invite_network:
+    depends_on:
+      - steam_invite_db
+
+  steam_invite_db:
+    image: postgres:14.3
+    container_name: steam_invite_db
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: username
+      POSTGRES_DB: steam_invite
+    volumes:
+      - db_vol:/var/lib/postgresql/data:rw
+      - ./db/PG_SKEL.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      steam_invite_network:
