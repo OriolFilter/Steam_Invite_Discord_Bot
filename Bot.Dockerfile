@@ -19,6 +19,8 @@ ENV DB_USERNAME=
 ENV DB_PASSWORD=
 ENV DB_DATABASE="steam_invite"
 
+RUN apk add --no-cache libpq-dev
+
 
 WORKDIR /tmp
 ADD ./requirements.txt /tmp
