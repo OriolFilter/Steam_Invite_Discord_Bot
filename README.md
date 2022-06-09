@@ -35,6 +35,29 @@ Finally, we can start the containers.
 docker-compose up -d
 ```
 
+### Update container to a newer version
+
+Set the `latest` tag to automatically pull the latest version, 
+```yaml
+service_name:
+  image:  <dockerimage>:latest
+```
+
+Afterwards, proceed to download the last version of the image using `docker-compose` command
+
+```shell
+docker-compose pull
+```
+
+Finally relaunch the containers with the last downloaded image and let `docker-compose` deal with the containers for you
+
+```shell
+docker-compose up -d
+```
+
+
+
+
 ## Configuration
 
 ### Environments

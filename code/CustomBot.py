@@ -16,6 +16,7 @@ import DBClient
 
 middleware = Middleware()
 
+
 class CustomBot(commands.Bot):
     configuration: DiscordConf
 
@@ -174,17 +175,22 @@ class CustomBot(commands.Bot):
             await ctx.send(f'https://www.steamidfinder.com/signature/{steam_id}.png')
 
         @self.command()
-        async def version(ctx:Context):
+        async def version(ctx: Context):
             """
             Prints the current version and the github container
             :param ctx:
             :return:
             """
-            repo="https://github.com/OriolFilter/Steam_Invite_Discord"
-            vers=os.getenv("VERSION")
-            await ctx.send(f"Current version: {vers}\nOG Repository:\n{repo}")
+            await ctx.send(embed=self._embed_version)
 
-            # await ctx.send(embed=embed)
+    @property
+    def _embed_version(self) -> Embed:
+        embed = Embed(title="Github Repository", url="https://github.com/OriolFilter/Steam_Invite_Discord",
+                              description="Discord bot mainly used to get users's lobby link", color=0xababab)
+        embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
+                         icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
+        embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=False)
+        return embed
 
     @property
     def _embed_error_command_not_found(self) -> Embed:
