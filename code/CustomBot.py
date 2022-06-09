@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 
 import discord
@@ -171,6 +172,18 @@ class CustomBot(commands.Bot):
             else:
                 steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
             await ctx.send(f'https://www.steamidfinder.com/signature/{steam_id}.png')
+
+        @self.command()
+        async def version(ctx:Context):
+            """
+            Prints the current version and the github container
+            :param ctx:
+            :return:
+            """
+            repo="https://github.com/OriolFilter/Steam_Invite_Discord"
+            vers=os.getenv("VERSION")
+            await ctx.send(f"Current version: {vers}\nOG Repository:\n{repo}")
+
             # await ctx.send(embed=embed)
 
     @property
