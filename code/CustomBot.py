@@ -209,8 +209,8 @@ class CustomBot(commands.Bot):
         :return:
         """
         # Be able to enable/disable on the guild
-        embed = Embed(title="Error", description="Specified Command not found", color=0xff5c5c)
-        embed.set_footer(text="https://github.com/OriolFilter")
+        # embed = Embed(title="Error", description="Specified Command not found", color=0xff5c5c)
+        embed = Embed(title="Command not found")
         return embed
 
     @property
