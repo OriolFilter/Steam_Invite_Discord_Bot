@@ -25,7 +25,7 @@ RUN apk add build-base postgresql-dev libpq
 
 WORKDIR /tmp
 ADD ./requirements.txt /tmp
-RUN pip3 install -r ./requirements.txt --user
+RUN pip3 install -r /tmp/requirements.txt --user
 
 ADD ./code /main
 WORKDIR /main
