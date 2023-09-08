@@ -12,7 +12,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: Bot.Dockerfile
+      dockerfile: Dockerfile
     environment:
       STEAM_TOKEN:
 
@@ -32,7 +32,7 @@ services:
       - steam_invite_db
 
   steam_invite_db:
-    image: postgres:14.3
+    image: postgres:latest
     container_name: steam_invite_db
     restart: always
     environment:
