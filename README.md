@@ -1,4 +1,4 @@
-# Mosscraft
+# Steam Lobby Discord Bot
 
 ## Description
 
