@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM python:alpine as build
+FROM python:alpine as build
 ARG VERSION="1.0"
 LABEL "author"="Oriol Filter Anson"
 LABEL "version"="${VERSION}"
