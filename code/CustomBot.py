@@ -31,6 +31,7 @@ class CustomBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         self.configuration = DiscordConf()
         intents = discord.Intents.default()
+        intents.message_content = True
         print(intents)
         super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
                                            description=self.configuration.description,
