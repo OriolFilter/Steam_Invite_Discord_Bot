@@ -30,9 +30,11 @@ class CustomBot(commands.Bot):
 
     def __init__(self, *args, **kwargs):
         self.configuration = DiscordConf()
+        intents = discord.Intents.default()
+        print(intents)
         super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
                                            description=self.configuration.description,
-                                           self_bot=False)
+                                           self_bot=False, intents=intents)
         self.add_commands()
 
     async def on_command_error(self, ctx: Context, exception: Exception):
