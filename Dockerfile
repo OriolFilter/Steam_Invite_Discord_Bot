@@ -20,7 +20,10 @@ ENV DB_PASSWORD=""
 ENV DB_DATABASE="steam_invite"
 
 #RUN apk update --no-cache \
-RUN apk add build-base postgresql-dev libpq
+#RUN apk add build-base postgresql-dev libpq
+RUN apt update
+RUN apt install build-base postgresql-dev
+# libpq
 
 
 WORKDIR /tmp
