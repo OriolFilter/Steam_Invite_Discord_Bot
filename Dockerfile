@@ -1,4 +1,8 @@
-FROM python:latest as build
+ARG IMAGE="python"
+ARG TAG="3.11-alpine"
+ARG BASEIMAGE="${IMAGE}:${TAG:-latest}"
+
+FROM ${BASEIMAGE} as build
 ARG VERSION="1.0"
 LABEL "author"="Oriol Filter Anson"
 LABEL "version"="${VERSION}"
@@ -19,11 +23,8 @@ ENV DB_USERNAME=""
 ENV DB_PASSWORD=""
 ENV DB_DATABASE="steam_invite"
 
-#RUN apk update --no-cache \
-#RUN apk add build-base postgresql-dev libpq
-RUN apt update
-RUN apt install build-base postgresql-dev
-# libpq
+RUN apk update --no-cache
+RUN apk add build-base postgresql-dev libpq
 
 
 WORKDIR /tmp
