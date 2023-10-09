@@ -1,4 +1,4 @@
-FROM python:alpine as build
+FROM python:latest as build
 ARG VERSION="1.0"
 LABEL "author"="Oriol Filter Anson"
 LABEL "version"="${VERSION}"
