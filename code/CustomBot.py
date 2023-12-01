@@ -116,7 +116,7 @@ class CustomBot(commands.Bot):
             await ctx.reply("Successfully removed the entry", mention_author=False)
 
         @self.command()
-        async def status(ctx: Context, user: discord.User = None):
+        async def user_status(ctx: Context, user: discord.User = None):
             """
             Placeholder, it does be mad ugly
             Returns the status of the specified player
