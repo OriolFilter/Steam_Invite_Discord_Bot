@@ -39,7 +39,7 @@ class PlayerSummary:
 
     @property
     def is_playing(self) -> bool:
-        return True if self.gameextrainfo else False
+        return True if self.gameid else False
 
     @property
     def has_lobby(self) -> bool:
