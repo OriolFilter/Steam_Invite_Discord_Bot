@@ -1,6 +1,7 @@
 from Steam import SteamApi, PlayerSummary
 from Classes import Configuration
-from DBClient import DBClient
+from DBClient import DBClient as DBClient
+# from DBClient import doomyDBClient as DBClient
 
 
 class Middleware:
@@ -17,7 +18,7 @@ class Middleware:
         self.Configuration = configuration
 
     def set_steam_id(self, discord_id, steam_id, *args, **kwargs):
-        """"
+        """
         Automatically store? Better nha?
         But how do I do confirmation :facepalm:
         """
@@ -30,7 +31,7 @@ class Middleware:
         self.DBClient.unset_steam_id(discord_id=discord_id)
 
     def set_steam_id_from_vanity(self, discord_id, vanity_url, *args, **kwargs):
-        """"
+        """
         Automatically store? Better nha?
         But how do I do confirmation :facepalm:
         """

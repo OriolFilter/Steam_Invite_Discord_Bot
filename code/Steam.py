@@ -106,11 +106,12 @@ class SteamApi:
 
     @steam_api_call
     def __get_id_from_vanity_url(self, vanity_url) -> requests.request:
-        return requests.get(
+        requests.get(
             f"https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key={self.__api_key}&vanityurl={vanity_url}")
 
     def get_id_from_vanity_url(self, vanity_url) -> int:
         jresponse = self.__get_id_from_vanity_url(vanity_url)
+        # print(jresponse)
         if jresponse["success"] == 1:
             return jresponse["steamid"]
         elif jresponse["success"] == 42:

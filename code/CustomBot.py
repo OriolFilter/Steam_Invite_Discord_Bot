@@ -34,7 +34,7 @@ class CustomBot(commands.Bot):
         intents.message_content = True
         print(intents)
         super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
-                                           description=self.configuration.description,
+                                           status=self.configuration.description,
                                            self_bot=False, intents=intents)
         self.add_commands()
 
@@ -85,18 +85,25 @@ class CustomBot(commands.Bot):
             :param vanity_url:
             :return:
             """
+            print("aaa")
             if not vanity_url:
                 await ctx.reply(
                     f"You need to insert a vanity url, for further information regarding it's usage type '{self.command_prefix}vanity' ")
             else:
                 try:
+                    print("bbb")
+                    await ctx.send("hi")
+                    print("ccc")
                     steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
+                    print("ddd")
                     middleware.set_steam_id(discord_id=ctx.author.id,
                                             steam_id=steam_id)
+                    print("ddd")
                     await ctx.reply(f"Just linked up your account, please verify the following account is "
                                     f"yours.\nhttps://www.steamidfinder.com/signature/{steam_id}.png",
                                     mention_author=False)
                 except Steam.VanityUrlNotFound:
+                    print(11111111)
                     await ctx.reply("Vanity URL couldn't be found, please check the syntax again", mention_author=False)
 
         @self.command()
@@ -108,22 +115,22 @@ class CustomBot(commands.Bot):
             middleware.unset_steam_id(discord_id=ctx.author.id)
             await ctx.reply("Successfully removed the entry", mention_author=False)
 
-        # @self.command()
-        # async def status(ctx: Context, user: discord.User = None):
-        #     """
-        #     Placeholder, it does be mad ugly
-        #     Returns the status of the specified player
-        #     :param ctx:
-        #     :param user:
-        #     :return:
-        #     """
-        #     if user:
-        #         steam_id = middleware.get_steam_id_from_discord_id(user.id)
-        #     else:
-        #         steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
-        #     summary = middleware.get_steam_summary(steam_id=steam_id)
-        #     embed = self._embed_player_simple(summary)
-        #     await ctx.send(embed=embed)
+        @self.command()
+        async def status(ctx: Context, user: discord.User = None):
+            """
+            Placeholder, it does be mad ugly
+            Returns the status of the specified player
+            :param ctx:
+            :param user:
+            :return:
+            """
+            if user:
+                steam_id = middleware.get_steam_id_from_discord_id(user.id)
+            else:
+                steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
+            summary = middleware.get_steam_summary(steam_id=steam_id)
+            embed = self._embed_player_simple(summary)
+            await ctx.send(embed=embed)
 
         @self.command()
         async def lobby(ctx: Context, *members: discord.Member):

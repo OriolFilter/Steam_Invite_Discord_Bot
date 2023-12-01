@@ -90,3 +90,55 @@ class DBClient:
     def get_steam_id(self, discord_id) -> str:
         steam_id = self.__get_steam_id(discord_id=discord_id)
         return steam_id
+
+
+# class doomyDBClient:
+#   """
+#   For testing purpouses
+#   """
+#     __config: _DatabaseConf
+#     __client: psycopg2.connect
+#
+#     def __init__(self, **kwargs):
+#         configuration = kwargs.get("configuration")
+#         if configuration:
+#             self.__config = configuration
+#         else:
+#             raise Errors.NoConfigGivenError
+#
+#     @property
+#     def _connection(self):
+#         return True
+#
+#     def _dbquery(method):
+#         @wraps(method)
+#         def wrapper(self, *args, **kwargs):
+#             try:
+#                 return method(self, *args, **kwargs)
+#             except psycopg2.Error as e:
+#                 raise e
+#
+#         return wrapper
+#
+#     @_dbquery
+#     def __set_steam_id(self, *args, **kwargs):
+#         return True
+#
+#     def set_steam_id(self, discord_id, steam_id):
+#         self.__set_steam_id(discord_id=discord_id, steam_id=steam_id)
+#
+#     @_dbquery
+#     def __unset_steam_id(self, *args, **kwargs):
+#         return True
+#
+#     def unset_steam_id(self, discord_id):
+#         self.__unset_steam_id(discord_id=discord_id)
+#
+#     @_dbquery
+#     def __get_steam_id(self, discord_id):
+#         steam_id=
+#         return steam_id
+#
+#     def get_steam_id(self, discord_id) -> str:
+#         steam_id = self.__get_steam_id(discord_id=discord_id)
+#         return steam_id
