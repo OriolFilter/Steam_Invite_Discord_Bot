@@ -8,6 +8,7 @@ LABEL "author"="Oriol Filter Anson"
 LABEL "version"="${VERSION}"
 LABEL "description"="Discord bot mainly used to post Steam's lobby link"
 LABEL "repository"="https://github.com/OriolFilter/Steam_Invite_Discord"
+LABEL "BuildDate"="02/Dec/2023"
 
 ENV VERSION=${VERSION}
 

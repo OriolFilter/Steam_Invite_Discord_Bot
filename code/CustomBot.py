@@ -27,6 +27,8 @@ class CustomBot(commands.Bot):
         print(self.user.id)
         print(f'invite me with: {self.invite_url}')
         print('------')
+        await self.change_presence(activity=discord.Game(name=f"Use {self.configuration.prefix}.help to get a list "
+                                                              f"from all the available commands"))
 
     def __init__(self, *args, **kwargs):
         self.configuration = DiscordConf()
@@ -36,8 +38,6 @@ class CustomBot(commands.Bot):
                                            description=self.configuration.description,
                                            self_bot=False, intents=intents)
         self.add_commands()
-        self.change_presence(activity=discord.Game(name=f"Use {self.configuration.prefix}.help to get a list from all "
-                                                        f"the available commands"))
 
     async def on_command_error(self, ctx: Context, exception: Exception):
         _: {Exception: Embed} = {
