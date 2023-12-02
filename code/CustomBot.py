@@ -27,8 +27,9 @@ class CustomBot(commands.Bot):
         print(self.user.id)
         print(f'invite me with: {self.invite_url}')
         print('------')
-        await self.change_presence(activity=discord.Game(name=f"Use {self.configuration.prefix}help to get a list "
-                                                              f"from all the available commands"))
+        await self.change_presence(activity=discord.Game(
+            name=(self.configuration.activity, f"Use {self.configuration.prefix}help to get a list "
+                                               f"from all the available commands")[self.configuration.activity]))
 
     def __init__(self, *args, **kwargs):
         self.configuration = DiscordConf()
@@ -356,10 +357,8 @@ class CustomBot(commands.Bot):
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
 
-        embed.add_field(name="User currently doesn't have a public lobby",
-                        value=f'---', inline=False)
-
         if player_summary.is_playing:
+
             game_title = player_summary.gameextrainfo
             if not game_title:
                 print("player_summary.gameextrainfo value is set to none!")
@@ -368,6 +367,9 @@ class CustomBot(commands.Bot):
             embed.add_field(name="Currently playing:",
                             value=f'[{game_title}](https://store.steampowered.com/app/{player_summary.gameid})',
                             inline=False)
+
+            embed.add_field(name="User currently doesn't have a public lobby",
+                            value=f'---', inline=False)
 
             embed.set_thumbnail(
                 url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
@@ -401,7 +403,8 @@ class CustomBot(commands.Bot):
          """
 
         embed = Embed(title=player_summary.gameextrainfo,
-                   url=f'https://store.steampowered.com/app/{player_summary.gameid}', color=self.__return_embed_color(player_summary=player_summary))
+                      url=f'https://store.steampowered.com/app/{player_summary.gameid}',
+                      color=self.__return_embed_color(player_summary=player_summary))
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
         embed.set_thumbnail(

@@ -62,13 +62,15 @@ class DiscordConf(_CONFIG):
     """
     token: str = None
     prefix: str = "s."
-    description: str = "Hi, I'm a Bot!\n" \
+    description: str = ""
+    activity: str = "Hi, I'm a Bot!\n" \
                        f" use {prefix}help for a list of the available commands.\n"
 
     def load_envs(self):
         self.token = getenv("DISCORD_TOKEN") or self.token
         self.prefix = getenv("DISCORD_PREFIX") or self.prefix
         self.description = getenv("DISCORD_DESCRIPTION") or self.description
+        self.description = getenv("DISCORD_ACTIVITY") or self.activity
         return self
 
 
