@@ -49,7 +49,7 @@ Afterwards, proceed to download the last version of the image using `docker-comp
 docker-compose pull
 ```
 
-Finally relaunch the containers with the last downloaded image and let `docker-compose` deal with the containers for you
+Finally, relaunch the containers with the last downloaded image and let `docker-compose` deal with the containers for you
 
 ```shell
 docker-compose up -d

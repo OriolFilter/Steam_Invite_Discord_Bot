@@ -32,11 +32,12 @@ class CustomBot(commands.Bot):
         self.configuration = DiscordConf()
         intents = discord.Intents.default()
         intents.message_content = True
-        print(intents)
         super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
-                                           status=self.configuration.description,
+                                           description=self.configuration.description,
                                            self_bot=False, intents=intents)
         self.add_commands()
+        self.change_presence(activity=discord.Game(name=f"Use {self.configuration.prefix}.help to get a list from all "
+                                                        f"the available commands"))
 
     async def on_command_error(self, ctx: Context, exception: Exception):
         _: {Exception: Embed} = {
@@ -85,25 +86,19 @@ class CustomBot(commands.Bot):
             :param vanity_url:
             :return:
             """
-            print("aaa")
             if not vanity_url:
                 await ctx.reply(
                     f"You need to insert a vanity url, for further information regarding it's usage type '{self.command_prefix}vanity' ")
             else:
                 try:
-                    print("bbb")
                     await ctx.send("hi")
-                    print("ccc")
                     steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
-                    print("ddd")
                     middleware.set_steam_id(discord_id=ctx.author.id,
                                             steam_id=steam_id)
-                    print("ddd")
                     await ctx.reply(f"Just linked up your account, please verify the following account is "
                                     f"yours.\nhttps://www.steamidfinder.com/signature/{steam_id}.png",
                                     mention_author=False)
                 except Steam.VanityUrlNotFound:
-                    print(11111111)
                     await ctx.reply("Vanity URL couldn't be found, please check the syntax again", mention_author=False)
 
         @self.command()
@@ -129,7 +124,8 @@ class CustomBot(commands.Bot):
             else:
                 steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
             summary = middleware.get_steam_summary(steam_id=steam_id)
-            embed = self._embed_player_simple(summary)
+            embed = self._embed_player_profile(summary)
+            # embed = self._embed_player_simple(summary)
             await ctx.send(embed=embed)
 
         @self.command()
@@ -159,8 +155,9 @@ class CustomBot(commands.Bot):
                         if isinstance(member, discord.Member):
                             mail_list.append(member)
                         else:
-                            await ctx.reply("There was an error with the users given, ensure you @ed correctly the users ",
-                                            mention_author=True)
+                            await ctx.reply(
+                                "There was an error with the users given, ensure you @ed correctly the users ",
+                                mention_author=True)
                     for member in mail_list:
                         await member.send(embed=embed)
                     await ctx.reply("Sent an invite to the specified user(s)!", mention_author=False)
@@ -192,11 +189,18 @@ class CustomBot(commands.Bot):
         @self.command()
         async def version(ctx: Context):
             """
-            Prints the current version and the github container
+            Prints the current version and the GitHub container
             :param ctx:
             :return:
             """
             await ctx.reply(embed=self._embed_version, mention_author=False)
+
+        @self.command()
+        async def howto(ctx: Context):
+            """
+            How to use this bot
+            """
+            await ctx.send("TODO")
 
     @property
     def invite_url(self) -> str:
@@ -204,7 +208,7 @@ class CustomBot(commands.Bot):
 
     @property
     def _embed_version(self) -> Embed:
-        embed = Embed(title="Github Repository", url="https://github.com/OriolFilter/Steam_Invite_Discord",
+        embed = Embed(title="Gitea Repository", url="https://gitea.filterhome.xyz/ofilter/Steam_Invite_Discord",
                       description="Discord bot mainly used to get users's lobby link", color=0xababab)
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
@@ -277,6 +281,43 @@ class CustomBot(commands.Bot):
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
+    def _embed_player_profile(self, player_summary: PlayerSummary) -> Embed:
+        """
+        Generates the embed for the player profile command
+        Embed color is picked based on the user activity
+        :param player_summary:
+        :return:
+        """
+
+        embed_color: hex = 0x61ff64
+
+        if player_summary.has_lobby:
+            embed_color = 0xff1abb
+        elif player_summary.is_playing:
+            embed_color = 0x8fce00
+
+        embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=embed_color)
+        embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
+                         icon_url=player_summary.avatarfull)
+
+        if player_summary.is_playing:
+            game_title = player_summary.gameextrainfo
+            if not game_title:
+                print("player_summary.gameextrainfo value is set to none!")
+                print(player_summary.__dict__())
+            embed.add_field(name="Currently playing:", value=game_title)
+
+            embed.set_thumbnail(
+                url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
+
+        else:
+            embed.add_field(name="User currently is not playing a game.", value=("Note that profile privacy settings "
+                                                                                 "could be interfering with this.")[
+                player_summary.is_playing])
+
+        embed.set_footer(text="https://github.com/OriolFilter")
+        return embed
+
     # def _embed_is_playing(self, player_summary: PlayerSummary) -> Embed:
     #     """
     #     Expand.
@@ -285,7 +326,7 @@ class CustomBot(commands.Bot):
     #     """
     #     embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0x61ff64)
     #     embed.set_thumbnail(url=player_summary.avatarfull, )
-    #     embed.add_field(name="Currenty playing?", value=("No", "Yes")[player_summary.is_playing])
+    #     embed.add_field(name="Currently playing?", value=("No", "Yes")[player_summary.is_playing])
     #     embed.set_footer(text="https://github.com/OriolFilter")
     #     return embed
 
@@ -299,10 +340,8 @@ class CustomBot(commands.Bot):
         return embed
 
     def _embed_player_lobby(self, player_summary: PlayerSummary) -> Embed:
-        # embed = Embed(title=player_summary.gameextrainfo,
-        #               url=f'https://store.steampowered.com/app/{player_summary.gameid}', color=0xffc766)
         embed = Embed(title=player_summary.gameextrainfo,
-                      url=f'<steam://joinlobby/1966720/109775244481433768/76561198170583259>', color=0xffc766)
+                      url=f'https://store.steampowered.com/app/{player_summary.gameid}', color=0xffc766)
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
         embed.set_thumbnail(
