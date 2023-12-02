@@ -114,8 +114,7 @@ class CustomBot(commands.Bot):
         @self.command()
         async def profile(ctx: Context, user: discord.User = None):
             """
-            Placeholder, it does be mad ugly
-            Returns the status of the specified player
+            Returns Steam account from the user and their current open game (if they are currenlty playing)
             :param ctx:
             :param user:
             :return:
@@ -189,7 +188,7 @@ class CustomBot(commands.Bot):
         @self.command()
         async def version(ctx: Context):
             """
-            Prints the current version and the GitHub container
+            Prints the current version and the Build Date
             :param ctx:
             :return:
             """
@@ -198,9 +197,11 @@ class CustomBot(commands.Bot):
         @self.command()
         async def howto(ctx: Context):
             """
-            How to use this bot
+            Example on hot to use this bot
             """
-            await ctx.send("TODO")
+            await ctx.reply("Use the following image as reference, note that the prefix command might "
+                            "vary.\nhttps://i.imgur.com/liZl6fI.png")
+
 
     @property
     def invite_url(self) -> str:
@@ -208,12 +209,12 @@ class CustomBot(commands.Bot):
 
     @property
     def _embed_version(self) -> Embed:
-        embed = Embed(title="Gitea Repository", url="https://gitea.filterhome.xyz/ofilter/Steam_Invite_Discord",
+        embed = Embed(title="Github Repository", url="https://github.com/OriolFilter/Steam_Invite_Discord",
                       description="Discord bot mainly used to get users's lobby link", color=0xababab)
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
         embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=False)
-        embed.add_field(name="Build Date", value=f'v{os.getenv("BUILDDATE")}', inline=False)
+        embed.add_field(name="Build Date", value=f'v{os.getenv("BUILDDATE","Unknown")}', inline=False)
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
@@ -360,23 +361,21 @@ class CustomBot(commands.Bot):
         if player_summary.is_playing:
 
             game_title = player_summary.gameextrainfo
-            if not game_title:
-                print("player_summary.gameextrainfo value is set to none!")
-                print(player_summary.__dict__())
 
             embed.add_field(name="Currently playing:",
                             value=f'[{game_title}](https://store.steampowered.com/app/{player_summary.gameid})',
                             inline=False)
 
-            embed.add_field(name="User currently doesn't have a public lobby",
-                            value=f'---', inline=False)
+            embed.add_field(name="Public lobby currently not available",
+                            value=f'Note that profile privacy settings or visibility could be interfering with this.',
+                            inline=False)
 
             embed.set_thumbnail(
                 url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
 
         else:
             embed.add_field(name="User currently is not playing a game.",
-                            value=("Note that profile privacy settings "
+                            value=("Note that profile privacy settings or visibility "
                                    "could be interfering with this."), inline=False)
 
         embed.set_footer(text="https://github.com/OriolFilter")
