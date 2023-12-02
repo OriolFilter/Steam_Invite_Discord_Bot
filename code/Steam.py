@@ -84,13 +84,14 @@ def steam_api_call(method) -> dict:
     @wraps(method)
     def wrapper(self, *args, **kwargs) -> dict:
         response: requests.request = method(self, *args, **kwargs)
+        print("CALLED STEAM API")
+        print(response)
         if response.status_code == 200:
             return response.json()["response"]
         elif response.status_code == 403:
             raise Forbidden
         else:
             raise UnexpectedError
-
     return wrapper
 
 
@@ -106,6 +107,8 @@ class SteamApi:
 
     @steam_api_call
     def __get_id_from_vanity_url(self, vanity_url) -> requests.request:
+        print(f"https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key={self.__api_key}&vanityurl={vanity_url}")
+        print("get ID from vanity URL")
         requests.get(
             f"https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key={self.__api_key}&vanityurl={vanity_url}")
 
@@ -121,6 +124,7 @@ class SteamApi:
 
     @steam_api_call
     def __player_summary(self, id) -> requests or dict:
+        print("player summary")
         response: Response = requests.get(
             f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={self.__api_key}&steamids={int(id)}")
         return response
