@@ -305,15 +305,14 @@ class CustomBot(commands.Bot):
             if not game_title:
                 print("player_summary.gameextrainfo value is set to none!")
                 print(player_summary.__dict__())
-            embed.add_field(name="Currently playing:", value=game_title)
+            embed.add_field(name="Currently playing:", value=f'[{game_title}](https://store.steampowered.com/app/{player_summary.gameid})')
 
             embed.set_thumbnail(
                 url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
 
         else:
             embed.add_field(name="User currently is not playing a game.", value=("Note that profile privacy settings "
-                                                                                 "could be interfering with this.")[
-                player_summary.is_playing])
+                                                                                 "could be interfering with this."))
 
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
@@ -335,7 +334,7 @@ class CustomBot(commands.Bot):
         embed.set_thumbnail(url=player_summary.avatarfull, )
         embed.add_field(name="User currently doesn't have an available lobby", value="--", inline=False)
         embed.add_field(name="Is user playing?",
-                        value=f"Currently playing {player_summary.gameextrainfo}" if player_summary.gameextrainfo else "No")
+                        value=f"Currently playing [{player_summary.gameextrainfo}](https://store.steampowered.com/app/{player_summary.gameid})" if player_summary.gameextrainfo else "No")
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
