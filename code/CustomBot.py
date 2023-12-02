@@ -91,12 +91,11 @@ class CustomBot(commands.Bot):
                     f"You need to insert a vanity url, for further information regarding it's usage type '{self.command_prefix}vanity' ")
             else:
                 try:
-                    await ctx.send("hi")
                     steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
                     middleware.set_steam_id(discord_id=ctx.author.id,
                                             steam_id=steam_id)
-                    await ctx.reply(f"Just linked up your account, please verify the following account is "
-                                    f"yours.\nhttps://www.steamidfinder.com/signature/{steam_id}.png",
+                    await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked "
+                                    f"by using the command `{self.command_prefix}.profile`",
                                     mention_author=False)
                 except Steam.VanityUrlNotFound:
                     await ctx.reply("Vanity URL couldn't be found, please check the syntax again", mention_author=False)
@@ -108,7 +107,8 @@ class CustomBot(commands.Bot):
             :return:
             """
             middleware.unset_steam_id(discord_id=ctx.author.id)
-            await ctx.reply("Successfully removed the entry", mention_author=False)
+            await ctx.reply("Successfully removed the entry, please verify that the account is correctly unlinked "
+                            f"by using the command `{self.command_prefix}.profile`", mention_author=False)
 
         @self.command()
         async def profile(ctx: Context, user: discord.User = None):
@@ -125,7 +125,6 @@ class CustomBot(commands.Bot):
                 steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
             summary = middleware.get_steam_summary(steam_id=steam_id)
             embed = self._embed_player_profile(summary)
-            # embed = self._embed_player_simple(summary)
             await ctx.send(embed=embed)
 
         @self.command()
@@ -290,23 +289,15 @@ class CustomBot(commands.Bot):
         :return:
         """
 
-        embed_color: hex = 0x41ffe6
-
-        if player_summary.has_lobby:
-            embed_color = 0xff1abb
-        elif player_summary.is_playing:
-            embed_color = 0x61ff64
-
-        embed = Embed(title=f'{player_summary.personaname} Steam Profile', url=player_summary.profileurl, color=embed_color)
-        embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
-                         icon_url=player_summary.avatarfull)
+        embed=self.__embed_skel(player_summary=player_summary)
 
         if player_summary.is_playing:
             game_title = player_summary.gameextrainfo
             if not game_title:
                 print("player_summary.gameextrainfo value is set to none!")
                 print(player_summary.__dict__())
-            embed.add_field(name="Currently playing:", value=f'[{game_title}](https://store.steampowered.com/app/{player_summary.gameid})')
+            embed.add_field(name="Currently playing:",
+                            value=f'[{game_title}](https://store.steampowered.com/app/{player_summary.gameid})')
 
             embed.set_thumbnail(
                 url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
@@ -330,14 +321,62 @@ class CustomBot(commands.Bot):
     #     embed.set_footer(text="https://github.com/OriolFilter")
     #     return embed
 
+    def __embed_skel(self, player_summary: PlayerSummary) -> Embed:
+        embed_color: hex = 0x41ffe6
+
+        if player_summary.has_lobby:
+            embed_color = 0xff1abb
+        elif player_summary.is_playing:
+            embed_color = 0x61ff64
+
+        embed = Embed(title=f'{player_summary.personaname} Steam Profile', url=player_summary.profileurl,
+                      color=embed_color)
+        embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
+                         icon_url=player_summary.avatarfull)
+
+        return embed
+
     def _embed_error_no_lobby(self, player_summary: PlayerSummary) -> Embed:
-        embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0xfff261)
-        embed.set_thumbnail(url=player_summary.avatarfull, )
-        embed.add_field(name="User currently doesn't have an available lobby", value="--", inline=False)
-        embed.add_field(name="Is user playing?",
-                        value=f"Currently playing [{player_summary.gameextrainfo}](https://store.steampowered.com/app/{player_summary.gameid})" if player_summary.gameextrainfo else "No")
+        """
+        """
+
+        embed=self.__embed_skel(player_summary=player_summary)
+
+        embed.add_field(name="User currently doesn't have a public lobby",
+                        value=f'---')
+
+        if player_summary.is_playing:
+            game_title = player_summary.gameextrainfo
+            if not game_title:
+                print("player_summary.gameextrainfo value is set to none!")
+                print(player_summary.__dict__())
+
+            embed.add_field(name="Currently playing:",
+                            value=f'[{game_title}](https://store.steampowered.com/app/{player_summary.gameid})')
+
+            embed.set_thumbnail(
+                url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
+
+        else:
+            embed.add_field(name="User currently is not playing a game.",
+                            value=("Note that profile privacy settings "
+                                   "could be interfering with this."))
+
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
+
+    # def _embed_error_no_lobby_old(self, player_summary: PlayerSummary) -> Embed:
+    #     embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0xfff261)
+    #     embed.set_thumbnail(url=player_summary.avatarfull, )
+    #     embed.add_field(name="User currently doesn't have an available lobby", value="--", inline=False)
+    #
+    #     embed.add_field(name="Is user playing?",
+    #                     value=f"Currently playing [{player_summary.gameextrainfo}](https://store.steampowered.com/app/{player_summary.gameid})" if player_summary.gameextrainfo else "No")
+    #
+    #
+    #
+    #     embed.set_footer(text="https://github.com/OriolFilter")
+    #     return embed
 
     def _embed_player_lobby(self, player_summary: PlayerSummary) -> Embed:
         embed = Embed(title=player_summary.gameextrainfo,
