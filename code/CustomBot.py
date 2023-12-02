@@ -116,7 +116,7 @@ class CustomBot(commands.Bot):
             await ctx.reply("Successfully removed the entry", mention_author=False)
 
         @self.command()
-        async def user_status(ctx: Context, user: discord.User = None):
+        async def profile(ctx: Context, user: discord.User = None):
             """
             Placeholder, it does be mad ugly
             Returns the status of the specified player
@@ -175,19 +175,19 @@ class CustomBot(commands.Bot):
             await ctx.reply(f"ie:  `{self.command_prefix}link SavageBidoof`\nhttps://i.imgur.com/VHdVEj8.png",
                             mention_author=False)
 
-        @self.command()
-        async def profile(ctx: Context, user: discord.User = None):
-            """
-            Show your profile
-            :param ctx:
-            :param user:
-            :return:
-            """
-            if user:
-                steam_id = middleware.get_steam_id_from_discord_id(user.id)
-            else:
-                steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
-            await ctx.reply(f'https://www.steamidfinder.com/signature/{steam_id}.png', mention_author=False)
+        # @self.command()
+        # async def profile(ctx: Context, user: discord.User = None):
+        #     """
+        #     Show your profile
+        #     :param ctx:
+        #     :param user:
+        #     :return:
+        #     """
+        #     if user:
+        #         steam_id = middleware.get_steam_id_from_discord_id(user.id)
+        #     else:
+        #         steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
+        #     await ctx.reply(f'https://www.steamidfinder.com/signature/{steam_id}.png', mention_author=False)
 
         @self.command()
         async def version(ctx: Context):
@@ -277,6 +277,18 @@ class CustomBot(commands.Bot):
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
+    # def _embed_is_playing(self, player_summary: PlayerSummary) -> Embed:
+    #     """
+    #     Expand.
+    #     :param player_summary:
+    #     :return:
+    #     """
+    #     embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0x61ff64)
+    #     embed.set_thumbnail(url=player_summary.avatarfull, )
+    #     embed.add_field(name="Currenty playing?", value=("No", "Yes")[player_summary.is_playing])
+    #     embed.set_footer(text="https://github.com/OriolFilter")
+    #     return embed
+
     def _embed_error_no_lobby(self, player_summary: PlayerSummary) -> Embed:
         embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0xfff261)
         embed.set_thumbnail(url=player_summary.avatarfull, )
@@ -287,8 +299,10 @@ class CustomBot(commands.Bot):
         return embed
 
     def _embed_player_lobby(self, player_summary: PlayerSummary) -> Embed:
+        # embed = Embed(title=player_summary.gameextrainfo,
+        #               url=f'https://store.steampowered.com/app/{player_summary.gameid}', color=0xffc766)
         embed = Embed(title=player_summary.gameextrainfo,
-                      url=f'https://store.steampowered.com/app/{player_summary.gameid}', color=0xffc766)
+                      url=f'steam://joinlobby/1966720/109775244481433768/76561198170583259', color=0xffc766)
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
         embed.set_thumbnail(
