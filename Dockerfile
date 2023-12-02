@@ -1,14 +1,16 @@
 ARG IMAGE="python"
-ARG TAG="3.11-alpine"
+ARG TAG="3-alpine"
 ARG BASEIMAGE="${IMAGE}:${TAG:-latest}"
 
 FROM ${BASEIMAGE} as build
+
 ARG VERSION="1.0"
+ARG BUILDDATE="02/Dec/2023"
 LABEL "author"="Oriol Filter Anson"
 LABEL "version"="${VERSION}"
 LABEL "description"="Discord bot mainly used to post Steam's lobby link"
 LABEL "repository"="https://github.com/OriolFilter/Steam_Invite_Discord"
-LABEL "BUILDDATE"="02/Dec/2023"
+LABEL "BUILDDATE"="${BUILDDATE}"
 
 ENV VERSION=${VERSION}
 ENV BUILDDATE=${BUILDDATE}
