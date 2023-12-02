@@ -213,6 +213,7 @@ class CustomBot(commands.Bot):
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
         embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=False)
+        embed.add_field(name="Build Date", value=f'v{os.getenv("BUILDDATE")}', inline=False)
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
@@ -289,14 +290,14 @@ class CustomBot(commands.Bot):
         :return:
         """
 
-        embed_color: hex = 0x61ff64
+        embed_color: hex = 0x41ffe6
 
         if player_summary.has_lobby:
             embed_color = 0xff1abb
         elif player_summary.is_playing:
-            embed_color = 0x8fce00
+            embed_color = 0x61ff64
 
-        embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=embed_color)
+        embed = Embed(title=f'{player_summary.personaname} Steam Profile', url=player_summary.profileurl, color=embed_color)
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
 
