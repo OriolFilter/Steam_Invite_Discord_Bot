@@ -302,7 +302,7 @@ class CustomBot(commands.Bot):
         # embed = Embed(title=player_summary.gameextrainfo,
         #               url=f'https://store.steampowered.com/app/{player_summary.gameid}', color=0xffc766)
         embed = Embed(title=player_summary.gameextrainfo,
-                      url=f'steam://joinlobby/1966720/109775244481433768/76561198170583259', color=0xffc766)
+                      url=f'<steam://joinlobby/1966720/109775244481433768/76561198170583259>', color=0xffc766)
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
         embed.set_thumbnail(
