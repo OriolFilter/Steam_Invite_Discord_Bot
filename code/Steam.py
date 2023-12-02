@@ -84,8 +84,6 @@ def steam_api_call(method) -> dict:
     @wraps(method)
     def wrapper(self, *args, **kwargs) -> dict:
         response: requests.request = method(self, *args, **kwargs)
-        print("CALLED STEAM API")
-        print(response)
         if response.status_code == 200:
             return response.json()["response"]
         elif response.status_code == 403:
