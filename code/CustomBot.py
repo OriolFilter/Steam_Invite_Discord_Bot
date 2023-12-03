@@ -217,8 +217,8 @@ class CustomBot(commands.Bot):
                       description="Discord bot intended to get lobby links from Steam users", color=0xababab)
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
-        embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=False)
-        embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE","Unknown")}', inline=False)
+        embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=True)
+        embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE","Unknown")}', inline=True)
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
