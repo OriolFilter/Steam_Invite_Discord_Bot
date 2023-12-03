@@ -211,7 +211,7 @@ class CustomBot(commands.Bot):
     @property
     def _embed_version(self) -> Embed:
         """
-        Returns an embed object with the Github Repo
+        Returns an embed object with the GitHub Repo
         """
         embed = Embed(title="Github Repository", url=os.getenv("REPOSITORY"),
                       description="Discord bot intended to get lobby links from Steam users", color=0xababab)
