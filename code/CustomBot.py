@@ -28,8 +28,10 @@ class CustomBot(commands.Bot):
         print(f'invite me with: {self.invite_url}')
         print('------')
         await self.change_presence(activity=discord.Game(
-            name=(self.configuration.activity, f"Use {self.configuration.prefix}help to get a list "
-                                               f"from all the available commands")[any(self.configuration.activity)]))
+            name=(
+                self.configuration.activity, f"Use {self.configuration.prefix}help to get a list "
+                                               f"from all the available commands")[not any(self.configuration.activity)]
+        ))
 
     def __init__(self, *args, **kwargs):
         self.configuration = DiscordConf()
@@ -77,7 +79,7 @@ class CustomBot(commands.Bot):
             """
             await ctx.reply(
                 f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
-                mention_author=False)
+                mention_author=True)
 
         @self.command()
         async def link(ctx: Context, vanity_url: str = None):
