@@ -200,7 +200,8 @@ class CustomBot(commands.Bot):
             Example on hot to use this bot
             """
             await ctx.reply("Use the following image as reference, note that the prefix command might "
-                            "vary.\nhttps://i.imgur.com/liZl6fI.png")
+                            "vary. (Also, open the image on the browser for better "
+                            "clarity...)\nhttps://i.imgur.com/liZl6fI.png")
 
 
     @property
