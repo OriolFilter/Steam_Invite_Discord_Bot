@@ -29,7 +29,7 @@ class CustomBot(commands.Bot):
         print('------')
         await self.change_presence(activity=discord.Game(
             name=(self.configuration.activity, f"Use {self.configuration.prefix}help to get a list "
-                                               f"from all the available commands")[self.configuration.activity]))
+                                               f"from all the available commands")[any(self.configuration.activity)]))
 
     def __init__(self, *args, **kwargs):
         self.configuration = DiscordConf()
