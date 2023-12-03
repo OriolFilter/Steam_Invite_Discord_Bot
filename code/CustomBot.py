@@ -209,7 +209,10 @@ class CustomBot(commands.Bot):
 
     @property
     def _embed_version(self) -> Embed:
-        embed = Embed(title="Github Repository", url="https://github.com/OriolFilter/Steam_Invite_Discord",
+        """
+        Returns an embed object with the Github Repo
+        """
+        embed = Embed(title="Github Repository", url=os.getenv("REPOSITORY"),
                       description="Discord bot intended to get lobby links from Steam users", color=0xababab)
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
