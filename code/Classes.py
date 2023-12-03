@@ -63,8 +63,7 @@ class DiscordConf(_CONFIG):
     token: str = None
     prefix: str = "s."
     description: str = ""
-    activity: str = "Hi, I'm a Bot!\n" \
-                       f" use {prefix}help for a list of the available commands.\n"
+    activity: str = ""
 
     def load_envs(self):
         self.token = getenv("DISCORD_TOKEN") or self.token
