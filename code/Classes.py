@@ -3,6 +3,8 @@ from os import getenv
 from functools import wraps
 import Errors
 import psycopg2
+
+
 # import mariadb
 # from Steam import Steam
 
@@ -66,10 +68,10 @@ class DiscordConf(_CONFIG):
     activity: str = ""
 
     def load_envs(self):
-        self.token = getenv("DISCORD_TOKEN") or self.token
-        self.prefix = getenv("DISCORD_PREFIX") or self.prefix
-        self.description = getenv("DISCORD_DESCRIPTION") or self.description
-        self.description = getenv("DISCORD_ACTIVITY") or self.activity
+        self.token = getenv("DISCORD_TOKEN", self.token)
+        self.prefix = getenv("DISCORD_PREFIX", self.prefix)
+        self.description = getenv("DISCORD_DESCRIPTION", self.description)
+        self.activity = getenv("DISCORD_ACTIVITY", self.activity)
         return self
 
 
@@ -109,8 +111,6 @@ class SteamConf(_CONFIG):
     def load_envs(self):
         self.token = getenv("STEAM_TOKEN") or self.token
         return self
-
-
 
 
 # class MemcachedCli(_DBSkel):
