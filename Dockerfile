@@ -3,19 +3,28 @@ ARG TAG="3.11-alpine"
 ARG BASEIMAGE="${IMAGE}:${TAG:-latest}"
 
 FROM ${BASEIMAGE} as build
-ARG VERSION="1.0"
+
+ARG BUILDDATE
+ARG VERSION="1.1"
+ARG REPOSITORY="https://github.com/OriolFilter/Steam_Invite_Discord"
+
 LABEL "author"="Oriol Filter Anson"
 LABEL "version"="${VERSION}"
-LABEL "description"="Discord bot mainly used to post Steam's lobby link"
-LABEL "repository"="https://github.com/OriolFilter/Steam_Invite_Discord"
+LABEL "description"="Discord bot mainly used to get Steam's lobby link"
+LABEL "repository"="${REPOSITORY}"
+LABEL "build_date"="${BUILDDATE}"
 
 ENV VERSION=${VERSION}
+ENV BUILDDATE=${BUILDDATE}
+ENV REPOSITORY=${REPOSITORY}
+
 
 ENV STEAM_TOKEN=""
 
 ENV DISCORD_TOKEN=""
 ENV DISCORD_PREFIX="s."
-ENV DISCORD_DESCRIPTION=""
+ENV DISCORD_DESCRIPTION="Discord bot mainly used to get Steam's lobby link"
+ENV DISCORD_ACTIVITY=""
 
 ENV DB_HOST="127.0.0.1"
 ENV DB_PORT=5432
