@@ -24,6 +24,7 @@ class Middleware:
         print("config stored")
         print(f"Shlink enabled? {self.ShlinkClient.enabled}")
         print(self.Configuration.shlink.token)
+        print(self.ShlinkClient.enabled)
         print(self.ShlinkClient.shorten('https://www.youtube.com/'))
 
     def set_steam_id(self, discord_id, steam_id, *args, **kwargs):

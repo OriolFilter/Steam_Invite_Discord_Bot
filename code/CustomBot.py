@@ -411,6 +411,7 @@ class CustomBot(commands.Bot):
         print(middleware.__dict__)
         print(middleware.ShlinkClient)
         print(middleware.ShlinkClient.__dict__)
+        print(middleware.ShlinkClient.enabled)
         if middleware.ShlinkClient.enabled:
             try:
                 shortLobbyUrl = Middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
