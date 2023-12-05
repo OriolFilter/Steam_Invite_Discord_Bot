@@ -411,7 +411,7 @@ class CustomBot(commands.Bot):
 
         if middleware.ShlinkClient.enabled:
             try:
-                shortLobbyUrl = Middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
+                shortLobbyUrl = middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
             except Errors.ShlinkError:
                 print(f"Failed generating a short link for URL: {player_summary.lobby_url}")
             else:
