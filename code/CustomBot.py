@@ -30,7 +30,7 @@ class CustomBot(commands.Bot):
         await self.change_presence(activity=discord.Game(
             name=(
                 self.configuration.activity, f"Use {self.configuration.prefix}help to get a list "
-                                               f"from all the available commands")[not any(self.configuration.activity)]
+                                             f"from all the available commands")[not any(self.configuration.activity)]
         ))
 
     def __init__(self, *args, **kwargs):
@@ -205,7 +205,6 @@ class CustomBot(commands.Bot):
                             "vary. (Also, open the image on the browser for better "
                             "clarity...)\nhttps://i.imgur.com/liZl6fI.png")
 
-
     @property
     def invite_url(self) -> str:
         return f"https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot"
@@ -220,7 +219,7 @@ class CustomBot(commands.Bot):
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
         embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=True)
-        embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE","Unknown")}', inline=True)
+        embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE", "Unknown")}', inline=True)
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
@@ -406,25 +405,25 @@ class CustomBot(commands.Bot):
 
          This function won't check for anything of that.
          """
+        shortLobbyUrl = ""
+        message_lobby_url = ""
+        if Middleware.ShlinkClient.enabled:
+            shortLobbyUrl = Middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
 
         embed = Embed(title=player_summary.gameextrainfo,
                       url=f'https://store.steampowered.com/app/{player_summary.gameid}',
                       color=self.__return_embed_color(player_summary=player_summary))
+
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
+
+        if shortLobbyUrl:
+            message_lobby_url = f'({player_summary.lobby_url})[{shortLobbyUrl}]'
+        else:
+            message_lobby_url = player_summary.lobby_url
+
         embed.set_thumbnail(
             url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
-        embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=player_summary.lobby_url, inline=False)
+        embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=message_lobby_url, inline=False)
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
-
-    # def _embed_player_lobby_old(self, player_summary: PlayerSummary) -> Embed:
-    #     embed = Embed(title=player_summary.gameextrainfo,
-    #                   url=f'https://store.steampowered.com/app/{player_summary.gameid}', color=0xffc766)
-    #     embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
-    #                      icon_url=player_summary.avatarfull)
-    #     embed.set_thumbnail(
-    #         url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
-    #     embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=player_summary.lobby_url, inline=False)
-    #     embed.set_footer(text="https://github.com/OriolFilter")
-    #     return embed
