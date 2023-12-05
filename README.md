@@ -118,5 +118,14 @@ Using a Shlink server might be more advanced than a "minimal setup", therefore I
 
 As per the moment **only API v3 is supported.**
 
+### FAQ
+
+- If I change my steam name will I need to relink my account?
+
+No.
+
+When you link the account, it obtains and stores your Steam ID instead of your Steam **Name**, therefore unless you desire to link a different steam account, there is no need to relink it.
+
+- Is `Shlink` related variables 
 
 

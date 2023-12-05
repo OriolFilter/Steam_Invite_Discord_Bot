@@ -426,7 +426,7 @@ class CustomBot(commands.Bot):
 
         print(f">>> {shortLobbyUrl}")
         if shortLobbyUrl:
-            message_lobby_url = f'({player_summary.lobby_url})[{shortLobbyUrl}]'
+            message_lobby_url = f'[{player_summary.lobby_url}]({shortLobbyUrl})'
         else:
             message_lobby_url = player_summary.lobby_url
         print(f">>> {message_lobby_url}")
