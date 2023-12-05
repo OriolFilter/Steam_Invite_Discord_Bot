@@ -5,7 +5,7 @@ ARG BASEIMAGE="${IMAGE}:${TAG:-latest}"
 FROM ${BASEIMAGE} as build
 
 ARG BUILDDATE
-ARG VERSION="1.2ad"
+ARG VERSION="1.2ae"
 ARG REPOSITORY="https://github.com/OriolFilter/Steam_Invite_Discord"
 
 LABEL "author"="Oriol Filter Anson"
