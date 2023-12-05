@@ -1,5 +1,5 @@
 ARG IMAGE="python"
-ARG TAG="3.11-bookworm"
+ARG TAG="3.11-alpine"
 ARG BASEIMAGE="${IMAGE}:${TAG:-latest}"
 
 FROM ${BASEIMAGE}
