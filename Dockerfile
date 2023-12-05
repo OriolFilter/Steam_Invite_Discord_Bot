@@ -53,4 +53,4 @@ RUN pip3 install -r /tmp/requirements.txt --user
 ADD ./code /main
 WORKDIR /main
 RUN chmod +x ./main.py
-CMD ["python3","-u","/main/Middleware.py"]
+CMD ["python3","-u","/main/main.py"]
