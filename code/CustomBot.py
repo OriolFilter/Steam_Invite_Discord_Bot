@@ -409,6 +409,8 @@ class CustomBot(commands.Bot):
         shortLobbyUrl = ""
         message_lobby_url = ""
         print(middleware.__dict__)
+        print(middleware.ShlinkClient)
+        print(middleware.ShlinkClient.__dict__)
         if middleware.ShlinkClient.enabled:
             try:
                 shortLobbyUrl = Middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
