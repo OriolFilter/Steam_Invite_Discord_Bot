@@ -44,6 +44,7 @@ class ShlinkClient:
                                      data=json.dumps(payload))
 
         if api_response.status_code != 200:
+            print(f'Response code: {api_response.status_code}')
             print(f"Failed to get a URL shortener for the URL: `{longurl}`")
             print(f'Shlink server: `{self.__config.url}`')
             raise Errors.ShlinkError

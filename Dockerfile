@@ -6,7 +6,7 @@ FROM ${BASEIMAGE}
 #as build
 
 ARG BUILDDATE
-ARG VERSION="1.2af"
+ARG VERSION="1.2ag"
 ARG REPOSITORY="https://github.com/OriolFilter/Steam_Invite_Discord"
 
 LABEL "author"="Oriol Filter Anson"
@@ -53,4 +53,4 @@ RUN pip3 install -r /tmp/requirements.txt --user
 ADD ./code /main
 WORKDIR /main
 RUN chmod +x ./main.py
-CMD ["python3","-u","/main/main.py"]
+CMD ["python3","-u","/main/Middleware.py"]
