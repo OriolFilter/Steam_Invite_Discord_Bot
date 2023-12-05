@@ -15,7 +15,7 @@ from Steam import PlayerSummary
 import DBClient
 import Errors
 
-middleware = Middleware()
+middleware: Middleware = Middleware()
 
 
 class CustomBot(commands.Bot):
@@ -408,6 +408,7 @@ class CustomBot(commands.Bot):
          """
         shortLobbyUrl = ""
         message_lobby_url = ""
+        print(middleware.__dict__)
         if middleware.ShlinkClient.enabled:
             try:
                 shortLobbyUrl = Middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
