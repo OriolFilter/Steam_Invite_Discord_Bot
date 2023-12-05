@@ -12,13 +12,16 @@ class Middleware:
     ShlinkClient: ShlinkClient
 
     def __init__(self):
+        print("Middleware initialized")
         configuration = Configuration()
+        print(configuration.shlink.url)
 
         self.SteamApi = SteamApi(configuration=configuration.steam)
         self.DBClient = DBClient(configuration=configuration.database)
         self.ShlinkClient = ShlinkClient(configuration=configuration.shlink)
 
         self.Configuration = configuration
+        print("config stored")
 
     def set_steam_id(self, discord_id, steam_id, *args, **kwargs):
         """
