@@ -126,6 +126,10 @@ No.
 
 When you link the account, it obtains and stores your Steam ID instead of your Steam **Name**, therefore unless you desire to link a different steam account, there is no need to relink it.
 
-- Is `Shlink` related variables 
+- Is `Shlink` related variables obligatory/required if I don't want to set up the link shortener functionality?
+
+No, you can ignore them.
+
+If any from the both variables (`SHLINK_SERVER_URL` and `SHLINK_TOKEN`) is unset, the functionality won't be enabled.
 
 
