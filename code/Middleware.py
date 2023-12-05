@@ -22,6 +22,7 @@ class Middleware:
 
         self.Configuration = configuration
         print("config stored")
+        print(f"Shlink enabled? {self.ShlinkClient.enabled}")
 
     def set_steam_id(self, discord_id, steam_id, *args, **kwargs):
         """
@@ -61,3 +62,7 @@ class Middleware:
         elif kwargs.get('steam_id'):
             return self.__get_steam_summary_steam_id(steam_id=kwargs.get('steam_id'))
         raise TypeError("missing required positional argument: 'discord_id' or 'steam_id'")
+
+
+x=Middleware()
+print(x.ShlinkClient.enabled)
