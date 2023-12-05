@@ -91,15 +91,41 @@ docker-compose up -d
 
 ### Environments
 
-| Environment         | Default Value                                                      | Description                                                                                                       |
-|---------------------|--------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-| STEAM_TOKEN         | \<Null\>                                                           | Steam API token.                                                                                                  |
-| DISCORD_TOKEN       | \<Null\>                                                           | Discord bot token.                                                                                                |
-| DISCORD_PREFIX      | s.                                                                 | Prefix for the discord bot to read the commands.                                                                  |
-| DISCORD_ACTIVITY    | Use {bot_prefix}help to get a list from all the available commands | Activity  message displayed on the bot. Highly recommended to specify which is the prefix command to use the bot. |
-| DISCORD_DESCRIPTION | Discord bot mainly used to get Steam's lobby link                  | Description for the bot (visible during the help command).                                                        |
-| DB_HOST             | 127.0.0.1                                                          | Hostname/IP to connect to the database server/container.                                                          |
-| DB_PORT             | 5432                                                               | Port used to authenticate to the database server.                                                                 |
-| DB_USERNAME         | \<Null\>                                                           | Username used to authenticate to the database server.                                                             |
-| DB_PASSWORD         | \<Null\>                                                           | Password used to authenticate to the database server.                                                             |
-| DB_DATABASE         | steam_invite                                                       | Database used to connect                                                                                          |
+| Environment         | Default Value                                                      | Description                                                                                                                                           |
+|---------------------|--------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| STEAM_TOKEN         | \<Null\>                                                           | Steam API token.                                                                                                                                      |
+| DISCORD_TOKEN       | \<Null\>                                                           | Discord bot token.                                                                                                                                    |
+| DISCORD_PREFIX      | s.                                                                 | Prefix for the discord bot to read the commands.                                                                                                      |
+| DISCORD_ACTIVITY    | Use {bot_prefix}help to get a list from all the available commands | Activity  message displayed on the bot. Highly recommended to specify which is the prefix command to use the bot.                                     |
+| DISCORD_DESCRIPTION | Discord bot mainly used to get Steam's lobby link                  | Description for the bot (visible during the help command).                                                                                            |
+| DB_HOST             | 127.0.0.1                                                          | Hostname/IP to connect to the database server/container.                                                                                              |
+| DB_PORT             | 5432                                                               | Port used to authenticate to the database server.                                                                                                     |
+| DB_USERNAME         | \<Null\>                                                           | Username used to authenticate to the database server.                                                                                                 |
+| DB_PASSWORD         | \<Null\>                                                           | Password used to authenticate to the database server.                                                                                                 |
+| DB_DATABASE         | steam_invite                                                       | Database used to connect                                                                                                                              |
+| SHLINK_SERVER_URL   | \<Null\>                                                           | Api key from a Shlink server. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled.          |
+| SHLINK_TOKEN        | \<Null\>                                                           | URL for the Shlink API server/service. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled. |
+
+### Shlink
+
+Shlink is a self-hosted link shortener service.
+
+https://shlink.io/documentation/api-docs/
+
+Needless to say that this project is not associated nor correlated nor whatever, I chose that service out of my own convenience. 
+
+Using a Shlink server might be more advanced than a "minimal setup", therefore I will be skipping "how to".
+
+As per the moment **only API v3 is supported.**
+
+### FAQ
+
+- If I change my steam name will I need to relink my account?
+
+No.
+
+When you link the account, it obtains and stores your Steam ID instead of your Steam **Name**, therefore unless you desire to link a different steam account, there is no need to relink it.
+
+- Is `Shlink` related variables 
+
+

@@ -2,10 +2,11 @@ ARG IMAGE="python"
 ARG TAG="3.11-alpine"
 ARG BASEIMAGE="${IMAGE}:${TAG:-latest}"
 
-FROM ${BASEIMAGE} as build
+FROM ${BASEIMAGE}
+#as build
 
 ARG BUILDDATE
-ARG VERSION="1.1"
+ARG VERSION="1.2"
 ARG REPOSITORY="https://github.com/OriolFilter/Steam_Invite_Discord"
 
 LABEL "author"="Oriol Filter Anson"
@@ -26,11 +27,20 @@ ENV DISCORD_PREFIX="s."
 ENV DISCORD_DESCRIPTION="Discord bot mainly used to get Steam's lobby link"
 ENV DISCORD_ACTIVITY=""
 
+
 ENV DB_HOST="127.0.0.1"
 ENV DB_PORT=5432
 ENV DB_USERNAME=""
 ENV DB_PASSWORD=""
 ENV DB_DATABASE="steam_invite"
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONIOENCODING=UTF-8
+# Logs and things
+
+
+ENV SHLINK_SERVER_URL=""
+ENV SHLINK_TOKEN=""
 
 RUN apk update --no-cache
 RUN apk add build-base postgresql-dev libpq

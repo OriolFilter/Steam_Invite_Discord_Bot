@@ -113,6 +113,20 @@ class SteamConf(_CONFIG):
         return self
 
 
+@dataclass
+class ShlinkConf(_CONFIG):
+    """
+    Stores the API token and server URL for the Shlink service
+    """
+    token: str = None  # Api key
+    url: str = None  # Server URL
+
+    def load_envs(self):
+        self.url = getenv("SHLINK_SERVER_URL") or self.url
+        self.token = getenv("SHLINK_TOKEN") or self.token
+        return self
+
+
 # class MemcachedCli(_DBSkel):
 #     __config: MemcachedConf
 #
@@ -205,9 +219,11 @@ class Configuration:
     steam: SteamConf
     discord: DiscordConf
     database: DatabaseConf
+    shlink: ShlinkConf
 
     def __init__(self):
         # self.memcached = MemcachedConf()
         self.steam = SteamConf()
         self.discord = DiscordConf()
         self.database = DatabaseConf()
+        self.shlink = ShlinkConf()

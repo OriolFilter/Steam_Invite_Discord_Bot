@@ -5,7 +5,7 @@ from dataclasses import dataclass, asdict
 from typing import Optional
 from functools import wraps
 from Classes import SteamConf
-
+import Errors
 
 # steam error codes https://partner.steamgames.com/doc/webapi_overview/responses
 
@@ -50,34 +50,7 @@ class PlayerSummary:
         return f"steam://joinlobby/{self.gameid}/{self.lobbysteamid}/{self.steamid}"
 
 
-class VanityUrlNotFound(Exception):
-    """
-    Raised when couldn't find the vanity url specified
-    """
 
-
-class Forbidden(Exception):
-    """
-    Forbidden, this could be due accessing a page without permission or the api key expired/is wrong.
-    """
-
-
-class UnexpectedError(Exception):
-    """
-    Raised when the error wasn't planned
-    """
-
-
-class SteamIdUserNotFoundError(Exception):
-    """
-    Raised when couldn't find a user by the given SteamId
-    """
-
-
-class PlayerNotPlayingError(Exception):
-    """
-    Raised when the player is not playing and wanted to obtain the invite link
-    """
 
 
 def steam_api_call(method) -> dict:
@@ -87,9 +60,9 @@ def steam_api_call(method) -> dict:
         if response.status_code == 200:
             return response.json()["response"]
         elif response.status_code == 403:
-            raise Forbidden
+            raise Errors.Forbidden
         else:
-            raise UnexpectedError
+            raise Errors.UnexpectedError
     return wrapper
 
 
@@ -113,9 +86,9 @@ class SteamApi:
         if jresponse["success"] == 1:
             return jresponse["steamid"]
         elif jresponse["success"] == 42:
-            raise VanityUrlNotFound
+            raise Errors.VanityUrlNotFound
         else:
-            raise UnexpectedError
+            raise Errors.UnexpectedError
 
     @steam_api_call
     def __player_summary(self, id) -> requests or dict:
@@ -126,7 +99,7 @@ class SteamApi:
     def player_summary(self, id) -> PlayerSummary:
         result = self.__player_summary(id)['players']
         if len(result) == 0:
-            raise SteamIdUserNotFoundError
+            raise Errors.SteamIdUserNotFoundError
         summary = result[0]
         return PlayerSummary(**dict(summary))
 

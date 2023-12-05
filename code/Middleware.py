@@ -2,18 +2,21 @@ from Steam import SteamApi, PlayerSummary
 from Classes import Configuration
 from DBClient import DBClient as DBClient
 # from DBClient import doomyDBClient as DBClient
+from ShlinkCli import ShlinkClient
 
 
 class Middleware:
     Configuration: Configuration
     SteamApi: SteamApi
     DBClient: DBClient
+    ShlinkClient: ShlinkClient
 
     def __init__(self):
         configuration = Configuration()
 
         self.SteamApi = SteamApi(configuration=configuration.steam)
         self.DBClient = DBClient(configuration=configuration.database)
+        self.ShlinkClient = ShlinkClient(configuration=configuration.shlink)
 
         self.Configuration = configuration
 
