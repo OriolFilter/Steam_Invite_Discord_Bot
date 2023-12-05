@@ -407,7 +407,7 @@ class CustomBot(commands.Bot):
          """
         shortLobbyUrl = ""
         message_lobby_url = ""
-        if Middleware.ShlinkClient.enabled:
+        if middleware.ShlinkClient.enabled:
             shortLobbyUrl = Middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
 
         embed = Embed(title=player_summary.gameextrainfo,
