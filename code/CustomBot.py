@@ -407,8 +407,8 @@ class CustomBot(commands.Bot):
          """
         shortLobbyUrl = ""
         message_lobby_url = ""
-        if middleware.ShlinkClient.enabled:
-            shortLobbyUrl = Middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
+        # if middleware.ShlinkClient.enabled:
+        #     shortLobbyUrl = Middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
 
         embed = Embed(title=player_summary.gameextrainfo,
                       url=f'https://store.steampowered.com/app/{player_summary.gameid}',
@@ -417,10 +417,10 @@ class CustomBot(commands.Bot):
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
 
-        if shortLobbyUrl:
-            message_lobby_url = f'({player_summary.lobby_url})[{shortLobbyUrl}]'
-        else:
-            message_lobby_url = player_summary.lobby_url
+        # if shortLobbyUrl:
+        #     message_lobby_url = f'({player_summary.lobby_url})[{shortLobbyUrl}]'
+        # else:
+        message_lobby_url = player_summary.lobby_url
 
         embed.set_thumbnail(
             url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
