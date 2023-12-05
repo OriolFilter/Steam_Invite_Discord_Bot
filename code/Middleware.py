@@ -12,20 +12,13 @@ class Middleware:
     ShlinkClient: ShlinkClient
 
     def __init__(self):
-        print("Middleware initialized")
         configuration = Configuration()
-        print(configuration.shlink.url)
 
         self.SteamApi = SteamApi(configuration=configuration.steam)
         self.DBClient = DBClient(configuration=configuration.database)
         self.ShlinkClient = ShlinkClient(configuration=configuration.shlink)
 
         self.Configuration = configuration
-        print("config stored")
-        print(f"Shlink enabled? {self.ShlinkClient.enabled}")
-        print(self.Configuration.shlink.token)
-        print(self.ShlinkClient.enabled)
-        print(self.ShlinkClient.shorten('https://www.youtube.com/'))
 
     def set_steam_id(self, discord_id, steam_id, *args, **kwargs):
         """
@@ -65,8 +58,3 @@ class Middleware:
         elif kwargs.get('steam_id'):
             return self.__get_steam_summary_steam_id(steam_id=kwargs.get('steam_id'))
         raise TypeError("missing required positional argument: 'discord_id' or 'steam_id'")
-
-
-c = Middleware()
-# efb6b703-fd1c-4405-8c74-fd9dbc8a7c05
-# c.ShlinkClient.shorten('https://www.youtube.com/')
