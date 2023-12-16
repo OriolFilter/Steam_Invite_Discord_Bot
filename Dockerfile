@@ -1,6 +1,6 @@
 ARG IMAGE="python"
 ARG TAG="3.11-alpine"
-ARG BASEIMAGE="${IMAGE}:${TAG:-latest}"
+ARG BASEIMAGE="${IMAGE}:${TAG}"
 
 FROM ${BASEIMAGE}
 #as build
