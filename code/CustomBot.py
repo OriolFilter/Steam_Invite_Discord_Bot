@@ -173,7 +173,7 @@ class CustomBot(commands.Bot):
             """
 
             if not middleware.ShlinkClient.enabled:
-                return ctx.reply(embed=self._embed_)
+                return ctx.reply(embed=self._embed_shlink_not_enabled())
             else:
 
                 steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
@@ -258,7 +258,7 @@ class CustomBot(commands.Bot):
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
         embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=True)
         embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE", "Unknown")}', inline=True)
-        embed.set_footer(text="https://github.com/OriolFilter")
+        embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
 
     @property
@@ -478,13 +478,17 @@ class CustomBot(commands.Bot):
         """
         Returns a Discord Embed used to tell the user that shlink functionality is not enabled.
         """
-
+        embed = Embed(title="Shlink functionality is not enabled",description="Link shortener (shlink) functionality "
+                                                                              "is not enabled.\nReach out the bot "
+                                                                              "administrator in case you would like "
+                                                                              "for them to enable such.",
+                      color=0x8a8a8a)
 
 
     def _embed_player_lobby_shlink(self, player_summary: PlayerSummary) -> Embed:
         """
         Exactly the same as `_embed_player_lobby`, but will return the shlink URL instead of the lobby URL (as in text)
-
+        This won't validate if the link shortener is enabled.
         """
         shortLobbyUrl = ""
         message_lobby_url = ""
@@ -504,15 +508,10 @@ class CustomBot(commands.Bot):
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
 
-        print(f">>> {shortLobbyUrl}")
-        if shortLobbyUrl:
-            message_lobby_url = f'[{shortLobbyUrl}]({shortLobbyUrl})'
-        else:
-            message_lobby_url = player_summary.lobby_url
-        print(f">>> {message_lobby_url}")
+        message_lobby_url = f'[{shortLobbyUrl}]({shortLobbyUrl})'
 
         embed.set_thumbnail(
             url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
         embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=message_lobby_url, inline=False)
-        embed.set_footer(text="https://github.com/OriolFilter")
+        embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
