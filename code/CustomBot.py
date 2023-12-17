@@ -149,7 +149,7 @@ class CustomBot(commands.Bot):
                 embed = self._embed_player_lobby(summary)
                 if not any(members):
                     await ctx.reply(embed=embed, mention_author=False)
-                elif len(members) > 4:
+                elif len(members) > 8:
                     await ctx.reply("Sorry, max allowed players to invite are 4", mention_author=True)
                 else:
                     mail_list = []
@@ -163,6 +163,43 @@ class CustomBot(commands.Bot):
                     for member in mail_list:
                         await member.send(embed=embed)
                     await ctx.reply("Sent an invite to the specified user(s)!", mention_author=False)
+
+        @self.command()
+        async def shlink(ctx: Context, *members: discord.Member):
+            # Add cooldown
+            """
+            Stands for "short link"
+            Same as `lobby` command, but will return the link shortener as text instead of the lobby url. Only works if the `shortener` functionality is enabled.
+            """
+
+            if not middleware.ShlinkClient.enabled:
+                return ctx.reply(embed=self._embed_)
+            else:
+
+                steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
+                summary = middleware.get_steam_summary(steam_id=steam_id)
+                if not summary.has_lobby:
+                    embed = self._embed_error_no_lobby(summary)
+                    await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=True)
+                else:
+                    embed = self._embed_player_lobby_shlink(summary)
+                    if not any(members):
+                        await ctx.reply(embed=embed, mention_author=False)
+                    elif len(members) > 8:
+                        await ctx.reply("Sorry, max allowed players to invite are 4", mention_author=True)
+                    else:
+                        mail_list = []
+                        for member in list(set(members)):
+                            if isinstance(member, discord.Member):
+                                mail_list.append(member)
+                            else:
+                                await ctx.reply(
+                                    "There was an error with the users given, ensure you @ed correctly the users ",
+                                    mention_author=True)
+                        for member in mail_list:
+                            await member.send(embed=embed)
+                        await ctx.reply("Sent an invite to the specified user(s)!", mention_author=False)
+
 
         @self.command()
         async def vanity(ctx: Context):
@@ -427,6 +464,49 @@ class CustomBot(commands.Bot):
         print(f">>> {shortLobbyUrl}")
         if shortLobbyUrl:
             message_lobby_url = f'[{player_summary.lobby_url}]({shortLobbyUrl})'
+        else:
+            message_lobby_url = player_summary.lobby_url
+        print(f">>> {message_lobby_url}")
+
+        embed.set_thumbnail(
+            url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
+        embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=message_lobby_url, inline=False)
+        embed.set_footer(text="https://github.com/OriolFilter")
+        return embed
+
+    def _embed_shlink_not_enabled(self) -> Embed:
+        """
+        Returns a Discord Embed used to tell the user that shlink functionality is not enabled.
+        """
+
+
+
+    def _embed_player_lobby_shlink(self, player_summary: PlayerSummary) -> Embed:
+        """
+        Exactly the same as `_embed_player_lobby`, but will return the shlink URL instead of the lobby URL (as in text)
+
+        """
+        shortLobbyUrl = ""
+        message_lobby_url = ""
+
+        if middleware.ShlinkClient.enabled:
+            try:
+                shortLobbyUrl = middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
+            except Errors.ShlinkError:
+                print(f"Failed generating a short link for URL: {player_summary.lobby_url}")
+            else:
+                print(f"Some error occurred while generating a short link for URL: {player_summary.lobby_url}")
+
+        embed = Embed(title=player_summary.gameextrainfo,
+                      url=f'https://store.steampowered.com/app/{player_summary.gameid}',
+                      color=self.__return_embed_color(player_summary=player_summary))
+
+        embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
+                         icon_url=player_summary.avatarfull)
+
+        print(f">>> {shortLobbyUrl}")
+        if shortLobbyUrl:
+            message_lobby_url = f'[{shortLobbyUrl}]({shortLobbyUrl})'
         else:
             message_lobby_url = player_summary.lobby_url
         print(f">>> {message_lobby_url}")
