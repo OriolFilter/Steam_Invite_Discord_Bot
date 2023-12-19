@@ -5,7 +5,6 @@ import discord
 from discord.ext import commands
 from discord import Embed
 from discord.ext.commands.context import Context
-from discord import app_commands
 
 import Steam
 from Middleware import Middleware
@@ -22,8 +21,6 @@ middleware: Middleware = Middleware()
 
 class CustomBot(commands.Bot):
     configuration: DiscordConf
-    tree: app_commands
-
     async def on_ready(self):
         print('------')
         print('Logged as')
@@ -45,7 +42,7 @@ class CustomBot(commands.Bot):
                                            description=self.configuration.description,
                                            self_bot=False, intents=intents)
         self.add_commands()
-        self.tree = app_commands.CommandTree(self)
+        # self.tree = app_commands.CommandTree(self)
 
     async def on_command_error(self, ctx: Context, exception: Exception):
         _: {Exception: Embed} = {
@@ -74,10 +71,8 @@ class CustomBot(commands.Bot):
     def run(self, *args, **kwargs):
         super(commands.Bot, self).run(self.configuration.token, *args, **kwargs)
 
-
-
     def add_commands(self):
-        @self.tree.command()
+        @self.tree.command(name="bot_invite", description="Hihi test")
         async def bot_invite(ctx):
             """
             In case someone wants to add this bot to their server use the link provided by this command
