@@ -23,6 +23,7 @@ from Steam import PlayerSummary
 middleware: Middleware = Middleware()
 
 
+# class CustomBot():
 class CustomBot(commands.Bot):
 # class CustomBot(discord.app_commands.CommandTree):
     configuration: DiscordConf
@@ -47,7 +48,9 @@ class CustomBot(commands.Bot):
         super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
                                            description=self.configuration.description,
                                            self_bot=False, intents=intents)
-        self.tree = app_commands.CommandTree(self)
+        # self.tree.
+        # self.tree = app_commands.CommandTree(self)
+        # s
         # self.add_commands()
         # return CustomTreeCommands(self)
         # self.tree = app_commands.CommandTree(self)
@@ -80,16 +83,22 @@ class CustomBot(commands.Bot):
         super(commands.Bot, self).run(self.configuration.token, *args, **kwargs)
 
     def add_commands(self):
-        # @self.tree.command(name="bot_invite", description="Hihi test")
-        # async def bot_invite(ctx):
-        #     """
-        #     In case someone wants to add this bot to their server use the link provided by this command
-        #     :param ctx:
-        #     :return:
-        #     """
-        #     await ctx.reply(
-        #         f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
-        #         mention_author=True)
+
+        @self.tree.command()
+        async def hello(interaction: discord.Interaction):
+            """Says hello!"""
+            await interaction.response.send_message(f'Hi, {interaction.user.mention}')
+
+        @self.tree.command(name="bot_invite", description="Hihi test")
+        async def bot_invite(ctx):
+            """
+            In case someone wants to add this bot to their server use the link provided by this command
+            :param ctx:
+            :return:
+            """
+            await ctx.reply(
+                f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
+                mention_author=True)
 
         @self.command()
         async def link(ctx: Context, vanity_url: str = None):
