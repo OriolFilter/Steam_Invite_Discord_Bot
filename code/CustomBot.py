@@ -1,25 +1,50 @@
 import os
-from functools import wraps
-
-import discord
-from discord.ext import commands
-from discord import Embed
-from discord.ext.commands.context import Context
-
-import Steam
-from Middleware import Middleware
-from Classes import DiscordConf
-from psycopg2 import errors as dberrors
-from psycopg2 import OperationalError
-from Steam import PlayerSummary
 import DBClient
 import Errors
+import Steam
+import discord
+
+
+from discord import Embed
+from discord import app_commands
+from discord.ext import commands
+from discord.ext.commands.context import Context
+
+from functools import wraps
+
+from Middleware import Middleware
+from Classes import DiscordConf
+
+from psycopg2 import errors as dberrors
+from psycopg2 import OperationalError
+
+from Steam import PlayerSummary
 
 middleware: Middleware = Middleware()
 
 
+# class CustomTreeCommands(discord.app_commands.CommandTree):
+#     """Command Test"""
+#     def __init__(self, bot: discord.Client):
+#         super().__init__(bot)
+#         self.bot = bot
+#         self.tree = app_commands.CommandTree(self.bot)
+#         self.define_commands()
+#
+#     def define_commands(self):
+#         @self.tree.command(name="command_name", description="My first application Command", guild=discord.Object(id='My Guild Id is here'))
+#         async def bot_invite(ctx):
+#             """
+#             In case someone wants to add this bot to their server use the link provided by this command
+#             :param ctx:
+#             :return:
+#             """
+#             await ctx.reply(
+#                 f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
+#                 mention_author=True)
 
-class CustomBot(commands.Bot):
+
+class CustomBot(discord.app_commands.CommandTree):
     configuration: DiscordConf
     async def on_ready(self):
         print('------')
@@ -42,6 +67,7 @@ class CustomBot(commands.Bot):
                                            description=self.configuration.description,
                                            self_bot=False, intents=intents)
         self.add_commands()
+        # return CustomTreeCommands(self)
         # self.tree = app_commands.CommandTree(self)
 
     async def on_command_error(self, ctx: Context, exception: Exception):
