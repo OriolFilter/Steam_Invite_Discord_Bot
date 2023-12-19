@@ -44,6 +44,7 @@ middleware: Middleware = Middleware()
 #                 mention_author=True)
 
 
+# class CustomBot(commands.Bot):
 class CustomBot(discord.app_commands.CommandTree):
     configuration: DiscordConf
     async def on_ready(self):
@@ -63,7 +64,8 @@ class CustomBot(discord.app_commands.CommandTree):
         self.configuration = DiscordConf()
         intents = discord.Intents.default()
         intents.message_content = True
-        super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
+        super(discord.app_commands.CommandTree, self).__init__(command_prefix=self.configuration.prefix,
+        # super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
                                            description=self.configuration.description,
                                            self_bot=False, intents=intents)
         self.add_commands()
