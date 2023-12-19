@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 from discord import Embed
 from discord.ext.commands.context import Context
+from discord import app_commands
 
 import Steam
 from Middleware import Middleware
@@ -18,8 +19,10 @@ import Errors
 middleware: Middleware = Middleware()
 
 
+
 class CustomBot(commands.Bot):
     configuration: DiscordConf
+    tree: app_commands
 
     async def on_ready(self):
         print('------')
@@ -42,6 +45,7 @@ class CustomBot(commands.Bot):
                                            description=self.configuration.description,
                                            self_bot=False, intents=intents)
         self.add_commands()
+        self.tree = app_commands.CommandTree(self)
 
     async def on_command_error(self, ctx: Context, exception: Exception):
         _: {Exception: Embed} = {
