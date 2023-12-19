@@ -493,13 +493,7 @@ class CustomBot(commands.Bot):
         shortLobbyUrl = ""
         message_lobby_url = ""
 
-        if middleware.ShlinkClient.enabled:
-            try:
-                shortLobbyUrl = middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
-            except Errors.ShlinkError:
-                print(f"Failed generating a short link for URL: {player_summary.lobby_url}")
-            else:
-                print(f"Some error occurred while generating a short link for URL: {player_summary.lobby_url}")
+        shortLobbyUrl = middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
 
         embed = Embed(title=player_summary.gameextrainfo,
                       url=f'https://store.steampowered.com/app/{player_summary.gameid}',
@@ -508,10 +502,8 @@ class CustomBot(commands.Bot):
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
 
-        message_lobby_url = f'[{shortLobbyUrl}]({shortLobbyUrl})'
-
         embed.set_thumbnail(
             url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
-        embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=message_lobby_url, inline=False)
+        embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=shortLobbyUrl, inline=False)
         embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
