@@ -23,29 +23,8 @@ from Steam import PlayerSummary
 middleware: Middleware = Middleware()
 
 
-# class CustomTreeCommands(discord.app_commands.CommandTree):
-#     """Command Test"""
-#     def __init__(self, bot: discord.Client):
-#         super().__init__(bot)
-#         self.bot = bot
-#         self.tree = app_commands.CommandTree(self.bot)
-#         self.define_commands()
-#
-#     def define_commands(self):
-#         @self.tree.command(name="command_name", description="My first application Command", guild=discord.Object(id='My Guild Id is here'))
-#         async def bot_invite(ctx):
-#             """
-#             In case someone wants to add this bot to their server use the link provided by this command
-#             :param ctx:
-#             :return:
-#             """
-#             await ctx.reply(
-#                 f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
-#                 mention_author=True)
-
-
-# class CustomBot(commands.Bot):
-class CustomBot(discord.app_commands.CommandTree):
+class CustomBot(commands.Bot):
+# class CustomBot(discord.app_commands.CommandTree):
     configuration: DiscordConf
     async def on_ready(self):
         print('------')
@@ -64,8 +43,8 @@ class CustomBot(discord.app_commands.CommandTree):
         self.configuration = DiscordConf()
         intents = discord.Intents.default()
         intents.message_content = True
-        super(discord.app_commands.CommandTree, self).__init__(command_prefix=self.configuration.prefix,
-        # super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
+        # super(discord.app_commands.CommandTree, self).__init__(command_prefix=self.configuration.prefix,
+        super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
                                            description=self.configuration.description,
                                            self_bot=False, intents=intents)
         self.add_commands()
@@ -100,16 +79,16 @@ class CustomBot(discord.app_commands.CommandTree):
         super(commands.Bot, self).run(self.configuration.token, *args, **kwargs)
 
     def add_commands(self):
-        @self.tree.command(name="bot_invite", description="Hihi test")
-        async def bot_invite(ctx):
-            """
-            In case someone wants to add this bot to their server use the link provided by this command
-            :param ctx:
-            :return:
-            """
-            await ctx.reply(
-                f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
-                mention_author=True)
+        # @self.tree.command(name="bot_invite", description="Hihi test")
+        # async def bot_invite(ctx):
+        #     """
+        #     In case someone wants to add this bot to their server use the link provided by this command
+        #     :param ctx:
+        #     :return:
+        #     """
+        #     await ctx.reply(
+        #         f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
+        #         mention_author=True)
 
         @self.command()
         async def link(ctx: Context, vanity_url: str = None):
@@ -494,3 +473,28 @@ class CustomBot(discord.app_commands.CommandTree):
         embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=shortLobbyUrl, inline=False)
         embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
+
+
+class CustomTreeBot(discord.app_commands.CommandTree):
+    """Command Test"""
+    bot: CustomBot
+
+    def __init__(self, *args, **kwargs):
+        bot = CustomBot(*args, **kwargs)
+        super().__init__(bot)
+        self.bot = bot
+        self.tree = app_commands.CommandTree(self.bot)
+        self.define_commands()
+
+    def define_commands(self):
+        @self.tree.command(name="command_name", description="My first application Command",
+                           guild=discord.Object(id='My Guild Id is here'))
+        async def bot_invite(ctx):
+            """
+            In case someone wants to add this bot to their server use the link provided by this command
+            :param ctx:
+            :return:
+            """
+            await ctx.reply(
+                f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
+                mention_author=True)
