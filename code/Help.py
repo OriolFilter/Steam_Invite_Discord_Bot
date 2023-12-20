@@ -68,7 +68,7 @@ Regarding unlinking the account, the output will "always" be the same (as long i
 
 As much there could be issues connecting to the database, in such scenario an error will be risen accordingly.
 
-https://i.imgur.com/5xhMNyx.png
+https://i.imgur.com/J7UUUPD.png
 """
 
 txt_help_usage = """
