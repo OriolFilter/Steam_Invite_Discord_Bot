@@ -60,6 +60,8 @@ class CustomBot(commands.Bot):
         self.add_commands()
 
     async def on_command_error(self, ctx: Context, exception: Exception):
+        # discord.ext.commands.errors.MissingRequiredArgument
+        # discord.ext.commands.errors.MissingRequiredArgument
         _: {Exception: Embed} = {
             DBErrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
             DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_no_steam_id_set,
@@ -174,7 +176,7 @@ class CustomBot(commands.Bot):
                 mention_author=False)
 
         @self.hybrid_command()
-        async def link(ctx: Context, vanity_url: str):
+        async def link(ctx: Context, vanity_url: str=None):
             # https://discord-py-slash-command.readthedocs.io/en/latest/quickstart.html#modals?
             """
             Sets up your account providing the vanity url

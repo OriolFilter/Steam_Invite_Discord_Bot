@@ -57,6 +57,18 @@ Based on my Steam link, I would be using:
 Note: This command is not sensitive to upper and lower case so write whatever you want.
 
 Also, the prefix from the command I used might be different from the one running on this bot.
+
+Couple images as reference (note that outputs and command prefix might vary):
+
+https://i.imgur.com/jiYtPVN.png
+
+https://i.imgur.com/7Ff5rzz.png
+
+Regarding unlinking the account, the output will "always" be the same (as long it worked correctly).
+
+As much there could be issues connecting to the database, in such scenario an error will be risen accordingly.
+
+https://i.imgur.com/5xhMNyx.png
 """
 
 txt_help_usage = """
@@ -70,9 +82,6 @@ txt_help_usage = """
 
 An image for reference, note that outputs and command prefix might vary (as well I would recommend to open the image on a new browser tab as otherwise might be blurry):
 https://i.imgur.com/liZl6fI.png
-
-# Example of pinging users and stuff
-
 """
 
 txt_help_lobby = """
@@ -86,7 +95,7 @@ TODO
 HELP_DIC = {
     'general': txt_help_help,
     'link': txt_help_link,
-    'usage': txt_help_usage,
     'lobby': txt_help_lobby,
-    'profile': txt_help_profile
+    'profile': txt_help_profile,
+    'usage': txt_help_usage,
 }
