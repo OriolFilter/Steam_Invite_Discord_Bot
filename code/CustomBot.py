@@ -1,9 +1,13 @@
 import os
+from typing import List
+
 import DBClient
 import Errors
 import Steam
 import discord
 
+from psycopg2 import errors as DBErrors
+from psycopg2 import OperationalError
 
 from discord import Embed
 from discord import app_commands
@@ -15,18 +19,24 @@ from functools import wraps
 from Middleware import Middleware
 from Classes import DiscordConf
 
-from psycopg2 import errors as dberrors
-from psycopg2 import OperationalError
-
 from Steam import PlayerSummary
+
+from Help import HELP_DIC
+
+## Main
 
 middleware: Middleware = Middleware()
 
 
-# class CustomBot():
+# https://www.reddit.com/r/Discord_Bots/comments/nbnudq/multiple_optional_arguments_discordpy/
+# https://discord.com/developers/docs/interactions/application-commands
+# https://discord-py-slash-command.readthedocs.io/en/latest/quickstart.html#modals
+# Move help to embed eventually
+
+
 class CustomBot(commands.Bot):
-# class CustomBot(discord.app_commands.CommandTree):
     configuration: DiscordConf
+
     async def on_ready(self):
         print('------')
         print('Logged as')
@@ -44,23 +54,18 @@ class CustomBot(commands.Bot):
         self.configuration = DiscordConf()
         intents = discord.Intents.default()
         intents.message_content = True
-        # super(discord.app_commands.CommandTree, self).__init__(command_prefix=self.configuration.prefix,
         super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
                                            description=self.configuration.description,
-                                           self_bot=False, intents=intents)
-        # self.tree.
-        # self.tree = app_commands.CommandTree(self)
-        # s
-        # self.add_commands()
-        # return CustomTreeCommands(self)
-        # self.tree = app_commands.CommandTree(self)
+                                           self_bot=False, intents=intents, help_command=None)
+        self.add_commands()
 
     async def on_command_error(self, ctx: Context, exception: Exception):
         _: {Exception: Embed} = {
-            dberrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
+            DBErrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
             DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_no_steam_id_set,
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
             OperationalError: lambda: self._embed_error_no_db_connection,
+
         }
 
         if hasattr(exception, "original"):
@@ -82,15 +87,83 @@ class CustomBot(commands.Bot):
     def run(self, *args, **kwargs):
         super(commands.Bot, self).run(self.configuration.token, *args, **kwargs)
 
+    def is_god(self):
+        async def extended_check(ctx: Context) -> bool:
+            if int(ctx.author.id) != int(self.configuration.god_id):
+                raise Errors.DiscordNotGodError()
+            return True
+
+        return commands.check(extended_check)
+
     def add_commands(self):
+        @self.hybrid_command(name="help")
+        async def help(ctx: Context, topic: str = None):
+            """
+            Use this command to display a list of options available and more!
+            """
+            # print(option)
+            if topic is None:
+                topic = 'general'
+            if topic not in HELP_DIC:
+                raise commands.errors.CommandNotFound
+            await ctx.reply(HELP_DIC[topic], mention_author=False)
 
-        @self.tree.command()
-        async def hello(interaction: discord.Interaction):
-            """Says hello!"""
-            await interaction.response.send_message(f'Hi, {interaction.user.mention}')
+        @help.autocomplete('topic')
+        async def help_autocomplete(
+                ctx: Context,
+                input: str,
+        ) -> List[app_commands.Choice[str]]:
+            topic_list = ['link', 'usage', 'general', 'lobby']
+            return [
+                app_commands.Choice(name=topic, value=topic)
+                for topic in topic_list if input.lower() in topic.lower()
+            ]
 
-        @self.tree.command(name="bot_invite", description="Hihi test")
-        async def bot_invite(ctx):
+        # @help.autocomplete('option')
+        # @help.
+        # async def help_autocomplete(
+        #         ctx,
+        #         current: str,
+        # ) -> List[app_commands.Choice[str]]:
+        #     options = ['links', 'usage']
+        #     return [
+        #         app_commands.Choice(name=option, value=option)
+        #         for option in options if current.lower() in option.lower()
+        #     ]
+        #
+        # @help.command(name="link")
+        # async def help_link(ctx: Context):
+        #     await ctx.reply(txt_help_link, mention_author=False)
+        #
+        # @help.command(name="usage")
+        # async def help_usage(ctx: Context):
+        #     await ctx.reply(txt_help_usage, mention_author=False)
+
+        # @self.tree.command()
+        # @self.hybrid_command()
+        # async def fruits(interaction: discord.Interaction, fruit: str=None):
+        #     await interaction.response.send_message(f'Your favourite fruit seems to be {fruit}')
+        #
+        # @fruits.autocomplete('fruit')
+        # async def fruits_autocomplete(
+        #         interaction: discord.Interaction,
+        #         current: str,
+        # ) -> List[app_commands.Choice[str]]:
+        #     fruits = ['Banana', 'Pineapple', 'Apple', 'Watermelon', 'Melon', 'Cherry']
+        #     return [
+        #         app_commands.Choice(name=fruit, value=fruit)
+        #         for fruit in fruits if current.lower() in fruit.lower()
+        #     ]
+
+        @self.command()
+        @self.is_god()
+        async def sync(ctx: Context):
+            await self.tree.sync()
+            await ctx.send("Sync!\nYou might need to reload the browser page or discord app for changes to be applied.")
+
+
+        @self.hybrid_command()
+        async def bot_invite(ctx: Context):
             """
             In case someone wants to add this bot to their server use the link provided by this command
             :param ctx:
@@ -98,10 +171,11 @@ class CustomBot(commands.Bot):
             """
             await ctx.reply(
                 f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
-                mention_author=True)
+                mention_author=False)
 
         @self.command()
         async def link(ctx: Context, vanity_url: str = None):
+            # https://discord-py-slash-command.readthedocs.io/en/latest/quickstart.html#modals?
             """
             Sets up your account providing the vanity url
             :param ctx:
@@ -110,7 +184,7 @@ class CustomBot(commands.Bot):
             """
             if not vanity_url:
                 await ctx.reply(
-                    f"You need to insert a vanity url, for further information regarding it's usage type '{self.command_prefix}vanity' ")
+                    f"You need to insert a vanity url, for further information regarding it's usage type '{self.command_prefix}vanity'.\nRemember that linking another account will overwrite the current linked one.")
             else:
                 try:
                     steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
@@ -119,71 +193,85 @@ class CustomBot(commands.Bot):
                     await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked "
                                     f"by using the command `{self.command_prefix}profile`",
                                     mention_author=False)
-                except Steam.VanityUrlNotFound:
+                except Errors.VanityUrlNotFoundError:
                     await ctx.reply("Vanity URL couldn't be found, please check the syntax again", mention_author=False)
 
-        @self.command()
-        async def unlink(ctx):
+        @self.hybrid_command()
+        async def unlink(ctx: Context):
             """
             Use this to unlink the account.
             :return:
             """
             middleware.unset_steam_id(discord_id=ctx.author.id)
-            await ctx.reply("Successfully removed the entry, please verify that the account is correctly unlinked "
-                            f"by using the command `{self.command_prefix}profile`", mention_author=False)
+            await ctx.reply(
+                "Successfully removed the entry (if there was one), please verify that the account is correctly unlinked "
+                f"by using the command `{self.command_prefix}profile`", mention_author=False)
 
-        @self.command()
+        @self.hybrid_command()
         async def profile(ctx: Context, user: discord.User = None):
             """
-            Returns Steam account from the user and their current open game (if they are currenlty playing)
+            Returns Steam account from the user and their current open game (if they are currently playing)
             :param ctx:
-            :param user:
+            :param user: User targeted on which the command "profile" will be used.
             :return:
             """
+
+            target_discord_id: int
             if user:
-                steam_id = middleware.get_steam_id_from_discord_id(user.id)
+                target_discord_id = user.id
             else:
-                steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
+                target_discord_id = ctx.author.id
+
+            steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
             summary = middleware.get_steam_summary(steam_id=steam_id)
             embed = self._embed_player_profile(summary)
             await ctx.send(embed=embed)
 
-        @self.command()
-        async def lobby(ctx: Context, *members: discord.Member):
-            # Add cooldown
+        # async def lobby(ctx: Context, member: Optional[discord.Member] = None):
+        # @self.hybrid_command()
+        @self.hybrid_command()
+        async def lobby(ctx: Context, user: discord.User = None):
             """
-            If no user is specified, posts the caller lobby in the chat, if users are specified sends the lobby url
-            to the specified user(s) DM's
+            If no user is specified, posts the caller lobby in the chat.
+            If a user is specified, it will apply the command `lobby` to them.
             :param ctx:
-            :arg: List of users
+            :arg: Target user
             :return:
             """
-            steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
+            target_discord_id: int
+            if user:
+                target_discord_id = user.id
+            else:
+                target_discord_id = ctx.author.id
+
+            steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
             summary = middleware.get_steam_summary(steam_id=steam_id)
+
             if not summary.has_lobby:
                 embed = self._embed_error_no_lobby(summary)
                 await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=True)
             else:
                 embed = self._embed_player_lobby(summary)
-                if not any(members):
-                    await ctx.reply(embed=embed, mention_author=False)
-                elif len(members) > 8:
-                    await ctx.reply("Sorry, max allowed players to invite are 4", mention_author=True)
-                else:
-                    mail_list = []
-                    for member in list(set(members)):
-                        if isinstance(member, discord.Member):
-                            mail_list.append(member)
-                        else:
-                            await ctx.reply(
-                                "There was an error with the users given, ensure you @ed correctly the users ",
-                                mention_author=True)
-                    for member in mail_list:
-                        await member.send(embed=embed)
-                    await ctx.reply("Sent an invite to the specified user(s)!", mention_author=False)
+                await ctx.reply(embed=embed, mention_author=False)
+                # if not any(members):
+                #     await ctx.reply(embed=embed, mention_author=False)
+                # elif len(members) > 8:
+                #     await ctx.reply("Sorry, max allowed players to invite are 8", mention_author=True)
+                # else:
+                #     mail_list = []
+                #     for member in list(set(members)):
+                #         if isinstance(member, discord.Member):
+                #             mail_list.append(member)
+                #         else:
+                #             await ctx.reply(
+                #                 "There was an error with the users given, ensure you @ed correctly the users ",
+                #                 mention_author=True)
+                #     for member in mail_list:
+                #         await member.send(embed=embed)
+                #     await ctx.reply("Sent an invite to the specified user(s)!", mention_author=False)
 
-        @self.command()
-        async def shlink(ctx: Context, *members: discord.Member):
+        @self.hybrid_command()
+        async def shlink(ctx: Context, user: discord.User = None):
             # Add cooldown
             """
             Stands for "short link"
@@ -193,41 +281,31 @@ class CustomBot(commands.Bot):
             if not middleware.ShlinkClient.enabled:
                 return ctx.reply(embed=self._embed_shlink_not_enabled())
             else:
+                target_discord_id: int
+                if user:
+                    target_discord_id = user.id
+                else:
+                    target_discord_id = ctx.author.id
 
-                steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
+                steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
                 summary = middleware.get_steam_summary(steam_id=steam_id)
+
                 if not summary.has_lobby:
                     embed = self._embed_error_no_lobby(summary)
                     await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=True)
                 else:
-                    embed = self._embed_player_lobby_shlink(summary)
-                    if not any(members):
-                        await ctx.reply(embed=embed, mention_author=False)
-                    elif len(members) > 8:
-                        await ctx.reply("Sorry, max allowed players to invite are 4", mention_author=True)
-                    else:
-                        mail_list = []
-                        for member in list(set(members)):
-                            if isinstance(member, discord.Member):
-                                mail_list.append(member)
-                            else:
-                                await ctx.reply(
-                                    "There was an error with the users given, ensure you @ed correctly the users ",
-                                    mention_author=True)
-                        for member in mail_list:
-                            await member.send(embed=embed)
-                        await ctx.reply("Sent an invite to the specified user(s)!", mention_author=False)
+                    embed = self._embed_player_lobby(summary)
+                    await ctx.reply(embed=embed, mention_author=False)
 
-
-        @self.command()
-        async def vanity(ctx: Context):
-            """
-            How to use the link command, and from where to extract the vanity name
-            :param ctx:
-            :return:
-            """
-            await ctx.reply(f"ie:  `{self.command_prefix}link SavageBidoof`\nhttps://i.imgur.com/VHdVEj8.png",
-                            mention_author=False)
+        # @self.command()
+        # async def vanity(ctx: Context):
+        #     """
+        #     How to use the link command, and from where to extract the vanity name
+        #     :param ctx:
+        #     :return:
+        #     """
+        #     await ctx.reply(f"ie:  `{self.command_prefix}link SavageBidoof`\nhttps://i.imgur.com/VHdVEj8.png",
+        #                     mention_author=False)
 
         @self.command()
         async def version(ctx: Context):
@@ -238,14 +316,14 @@ class CustomBot(commands.Bot):
             """
             await ctx.reply(embed=self._embed_version, mention_author=False)
 
-        @self.command()
-        async def howto(ctx: Context):
-            """
-            Example on hot to use this bot
-            """
-            await ctx.reply("Use the following image as reference, note that the prefix command might "
-                            "vary. (Also, open the image on the browser for better "
-                            "clarity...)\nhttps://i.imgur.com/liZl6fI.png")
+        # @self.hybrid_command()
+        # async def howto(ctx: Context):
+        #     """
+        #     Example on hot to use this bot
+        #     """
+        #     await ctx.reply("Use the following image as reference, note that the prefix command might "
+        #                     "vary. (Also, open the image on the browser for better "
+        #                     "clarity...)\nhttps://i.imgur.com/liZl6fI.png")
 
     @property
     def invite_url(self) -> str:
@@ -273,7 +351,7 @@ class CustomBot(commands.Bot):
         """
         # Be able to enable/disable on the guild
         # embed = Embed(title="Error", description="Specified Command not found", color=0xff5c5c)
-        embed = Embed(title="Command not found")
+        embed = Embed(title=f"Command not found!\nUse {self.command_prefix}help to get a list of available commands!")
         return embed
 
     @property
@@ -334,18 +412,6 @@ class CustomBot(commands.Bot):
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
-    # def _embed_is_playing(self, player_summary: PlayerSummary) -> Embed:
-    #     """
-    #     Expand.
-    #     :param player_summary:
-    #     :return:
-    #     """
-    #     embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0x61ff64)
-    #     embed.set_thumbnail(url=player_summary.avatarfull, )
-    #     embed.add_field(name="Currently playing?", value=("No", "Yes")[player_summary.is_playing])
-    #     embed.set_footer(text="https://github.com/OriolFilter")
-    #     return embed
-
     @staticmethod
     def __return_embed_color(player_summary: PlayerSummary) -> hex:
 
@@ -400,19 +466,6 @@ class CustomBot(commands.Bot):
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
-    # def _embed_error_no_lobby_old(self, player_summary: PlayerSummary) -> Embed:
-    #     embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0xfff261)
-    #     embed.set_thumbnail(url=player_summary.avatarfull, )
-    #     embed.add_field(name="User currently doesn't have an available lobby", value="--", inline=False)
-    #
-    #     embed.add_field(name="Is user playing?",
-    #                     value=f"Currently playing [{player_summary.gameextrainfo}](https://store.steampowered.com/app/{player_summary.gameid})" if player_summary.gameextrainfo else "No")
-    #
-    #
-    #
-    #     embed.set_footer(text="https://github.com/OriolFilter")
-    #     return embed
-
     def _embed_player_lobby(self, player_summary: PlayerSummary) -> Embed:
         """
          This will be called ONLY after confirming the user has an available public lobby.
@@ -454,20 +507,18 @@ class CustomBot(commands.Bot):
         """
         Returns a Discord Embed used to tell the user that shlink functionality is not enabled.
         """
-        embed = Embed(title="Shlink functionality is not enabled",description="Link shortener (shlink) functionality "
-                                                                              "is not enabled.\nReach out the bot "
-                                                                              "administrator in case you would like "
-                                                                              "for them to enable such.",
+        embed = Embed(title="Shlink functionality is not enabled", description="Link shortener (shlink) functionality "
+                                                                               "is not enabled.\nReach out the bot "
+                                                                               "administrator in case you would like "
+                                                                               "for them to enable such.",
                       color=0x8a8a8a)
-
+        return embed
 
     def _embed_player_lobby_shlink(self, player_summary: PlayerSummary) -> Embed:
         """
         Exactly the same as `_embed_player_lobby`, but will return the shlink URL instead of the lobby URL (as in text)
         This won't validate if the link shortener is enabled.
         """
-        shortLobbyUrl = ""
-        message_lobby_url = ""
 
         shortLobbyUrl = middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
 
@@ -483,28 +534,3 @@ class CustomBot(commands.Bot):
         embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=shortLobbyUrl, inline=False)
         embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
-
-#
-# class CustomClientBot(discord.app_commands.CommandTree):
-#     """Command Test"""
-#     bot: CustomBot
-#
-#     def __init__(self, *args, **kwargs):
-#         bot = CustomBot(*args, **kwargs)
-#         super().__init__(bot)
-#         self.bot = bot
-#         self.tree = app_commands.CommandTree(self.bot)
-#         self.define_commands()
-#
-#     def define_commands(self):
-#         @self.tree.command(name="command_name", description="My first application Command",
-#                            guild=discord.Object(id='My Guild Id is here'))
-#         async def bot_invite(ctx):
-#             """
-#             In case someone wants to add this bot to their server use the link provided by this command
-#             :param ctx:
-#             :return:
-#             """
-#             await ctx.reply(
-#                 f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
-#                 mention_author=True)
