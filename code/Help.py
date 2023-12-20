@@ -85,11 +85,28 @@ https://i.imgur.com/liZl6fI.png
 """
 
 txt_help_lobby = """
-TODO
+The `lobby` command returns the Steam account of the user, their current active game, and their lobby (if there is one).
+
+You can also target another user to display their lobby.
+
+If the `shlink` (short links) functionality is enabled, links will be clickable and redirect towards the Steam lobby.
+
+
+The `shlink` command does the same functionality as `lobby`, but the text displayed will be the short link, this is most useful if you wanna copy paste the short link to the lobby.
+
+On both instances you can target another user to display their profile.
+
+https://i.imgur.com/0D83hsz.png
+
+https://i.imgur.com/BsjU1ps.png
 """
 
 txt_help_profile = """
-TODO
+The `profile` command returns the Steam account of the user, and their current active game (if there is one).
+
+You can also target another user to display their profile.
+
+https://i.imgur.com/aVPfFzR.png
 """
 
 HELP_DIC = {
