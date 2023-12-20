@@ -105,7 +105,7 @@ docker-compose up -d
 | DB_DATABASE         | steam_invite                                                       | Database used to connect                                                                                                                              |
 | SHLINK_SERVER_URL   | \<Null\>                                                           | Api key from a Shlink server. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled.          |
 | SHLINK_TOKEN        | \<Null\>                                                           | URL for the Shlink API server/service. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled. |
-| GOD_DISCORD_ID        | \<Null\>                                                           | Used for certain special commands and stuff. Aka Discord Account ID for the GOD mode.                |
+| GOD_DISCORD_ID      | \<Null\>                                                           | Used for certain special commands and stuff. Aka Discord Account ID for the admin of this bot.                                                        |
 
 ### Shlink
 
@@ -135,6 +135,12 @@ No.
 
 When you link the account, it obtains and stores your Steam ID instead of your Steam **Name**, therefore unless you desire to link a different steam account, there is no need to relink it.
 
+- Which information does this bot store from the users?
+
+It only stores:
+
+Steam vanity url and the ID from the user who submitted such account.
+
 - Is `Shlink` related variables obligatory/required if I don't want to set up the link shortener functionality?
 
 No, you can ignore them.
@@ -158,3 +164,4 @@ TODO
 Used to sync the bot app/slash commands with the Discord servers.
 
 Only intended for when a new update/version has been rolled in.
+
