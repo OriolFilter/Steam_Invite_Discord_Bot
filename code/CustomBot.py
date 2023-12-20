@@ -78,7 +78,7 @@ class CustomBot(commands.Bot):
         if isinstance(exception, discord.ext.commands.errors.HybridCommandError):
             _exception_layer1: Exception = exception.original
             _exception_layer2: Exception = _exception_layer1.original  # Desired target
-            raised_exception=_exception_layer2
+            raised_exception = _exception_layer2
         else:
             raised_exception: Exception = exception
 
@@ -166,7 +166,7 @@ class CustomBot(commands.Bot):
                 await ctx.reply(
                     f"You need to insert a vanity url, for further information regarding it's usage type '{self.command_prefix}vanity'.\nRemember that linking another account will overwrite the current linked one.")
             else:
-            #     try:
+                #     try:
                 steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
                 middleware.set_steam_id(discord_id=ctx.author.id,
                                         steam_id=steam_id)
@@ -261,7 +261,6 @@ class CustomBot(commands.Bot):
                     embed = self._embed_player_lobby(summary)
                     await ctx.reply(embed=embed, mention_author=False)
 
-
         @self.command()
         async def version(ctx: Context):
             """
@@ -289,11 +288,10 @@ class CustomBot(commands.Bot):
         embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
 
-    def __embed_error_template(self, title:str, description:str)-> discord.Embed:
-        embed = Embed(title=title,description=description,color=0xff5c5c)
+    def __embed_error_template(self, title: str, description: str) -> discord.Embed:
+        embed = Embed(title=title, description=description, color=0xff5c5c)
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
-
 
     @property
     def _embed_error_command_not_found(self) -> Embed:
@@ -301,7 +299,8 @@ class CustomBot(commands.Bot):
         Embed used to tell the user command not found.
         :return:
         """
-        return self.__embed_error_template(title=f"Command not found!\nUse {self.command_prefix}help to get a list of available commands!",description="")
+        return self.__embed_error_template(title="Command not found!",
+                                           description=f"Use `{self.command_prefix}help` to get a list of available commands!")
 
     @property
     def _embed_error_no_steam_id_set(self) -> Embed:
@@ -309,8 +308,8 @@ class CustomBot(commands.Bot):
         Embed that has a message indicating that the user has no steam_id currently linked
         :return:
         """
-        embed = self.__embed_error_template(title="Error",
-                                            description=f"The discord user currently has no SteamID configured, to add an account use {self.command_prefix}link <vanity_url>")
+        embed = self.__embed_error_template(title="No SteamID currenlty linked",
+                                            description=f"The discord user currently has no SteamID configured, to add an account use `{self.command_prefix}link <vanity_url>`")
         embed.add_field(name=f"What is a vanity url?",
                         value=f"To learn more regarding the vanity rul, use: `{self.command_prefix}vanity`")
         return embed
@@ -321,9 +320,10 @@ class CustomBot(commands.Bot):
         Embed used when cannot communicate to the database
         :return:
         """
-        embed = self.__embed_error_template(title="Error",
-                                            description=f"Cannot communicate to the database, contact an administrator.")
+        embed = self.__embed_error_template(title="Cannot connect to the database",
+                                            description=f"Please contact an administrator to check the infrastructure status.")
         return embed
+
     @property
     def _embed_error_vanity_url_not_found(self):
         """
@@ -331,8 +331,8 @@ class CustomBot(commands.Bot):
         :return:
         """
 
-        embed = self.__embed_error_template(title="Error",
-                                            description=f"Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance.")
+        embed = self.__embed_error_template(title="Vanity URL not found",
+                                            description=f"Vanity URL didn't match an user, please check the syntax again or use the command `{self.command_prefix}help link` if you need guidance.")
         return embed
 
     @property
@@ -342,8 +342,8 @@ class CustomBot(commands.Bot):
         :return:
         """
 
-        embed = self.__embed_error_template(title="Error",
-                                            description=f"You are not GOD!.\nMind your own business, ty.")
+        embed = self.__embed_error_template(title="You are not GOD!.",
+                                            description=f"Only GOD is allowed to run this command.")
         return embed
 
     def _embed_player_profile(self, player_summary: PlayerSummary) -> Embed:
