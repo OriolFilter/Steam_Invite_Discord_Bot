@@ -61,14 +61,18 @@ class CustomBot(commands.Bot):
 
     async def on_command_error(self, ctx: Context, exception: Exception):
         # discord.ext.commands.errors.MissingRequiredArgument
-        # discord.ext.commands.errors.MissingRequiredArgument
+        # ???
+        # VanityUrlNotFoundError
+        # Hybrid commands fail like ??
+        # https://github.com/Rapptz/discord.py/discussions/8384
         _: {Exception: Embed} = {
             DBErrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
             DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_no_steam_id_set,
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
             OperationalError: lambda: self._embed_error_no_db_connection,
-
         }
+        print(f" >>>- Error testing {exception.__class__}")
+        print(f'@@@ {isinstance(exception,DBClient.DBSteamIDNotFoundError)}')
 
         if hasattr(exception, "original"):
             original_err_class = exception.original
@@ -91,7 +95,7 @@ class CustomBot(commands.Bot):
 
     def is_god(self):
         async def extended_check(ctx: Context) -> bool:
-            if int(ctx.author.id) != int(self.configuration.god_id):
+            if self.configuration.god_id and int(ctx.author.id) != int(self.configuration.god_id):
                 raise Errors.DiscordNotGodError()
             return True
 
