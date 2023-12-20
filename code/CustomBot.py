@@ -63,7 +63,7 @@ class CustomBot(commands.Bot):
         # discord.ext.commands.errors.MissingRequiredArgument
         # ???
         # VanityUrlNotFoundError
-        # Hybrid commands fail like ??
+        # Hybrid commands fail like `discord.ext.commands.errors.HybridCommandError`
         # https://github.com/Rapptz/discord.py/discussions/8384
         _: {Exception: Embed} = {
             DBErrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
@@ -72,14 +72,27 @@ class CustomBot(commands.Bot):
             OperationalError: lambda: self._embed_error_no_db_connection,
         }
         print(f" >>>- Error testing {exception.__class__}")
-        print(f'@@@ {isinstance(exception,DBClient.DBSteamIDNotFoundError)}')
+        print(f'@@@ {isinstance(exception, DBClient.DBSteamIDNotFoundError)}')
 
-        if hasattr(exception, "original"):
-            original_err_class = exception.original
+        raised_exception: Exception
+
+        if isinstance(exception, discord.ext.commands.errors.HybridCommandError):
+            # when discord.ext.commands.errors.HybridCommandError is risen, I gotta digg 2 times down to get the error I raised (discord by itself hides it 2 layers deep)
+            _exception_layer1: Exception = exception.original
+            _exception_layer2: Exception = _exception_layer1.original  # Desired target
+            raised_exception=_exception_layer2
         else:
-            original_err_class = exception
+            raised_exception: Exception = exception
+        # print(f'!!! {og2.__cause__}')
+        # print(f'!!! {og2.__class__}')
+        # print(f'@@@ {isinstance(og2,OperationalError)}')
+
+        if hasattr(raised_exception, "original"):
+            original_err_class = raised_exception.original
+        else:
+            original_err_class = raised_exception
         print(
-            f'[ERROR] USER: {ctx.author.name} raised error {exception.__class__}\n\tWith line: {exception}')
+            f'[ERROR] USER: {ctx.author.name} raised error {raised_exception.__class__}\n\tWith line: {raised_exception}')
         embed = None
         for key, value in _.items():
             if isinstance(original_err_class, key):
@@ -167,7 +180,6 @@ class CustomBot(commands.Bot):
             await self.tree.sync()
             await ctx.send("Sync!\nYou might need to reload the browser page or discord app for changes to be applied.")
 
-
         @self.command()
         async def botinvite(ctx: Context):
             """
@@ -180,7 +192,7 @@ class CustomBot(commands.Bot):
                 mention_author=False)
 
         @self.hybrid_command()
-        async def link(ctx: Context, vanity_url: str=None):
+        async def link(ctx: Context, vanity_url: str = None):
             # https://discord-py-slash-command.readthedocs.io/en/latest/quickstart.html#modals?
             """
             Sets up your account providing the vanity url
@@ -200,7 +212,9 @@ class CustomBot(commands.Bot):
                                     f"by using the command `{self.command_prefix}profile`",
                                     mention_author=False)
                 except Errors.VanityUrlNotFoundError:
-                    await ctx.reply("Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance", mention_author=False)
+                    await ctx.reply(
+                        "Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance",
+                        mention_author=False)
 
         @self.hybrid_command()
         async def unlink(ctx: Context):
