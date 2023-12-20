@@ -59,6 +59,13 @@ class CustomBot(commands.Bot):
         self.add_commands()
 
     async def on_command_error(self, ctx: Context, exception: Exception):
+        """
+        On command error "returns" an embed based on the exception risen.
+
+        Object `_` contains is a dictionary that stores an embed for each one of the errors.
+
+        By `return` I mean that prints back to the user.
+        """
         # discord.ext.commands.errors.MissingRequiredArgument #Not used as per the moment
         # https://github.com/Rapptz/discord.py/discussions/8384
         _: {Exception: Embed} = {
@@ -288,7 +295,7 @@ class CustomBot(commands.Bot):
         embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
 
-    def __embed_error_template(self, title: str, description: str) -> discord.Embed:
+    def __return_embed_error_template(self, title: str, description: str) -> discord.Embed:
         embed = Embed(title=title, description=description, color=0xff5c5c)
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
@@ -299,8 +306,8 @@ class CustomBot(commands.Bot):
         Embed used to tell the user command not found.
         :return:
         """
-        return self.__embed_error_template(title="Command not found!",
-                                           description=f"Use `{self.command_prefix}help` to get a list of available commands!")
+        return self.__return_embed_error_template(title="Command not found!",
+                                                  description=f"Use `{self.command_prefix}help` to get a list of available commands!")
 
     @property
     def _embed_error_no_steam_id_set(self) -> Embed:
@@ -308,8 +315,8 @@ class CustomBot(commands.Bot):
         Embed that has a message indicating that the user has no steam_id currently linked
         :return:
         """
-        embed = self.__embed_error_template(title="No SteamID currenlty linked",
-                                            description=f"The discord user currently has no SteamID configured, to add an account use `{self.command_prefix}link <vanity_url>`")
+        embed = self.__return_embed_error_template(title="No SteamID currenlty linked",
+                                                   description=f"The discord user currently has no SteamID configured, to add an account use `{self.command_prefix}link <vanity_url>`")
         embed.add_field(name=f"What is a vanity url?",
                         value=f"To learn more regarding the vanity rul, use: `{self.command_prefix}vanity`")
         return embed
@@ -320,8 +327,8 @@ class CustomBot(commands.Bot):
         Embed used when cannot communicate to the database
         :return:
         """
-        embed = self.__embed_error_template(title="Cannot connect to the database",
-                                            description=f"Please contact an administrator to check the infrastructure status.")
+        embed = self.__return_embed_error_template(title="Cannot connect to the database",
+                                                   description=f"Please contact an administrator to check the infrastructure status.")
         return embed
 
     @property
@@ -331,8 +338,8 @@ class CustomBot(commands.Bot):
         :return:
         """
 
-        embed = self.__embed_error_template(title="Vanity URL not found",
-                                            description=f"Vanity URL didn't match an user, please check the syntax again or use the command `{self.command_prefix}help link` if you need guidance.")
+        embed = self.__return_embed_error_template(title="Vanity URL not found",
+                                                   description=f"Vanity URL didn't match an user, please check the syntax again or use the command `{self.command_prefix}help link` if you need guidance.")
         return embed
 
     @property
@@ -342,8 +349,8 @@ class CustomBot(commands.Bot):
         :return:
         """
 
-        embed = self.__embed_error_template(title="You are not GOD!.",
-                                            description=f"Only GOD is allowed to run this command.")
+        embed = self.__return_embed_error_template(title="You are not GOD!.",
+                                                   description=f"Only GOD is allowed to run this command.")
         return embed
 
     def _embed_player_profile(self, player_summary: PlayerSummary) -> Embed:
@@ -398,6 +405,8 @@ class CustomBot(commands.Bot):
 
     def _embed_error_no_lobby(self, player_summary: PlayerSummary) -> Embed:
         """
+        This is a SOFT error (aka not actual error per se)
+
         This will be called ONLY after confirming if the user has or not has an available public lobby.
 
         Outside of this function, it will not be checked whether the user is playing something or not.
@@ -438,8 +447,8 @@ class CustomBot(commands.Bot):
 
          This function won't check for anything of that.
          """
-        shortLobbyUrl = ""
-        message_lobby_url = ""
+        shortLobbyUrl:str = ""
+        message_lobby_url: str
 
         if middleware.ShlinkClient.enabled:
             try:
