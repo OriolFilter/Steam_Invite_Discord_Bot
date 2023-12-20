@@ -105,6 +105,7 @@ docker-compose up -d
 | DB_DATABASE         | steam_invite                                                       | Database used to connect                                                                                                                              |
 | SHLINK_SERVER_URL   | \<Null\>                                                           | Api key from a Shlink server. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled.          |
 | SHLINK_TOKEN        | \<Null\>                                                           | URL for the Shlink API server/service. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled. |
+| GOD_DISCORD_ID        | \<Null\>                                                           | Used for certain special commands and stuff. Aka Discord Account ID for the GOD mode.                |
 
 ### Shlink
 
@@ -120,6 +121,14 @@ As per the moment **only API v3 is supported.**
 
 ### FAQ
 
+- Do I need to set an email or password/token from my Steam account or Log In on any way?
+
+No.
+
+The bot will only use and store "vanity URL".
+
+If you receive a message requesting further data than the vanity URL, please contact the bot administrator as there could have been a security breach.
+
 - If I change my steam name will I need to relink my account?
 
 No.
@@ -132,4 +141,20 @@ No, you can ignore them.
 
 If any from the both variables (`SHLINK_SERVER_URL` and `SHLINK_TOKEN`) is unset, the functionality won't be enabled.
 
+- Why `God` instead of `Owner` or `BotAdmin` something like that?
 
+I think it's more funny that way. 
+
+## List of commands
+
+### General usage
+
+TODO
+
+### Admin commands
+
+#### sync
+
+Used to sync the bot app/slash commands with the Discord servers.
+
+Only intended for when a new update/version has been rolled in.
