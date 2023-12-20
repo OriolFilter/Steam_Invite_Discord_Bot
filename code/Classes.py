@@ -66,12 +66,15 @@ class DiscordConf(_CONFIG):
     prefix: str = "s."
     description: str = ""
     activity: str = ""
+    god_id: int = None
 
     def load_envs(self):
         self.token = getenv("DISCORD_TOKEN", self.token)
         self.prefix = getenv("DISCORD_PREFIX", self.prefix)
         self.description = getenv("DISCORD_DESCRIPTION", self.description)
         self.activity = getenv("DISCORD_ACTIVITY", self.activity)
+        self.activity = getenv("DISCORD_ACTIVITY", self.activity)
+        self.god_id = getenv("GOD_DISCORD_ID", self.god_id)
         return self
 
 
