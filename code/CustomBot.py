@@ -255,7 +255,7 @@ class CustomBot(commands.Bot):
 
                 if not summary.has_lobby:
                     embed = self._embed_error_no_lobby(summary)
-                    await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=True)
+                    await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=False)
                 else:
                     embed = self._embed_player_lobby(summary)
                     await ctx.reply(embed=embed, mention_author=False)
