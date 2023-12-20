@@ -61,9 +61,7 @@ class CustomBot(commands.Bot):
 
     async def on_command_error(self, ctx: Context, exception: Exception):
         # discord.ext.commands.errors.MissingRequiredArgument
-        # ???
         # VanityUrlNotFoundError
-        # Hybrid commands fail like `discord.ext.commands.errors.HybridCommandError`
         # https://github.com/Rapptz/discord.py/discussions/8384
         _: {Exception: Embed} = {
             DBErrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
@@ -76,16 +74,13 @@ class CustomBot(commands.Bot):
 
         raised_exception: Exception
 
+        # when discord.ext.commands.errors.HybridCommandError is risen, I gotta digg 2 times down to get the error I raised (discord by itself hides it 2 layers deep)
         if isinstance(exception, discord.ext.commands.errors.HybridCommandError):
-            # when discord.ext.commands.errors.HybridCommandError is risen, I gotta digg 2 times down to get the error I raised (discord by itself hides it 2 layers deep)
             _exception_layer1: Exception = exception.original
             _exception_layer2: Exception = _exception_layer1.original  # Desired target
             raised_exception=_exception_layer2
         else:
             raised_exception: Exception = exception
-        # print(f'!!! {og2.__cause__}')
-        # print(f'!!! {og2.__class__}')
-        # print(f'@@@ {isinstance(og2,OperationalError)}')
 
         if hasattr(raised_exception, "original"):
             original_err_class = raised_exception.original
