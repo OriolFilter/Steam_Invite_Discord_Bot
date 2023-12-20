@@ -162,8 +162,8 @@ class CustomBot(commands.Bot):
             await ctx.send("Sync!\nYou might need to reload the browser page or discord app for changes to be applied.")
 
 
-        @self.hybrid_command()
-        async def bot_invite(ctx: Context):
+        @self.command()
+        async def botinvite(ctx: Context):
             """
             In case someone wants to add this bot to their server use the link provided by this command
             :param ctx:
@@ -173,8 +173,8 @@ class CustomBot(commands.Bot):
                 f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
                 mention_author=False)
 
-        @self.command()
-        async def link(ctx: Context, vanity_url: str = None):
+        @self.hybrid_command()
+        async def link(ctx: Context, vanity_url: str):
             # https://discord-py-slash-command.readthedocs.io/en/latest/quickstart.html#modals?
             """
             Sets up your account providing the vanity url
@@ -194,7 +194,7 @@ class CustomBot(commands.Bot):
                                     f"by using the command `{self.command_prefix}profile`",
                                     mention_author=False)
                 except Errors.VanityUrlNotFoundError:
-                    await ctx.reply("Vanity URL couldn't be found, please check the syntax again", mention_author=False)
+                    await ctx.reply("Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance", mention_author=False)
 
         @self.hybrid_command()
         async def unlink(ctx: Context):
@@ -310,7 +310,7 @@ class CustomBot(commands.Bot):
         @self.command()
         async def version(ctx: Context):
             """
-            Prints the current version and the Build Date
+            Prints the current version
             :param ctx:
             :return:
             """
@@ -339,7 +339,7 @@ class CustomBot(commands.Bot):
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
         embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=True)
-        embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE", "Unknown")}', inline=True)
+        # embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE", "Unknown")}', inline=True)
         embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
 
