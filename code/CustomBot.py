@@ -67,6 +67,7 @@ class CustomBot(commands.Bot):
             DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_no_steam_id_set,
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
             OperationalError: lambda: self._embed_error_no_db_connection,
+            Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_not_found
         }
         # print(f" >>>- Error testing {exception.__class__}")
         # print(f'@@@ {isinstance(exception, DBClient.DBSteamIDNotFoundError)}')
@@ -165,17 +166,17 @@ class CustomBot(commands.Bot):
                 await ctx.reply(
                     f"You need to insert a vanity url, for further information regarding it's usage type '{self.command_prefix}vanity'.\nRemember that linking another account will overwrite the current linked one.")
             else:
-                try:
-                    steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
-                    middleware.set_steam_id(discord_id=ctx.author.id,
-                                            steam_id=steam_id)
-                    await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked "
-                                    f"by using the command `{self.command_prefix}profile`",
-                                    mention_author=False)
-                except Errors.VanityUrlNotFoundError:
-                    await ctx.reply(
-                        "Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance",
-                        mention_author=False)
+            #     try:
+                steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
+                middleware.set_steam_id(discord_id=ctx.author.id,
+                                        steam_id=steam_id)
+                await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked "
+                                f"by using the command `{self.command_prefix}profile`",
+                                mention_author=False)
+                # except Errors.VanityUrlNotFoundError:
+                # await ctx.reply(
+                #     "Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance",
+                #     mention_author=False)
 
         @self.hybrid_command()
         async def unlink(ctx: Context):
@@ -321,6 +322,18 @@ class CustomBot(commands.Bot):
         """
         embed = Embed(title="Error",
                       description=f"Cannot communicate to the database, contact an administrator.",
+                      color=0xff5c5c)
+        embed.set_footer(text="https://github.com/OriolFilter")
+        return embed
+    @property
+    def _embed_error_vanity_url_not_found(self):
+        """
+        Embed used when the user (Steam vanity URL) is not found.
+        :return:
+        """
+
+        embed = Embed(title="Error",
+                      description=f"Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance.",
                       color=0xff5c5c)
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
