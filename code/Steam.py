@@ -60,7 +60,7 @@ def steam_api_call(method) -> dict:
         if response.status_code == 200:
             return response.json()["response"]
         elif response.status_code == 403:
-            raise Errors.Forbidden
+            raise Errors.SteamForbiddenError
         else:
             raise Errors.UnexpectedError
     return wrapper
@@ -86,7 +86,7 @@ class SteamApi:
         if jresponse["success"] == 1:
             return jresponse["steamid"]
         elif jresponse["success"] == 42:
-            raise Errors.VanityUrlNotFound
+            raise Errors.VanityUrlNotFoundError
         else:
             raise Errors.UnexpectedError
 
