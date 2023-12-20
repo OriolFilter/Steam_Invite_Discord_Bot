@@ -3,9 +3,9 @@
 txt_help_help = """
 ```md
 ### Bot commands commands
-lobby           If no user is specified, posts the caller lobby in the chat, if...
-profile         Returns Steam account from the user and their current open game...
-shlink          Stands for "short link"
+lobby           Returns the lobby of the user. A discord user can be mentioned to return their lobby. If the short link (shlink) functionality is enabled on the bot, the lobby link will be linked to a link shortener service and allow the users to click on the Steam link.
+profile         Returns the profile of the user and their active game. A discord user can be mentioned to return their profile.
+shlink          Behaves like the `lobby` command, but instead of  
 
 ### Account bindings
 link            Sets up your account providing the vanity url. If you need help setting it up use the command `help link`.
@@ -15,7 +15,7 @@ unlink          Use this to unlink the account and will delete the database entr
 sync            Sync the commands with all the servers (Bot Owner only)
 
 ### Help commands
-help            Returns this list. This also has an alias  (help general)
+help            Returns this list. This also has an alias `help general`
 help link       How to link your Steam account with this bot.
 help lobby      How to use the lobby command (and shlink)
 help usage      Example on how to use this bot/Commands and stuff (sort of functionalities)
@@ -79,9 +79,14 @@ txt_help_lobby = """
 TODO
 """
 
+txt_help_profile = """
+TODO
+"""
+
 HELP_DIC = {
     'general': txt_help_help,
     'link': txt_help_link,
     'usage': txt_help_usage,
-    'lobby': txt_help_lobby
+    'lobby': txt_help_lobby,
+    'profile': txt_help_profile
 }

@@ -113,7 +113,7 @@ class CustomBot(commands.Bot):
                 ctx: Context,
                 input: str,
         ) -> List[app_commands.Choice[str]]:
-            topic_list = ['link', 'usage', 'general', 'lobby']
+            topic_list = ['general', 'link', 'lobby', 'profile', 'usage']
             return [
                 app_commands.Choice(name=topic, value=topic)
                 for topic in topic_list if input.lower() in topic.lower()
