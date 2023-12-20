@@ -28,7 +28,6 @@ from Help import HELP_DIC
 middleware: Middleware = Middleware()
 
 
-# https://www.reddit.com/r/Discord_Bots/comments/nbnudq/multiple_optional_arguments_discordpy/
 # https://discord.com/developers/docs/interactions/application-commands
 # https://discord-py-slash-command.readthedocs.io/en/latest/quickstart.html#modals
 # Move help to embed eventually
@@ -60,7 +59,7 @@ class CustomBot(commands.Bot):
         self.add_commands()
 
     async def on_command_error(self, ctx: Context, exception: Exception):
-        # discord.ext.commands.errors.MissingRequiredArgument
+        # discord.ext.commands.errors.MissingRequiredArgument #Not used as per the moment
         # VanityUrlNotFoundError
         # https://github.com/Rapptz/discord.py/discussions/8384
         _: {Exception: Embed} = {
@@ -69,8 +68,8 @@ class CustomBot(commands.Bot):
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
             OperationalError: lambda: self._embed_error_no_db_connection,
         }
-        print(f" >>>- Error testing {exception.__class__}")
-        print(f'@@@ {isinstance(exception, DBClient.DBSteamIDNotFoundError)}')
+        # print(f" >>>- Error testing {exception.__class__}")
+        # print(f'@@@ {isinstance(exception, DBClient.DBSteamIDNotFoundError)}')
 
         raised_exception: Exception
 
@@ -133,45 +132,12 @@ class CustomBot(commands.Bot):
                 for topic in topic_list if input.lower() in topic.lower()
             ]
 
-        # @help.autocomplete('option')
-        # @help.
-        # async def help_autocomplete(
-        #         ctx,
-        #         current: str,
-        # ) -> List[app_commands.Choice[str]]:
-        #     options = ['links', 'usage']
-        #     return [
-        #         app_commands.Choice(name=option, value=option)
-        #         for option in options if current.lower() in option.lower()
-        #     ]
-        #
-        # @help.command(name="link")
-        # async def help_link(ctx: Context):
-        #     await ctx.reply(txt_help_link, mention_author=False)
-        #
-        # @help.command(name="usage")
-        # async def help_usage(ctx: Context):
-        #     await ctx.reply(txt_help_usage, mention_author=False)
-
-        # @self.tree.command()
-        # @self.hybrid_command()
-        # async def fruits(interaction: discord.Interaction, fruit: str=None):
-        #     await interaction.response.send_message(f'Your favourite fruit seems to be {fruit}')
-        #
-        # @fruits.autocomplete('fruit')
-        # async def fruits_autocomplete(
-        #         interaction: discord.Interaction,
-        #         current: str,
-        # ) -> List[app_commands.Choice[str]]:
-        #     fruits = ['Banana', 'Pineapple', 'Apple', 'Watermelon', 'Melon', 'Cherry']
-        #     return [
-        #         app_commands.Choice(name=fruit, value=fruit)
-        #         for fruit in fruits if current.lower() in fruit.lower()
-        #     ]
-
         @self.command()
         @self.is_god()
         async def sync(ctx: Context):
+            """
+            Syncs the slash/app commands with the discord servers (globaly)
+            """
             await self.tree.sync()
             await ctx.send("Sync!\nYou might need to reload the browser page or discord app for changes to be applied.")
 
@@ -242,8 +208,6 @@ class CustomBot(commands.Bot):
             embed = self._embed_player_profile(summary)
             await ctx.send(embed=embed)
 
-        # async def lobby(ctx: Context, member: Optional[discord.Member] = None):
-        # @self.hybrid_command()
         @self.hybrid_command()
         async def lobby(ctx: Context, user: discord.User = None):
             """
@@ -268,22 +232,6 @@ class CustomBot(commands.Bot):
             else:
                 embed = self._embed_player_lobby(summary)
                 await ctx.reply(embed=embed, mention_author=False)
-                # if not any(members):
-                #     await ctx.reply(embed=embed, mention_author=False)
-                # elif len(members) > 8:
-                #     await ctx.reply("Sorry, max allowed players to invite are 8", mention_author=True)
-                # else:
-                #     mail_list = []
-                #     for member in list(set(members)):
-                #         if isinstance(member, discord.Member):
-                #             mail_list.append(member)
-                #         else:
-                #             await ctx.reply(
-                #                 "There was an error with the users given, ensure you @ed correctly the users ",
-                #                 mention_author=True)
-                #     for member in mail_list:
-                #         await member.send(embed=embed)
-                #     await ctx.reply("Sent an invite to the specified user(s)!", mention_author=False)
 
         @self.hybrid_command()
         async def shlink(ctx: Context, user: discord.User = None):
@@ -312,15 +260,6 @@ class CustomBot(commands.Bot):
                     embed = self._embed_player_lobby(summary)
                     await ctx.reply(embed=embed, mention_author=False)
 
-        # @self.command()
-        # async def vanity(ctx: Context):
-        #     """
-        #     How to use the link command, and from where to extract the vanity name
-        #     :param ctx:
-        #     :return:
-        #     """
-        #     await ctx.reply(f"ie:  `{self.command_prefix}link SavageBidoof`\nhttps://i.imgur.com/VHdVEj8.png",
-        #                     mention_author=False)
 
         @self.command()
         async def version(ctx: Context):
@@ -330,15 +269,6 @@ class CustomBot(commands.Bot):
             :return:
             """
             await ctx.reply(embed=self._embed_version, mention_author=False)
-
-        # @self.hybrid_command()
-        # async def howto(ctx: Context):
-        #     """
-        #     Example on hot to use this bot
-        #     """
-        #     await ctx.reply("Use the following image as reference, note that the prefix command might "
-        #                     "vary. (Also, open the image on the browser for better "
-        #                     "clarity...)\nhttps://i.imgur.com/liZl6fI.png")
 
     @property
     def invite_url(self) -> str:
