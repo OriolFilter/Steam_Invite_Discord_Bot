@@ -19,6 +19,8 @@ ENV VERSION=${VERSION}
 ENV BUILDDATE=${BUILDDATE}
 ENV REPOSITORY=${REPOSITORY}
 
+# Used for certain special commands and stuff. Aka Discord Account ID for the GOD mode.
+ENV GOD_DISCORD_ID=""
 
 ENV STEAM_TOKEN=""
 
