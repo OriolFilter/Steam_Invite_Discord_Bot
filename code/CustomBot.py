@@ -308,7 +308,7 @@ class CustomBot(commands.Bot):
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
         embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=False)
-        embed.add_field(name="Repository", value=f'v{os.getenv("REPOSITORY")}', inline=False)
+        embed.add_field(name="Repository", value=f'{os.getenv("REPOSITORY")}', inline=False)
         # embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE", "Unknown")}', inline=True)
         # embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
