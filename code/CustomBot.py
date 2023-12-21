@@ -127,7 +127,18 @@ class CustomBot(commands.Bot):
             # await ctx.reply(embed=self.helper_class.menu(topic=topic), mention_author=False)
             # await ctx.reply(embed=self.helper_class.menu(topic=topic), mention_author=False)
             # await ctx.reply(self.helper_class.menu(topic=topic), mention_author=False)
-            await ctx.reply(embeds=self.helper_class.menu(topic=topic), mention_author=False)
+
+            # if isinstance(ctx.channel, discord.channel.DMChannel):
+            #     await ctx.send(arg)
+            # _command: ctx.author.send | ctx.reply
+            if not isinstance(ctx.channel, discord.channel.DMChannel):
+                # _command = ctx.author.send
+                await ctx.author.send(embeds=self.helper_class.menu(topic=topic), mention_author=False)
+                await ctx.reply("DM sent!", mention_author=False)
+            else:
+                await ctx.reply(embeds=self.helper_class.menu(topic=topic), mention_author=False)
+
+            # await ctx.reply(embeds=self.helper_class.menu(topic=topic), mention_author=False)
             # print(option)
             # if topic is None:
             #     topic = 'general'
@@ -172,7 +183,7 @@ class CustomBot(commands.Bot):
         @self.hybrid_command(
             # description=f"Use `{self.command_prefix}link <Steam Vanity URL>` to link your Steam account.")
             description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
-            # description=f"Sets up your account providing the vanity url. If you need help setting it up use the command `{self.command_prefix}help link`.")
+        # description=f"Sets up your account providing the vanity url. If you need help setting it up use the command `{self.command_prefix}help link`.")
         async def link(ctx: Context, vanity_url: str = None):
             # https://discord-py-slash-command.readthedocs.io/en/latest/quickstart.html#modals?
             """
@@ -209,7 +220,8 @@ class CustomBot(commands.Bot):
                 "Successfully removed the entry (if there was one), please verify that the account is correctly unlinked "
                 f"by using the command `{self.command_prefix}profile`", mention_author=False)
 
-        @self.hybrid_command(description=f"Returns the profile of the user and their active game. Use **{self.command_prefix}help profile** for help.")
+        @self.hybrid_command(
+            description=f"Returns the profile of the user and their active game. Use **{self.command_prefix}help profile** for help.")
         # @self.hybrid_command(description="Returns the profile of the user and their active game. A discord user can be mentioned to return their profile.")
         async def profile(ctx: Context, user: discord.User = None):
             """
@@ -230,7 +242,8 @@ class CustomBot(commands.Bot):
             embed = self._embed_player_profile(summary)
             await ctx.send(embed=embed)
 
-        @self.hybrid_command(description=f"Returns the lobby of the user. Use **{self.command_prefix}help lobby** for help.")
+        @self.hybrid_command(
+            description=f"Returns the lobby of the user. Use **{self.command_prefix}help lobby** for help.")
         # @self.hybrid_command(description="Returns the lobby of the user. A discord user can be mentioned to return their lobby. If the short link (shlink) functionality is enabled on the bot, the lobby link will be linked to a link shortener service and allow the users to click on the Steam link.")
         async def lobby(ctx: Context, user: discord.User = None):
             """
@@ -259,7 +272,8 @@ class CustomBot(commands.Bot):
         #
         # @self.hybrid_command(description='Behaves like the `lobby` command, but instead of returning "steam match '
         #                                  'link", returns the link shortener URL')
-        @self.hybrid_command(description=f"Behaves like the **lobby** command. Returns a short link instead of a lobby link.")
+        @self.hybrid_command(
+            description=f"Behaves like the **lobby** command. Returns a short link instead of a lobby link.")
         async def shlink(ctx: Context, user: discord.User = None):
             # Add cooldown
             """
