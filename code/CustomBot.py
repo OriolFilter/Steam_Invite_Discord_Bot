@@ -36,6 +36,7 @@ middleware: Middleware = Middleware()
 class CustomBot(commands.Bot):
     configuration: DiscordConf
     helper_class: HELPER
+    _link_menu_options: list[str]
 
     async def on_ready(self):
         print('------')
@@ -59,6 +60,7 @@ class CustomBot(commands.Bot):
                                            self_bot=False, intents=intents, help_command=None)
         self.helper_class = HELPER(discord_bot=self)
         self.add_commands()
+        self._link_menu_options = ['steamid', 'vanity']
 
     async def on_command_error(self, ctx: Context, exception: Exception):
         """
@@ -70,13 +72,15 @@ class CustomBot(commands.Bot):
         """
         # discord.ext.commands.errors.MissingRequiredArgument #Not used as per the moment
         # https://github.com/Rapptz/discord.py/discussions/8384
+        # SteamIdUserNotFoundError
         _: {Exception: Embed} = {
             DBErrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
             DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_no_steam_id_set,
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
             OperationalError: lambda: self._embed_error_no_db_connection,
             Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_not_found,
-            Errors.DiscordNotGodError: lambda: self._embed_error_vanity_url_not_found
+            Errors.SteamIdUserNotFoundError: lambda: self._embed_error_steam_id_not_found,
+            Errors.DiscordNotGodError: lambda: self._embed_error_not_god_user
         }
         # print(f" >>>- Error testing {exception.__class__}")
         # print(f'@@@ {isinstance(exception, DBClient.DBSteamIDNotFoundError)}')
@@ -118,19 +122,14 @@ class CustomBot(commands.Bot):
 
         return commands.check(extended_check)
 
+    # def _link_menu(self):
+    #     pass
     def add_commands(self):
         @self.hybrid_command(name="help", description="Prints a list of commands and their description")
         async def help(ctx: Context, topic: str = None):
             """
             Use this command to display a list of options available and more!
             """
-            # await ctx.reply(embed=self.helper_class.menu(topic=topic), mention_author=False)
-            # await ctx.reply(embed=self.helper_class.menu(topic=topic), mention_author=False)
-            # await ctx.reply(self.helper_class.menu(topic=topic), mention_author=False)
-
-            # if isinstance(ctx.channel, discord.channel.DMChannel):
-            #     await ctx.send(arg)
-            # _command: ctx.author.send | ctx.reply
             if not isinstance(ctx.channel, discord.channel.DMChannel):
                 # _command = ctx.author.send
                 await ctx.author.send(embeds=self.helper_class.menu(topic=topic), mention_author=False)
@@ -138,22 +137,9 @@ class CustomBot(commands.Bot):
             else:
                 await ctx.reply(embeds=self.helper_class.menu(topic=topic), mention_author=False)
 
-            # await ctx.reply(embeds=self.helper_class.menu(topic=topic), mention_author=False)
-            # print(option)
-            # if topic is None:
-            #     topic = 'general'
-            # if topic not in HELP_DIC:
-            #     raise commands.errors.CommandNotFound
-            # await ctx.reply(HELP_DIC[topic], mention_author=False)
-
         @help.autocomplete('topic')
-        async def help_autocomplete(
-                ctx: Context,
-                input: str,
-        ) -> List[app_commands.Choice[str]]:
+        async def help_autocomplete(ctx: Context, input: str, ) -> List[app_commands.Choice[str]]:
             topic_list = self.helper_class.menu_list
-            # print(self.helper_class.menu_list)
-            # topic_list = ['general', 'link', 'lobby', 'profile', 'usage']
             return [
                 app_commands.Choice(name=topic, value=topic)
                 for topic in topic_list if input.lower() in topic.lower()
@@ -180,33 +166,81 @@ class CustomBot(commands.Bot):
                 f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
                 mention_author=False)
 
-        @self.hybrid_command(
-            # description=f"Use `{self.command_prefix}link <Steam Vanity URL>` to link your Steam account.")
-            description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
-        # description=f"Sets up your account providing the vanity url. If you need help setting it up use the command `{self.command_prefix}help link`.")
-        async def link(ctx: Context, vanity_url: str = None):
-            # https://discord-py-slash-command.readthedocs.io/en/latest/quickstart.html#modals?
+        # @self.hybrid_command(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
+        # async def link(ctx: Context, vanity_url: str = None):
+        #     """
+        #     Sets up your account providing the vanity url
+        #     :param ctx:
+        #     :param vanity_url:
+        #     :return:
+        #     """
+        #     # await ctx.send("bitch")
+        #     if not vanity_url:
+        #         await ctx.reply(
+        #             f"You need to insert a vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
+        #     else:
+        #         #     try:
+        #         steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
+        #         middleware.set_steam_id(discord_id=ctx.author.id,
+        #                                 steam_id=steam_id)
+        #         await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked "
+        #                         f"by using the command `{self.command_prefix}profile`",
+        #                         mention_author=False)
+        #         # except Errors.VanityUrlNotFoundError:
+        #         # await ctx.reply(
+        #         #     "Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance",
+        #         #     mention_author=False)
+
+        # @self.hybrid_command(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
+        @self.hybrid_group(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
+        async def link(ctx: Context, option: str = None, input: str = None):
             """
-            Sets up your account providing the vanity url
-            :param ctx:
-            :param vanity_url:
-            :return:
+            Use this command to display a list of options available and more!
             """
+            if ctx.invoked_subcommand is None:
+                await ctx.reply("<<Complain placeholder>>")
+            # await ctx.author.send(embeds=self.helper_class.menu(topic=topic), mention_author=False)
+            # if not input:
+            #     await ctx.reply(
+            #         f"You need to insert a vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
+
+        # @help.autocomplete('topic')
+        # async def link_autocomplete(ctx: Context,input: str,) -> List[app_commands.Choice[str]]:
+        #     topic_list = self._link_menu_options
+        #     return [
+        #         app_commands.Choice(name=topic, value=topic)
+        #         for topic in topic_list if input.lower() in topic.lower()
+        #     ]
+        @link.command()
+        async def vanity(ctx: Context, vanity_url: str = None):
             if not vanity_url:
                 await ctx.reply(
                     f"You need to insert a vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
             else:
-                #     try:
                 steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
                 middleware.set_steam_id(discord_id=ctx.author.id,
                                         steam_id=steam_id)
-                await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked "
-                                f"by using the command `{self.command_prefix}profile`",
-                                mention_author=False)
+                await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked ",
+                                mention_author=False,
+                                embed=self._profile(discord_id=ctx.author.id))
+                                # f"by using the command `{self.command_prefix}profile`",
+                                # mention_author=False)
                 # except Errors.VanityUrlNotFoundError:
                 # await ctx.reply(
                 #     "Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance",
                 #     mention_author=False)
+
+        @link.command()
+        async def steamid(ctx: Context, steam_id: str = None):
+            if not steamid:
+                await ctx.reply(
+                    f"You need to insert a vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
+            else:
+                if middleware.SteamApi.player_summary(steam_id):
+                    middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
+                    await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked "
+                                    f"by using the command `{self.command_prefix}profile`",
+                                    mention_author=False)
 
         @self.hybrid_command(description="Remove your Steam account ID from the database.")
         # @self.hybrid_command(description="Use this to unlink the account and will delete the database entry.")
@@ -230,17 +264,13 @@ class CustomBot(commands.Bot):
             :param user: User targeted on which the command "profile" will be used.
             :return:
             """
-
             target_discord_id: int
             if user:
                 target_discord_id = user.id
             else:
                 target_discord_id = ctx.author.id
+            await ctx.send(embed=self._profile(discord_id=target_discord_id))
 
-            steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
-            summary = middleware.get_steam_summary(steam_id=steam_id)
-            embed = self._embed_player_profile(summary)
-            await ctx.send(embed=embed)
 
         @self.hybrid_command(
             description=f"Returns the lobby of the user. Use **{self.command_prefix}help lobby** for help.")
@@ -373,6 +403,17 @@ class CustomBot(commands.Bot):
 
         embed = self.__return_embed_error_template(title="Vanity URL not found",
                                                    description=f"Vanity URL didn't match an user, use the command `{self.command_prefix}help link` for help.")
+        return embed
+
+    @property
+    def _embed_error_steam_id_not_found(self):
+        """
+        Embed used when the user (Steam vanity URL) is not found.
+        :return:
+        """
+
+        embed = self.__return_embed_error_template(title="Steam ID not found",
+                                                   description=f"Steam ID didn't match an user, use the command `{self.command_prefix}help link` for help.")
         return embed
 
     @property
@@ -539,4 +580,13 @@ class CustomBot(commands.Bot):
         embed.set_thumbnail(
             url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
         embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=shortLobbyUrl, inline=False)
+        return embed
+    def _profile(self,discord_id: int) -> Embed:
+        """
+        Returns a profile embed for the discord ID specified
+        :return Embed
+        """
+        steam_id = middleware.get_steam_id_from_discord_id(discord_id)
+        summary = middleware.get_steam_summary(steam_id=steam_id)
+        embed = self._embed_player_profile(summary)
         return embed
