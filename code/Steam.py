@@ -82,10 +82,10 @@ class SteamApi:
     @steam_api_call
     def __get_id_from_vanity_url(self, vanity_url) -> requests.request:
         payload = {
-            "key":self.__api_key,
+            "key": self.__api_key,
             "vanityurl": vanity_url,
         }
-        return requests.get(f"https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/",params=payload)
+        return requests.get(f"https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/", params=payload)
 
     def get_id_from_vanity_url(self, vanity_url) -> int:
         jresponse = self.__get_id_from_vanity_url(vanity_url)
@@ -99,11 +99,11 @@ class SteamApi:
     @steam_api_call
     def __player_summary(self, id) -> requests or dict:
         payload = {
-            "key":self.__api_key,
+            "key": self.__api_key,
             "steamids": int(id),
         }
         response: Response = requests.get(
-            f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/",params=payload)
+            f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/", params=payload)
         return response
 
     def player_summary(self, id) -> PlayerSummary:
