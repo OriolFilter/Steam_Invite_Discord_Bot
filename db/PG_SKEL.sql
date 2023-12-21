@@ -31,8 +31,8 @@ create table if not exists relationships(
 --     end;
 -- $$;
 
-create trigger check_values_insert before insert on relationships for each row execute procedure trigger_check_values_relationships();
-create trigger check_values_update before update on relationships for each row execute procedure trigger_check_values_relationships();
+-- create trigger check_values_insert before insert on relationships for each row execute procedure trigger_check_values_relationships();
+-- create trigger check_values_update before update on relationships for each row execute procedure trigger_check_values_relationships();
 -- create trigger check_values_update after insert on relationships for each row execute procedure trigger_set_last_update_now();
 -- create trigger check_values_update after update on relationships for each row execute procedure trigger_set_last_update_now();
 
