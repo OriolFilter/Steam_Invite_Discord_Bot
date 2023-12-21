@@ -34,11 +34,11 @@ _help_commands_part2 = {
 
 _additional_commands = {
     ":hatching_chick: Help commands": {
-        "help": "Prints a list of commands and their description",
+        "help": "Prints a list of commands and their description.",
         "help link": "How to link your Steam account with this bot.",
-        "help lobby": "How to share a Steam lobby",
-        "help profile": "How share a Steam profile",
-        "help usage": "Example on how to use this bot/Commands and stuff (sort of functionalities)",
+        "help lobby": "How to share a Steam lobby.",
+        "help profile": "How share a Steam profile.",
+        "help usage": "Example on how to use this bot/Commands and stuff (sort of functionalities).",
     }
 }
 
@@ -107,7 +107,7 @@ class HELPER:
             for _command in _command_list:
                 __command = self.__discord_bot.all_commands[_command]
                 if not __command.hidden:
-                    _txt += f"**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n"
+                    _txt += f"**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n\n"
             _txt += "‎\n"
             embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
 
@@ -115,7 +115,7 @@ class HELPER:
         for _topic, _command_list in _additional_commands.items():
             _txt = "‎\n"
             for _command, _description in _command_list.items():
-                _txt += f"**{self.__discord_bot.command_prefix}{_command}:**         {_description}\n"
+                _txt += f"**{self.__discord_bot.command_prefix}{_command}:**         {_description}\n\n"
             _txt += "‎\n"
             embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
 
@@ -126,7 +126,7 @@ class HELPER:
             for _command in _command_list:
                 __command = self.__discord_bot.all_commands[_command]
                 if not __command.hidden:
-                    _txt += f"**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n"
+                    _txt += f"**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n\n"
             _txt += "‎\n"
             embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
 
@@ -215,7 +215,7 @@ class HELPER:
         # **{self.__discord_bot.command_prefix}lobby**: Post a link  to the lobby (if one is open)
         #
         # **{self.__discord_bot.command_prefix}shlink**: Post a link  to the lobby (if one is open), the link is shorten.
-        txt = f"Use commands such **{self.__discord_bot.command_prefix}lobby** or **{self.__discord_bot.command_prefix}shlink** to post a lobby.\n\nYou can select another user to post their lobby."
+        txt = f"If you haven't linked your Steam account use the command **{self.__discord_bot.command_prefix}help link** to get help on that.\n\nOnce you have linked your steam account through you can use commands such **{self.__discord_bot.command_prefix}lobby** or **{self.__discord_bot.command_prefix}shlink** to post a lobby.\n\nYou can select another user to post their lobby."
 
         embed.add_field(name="", value=txt, inline=False)
         images = ["https://i.imgur.com/VWk90iV.png", "https://i.imgur.com/w5DN6m0.png"]
