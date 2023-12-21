@@ -126,8 +126,8 @@ class HELPER:
             for _command in _command_list:
                 __command = self.__discord_bot.all_commands[_command]
                 if not __command.hidden:
-                    _txt += f"**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n\n"
-            _txt += "‎\n"
+                    _txt += f"‎\n**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n"
+            # _txt += "‎\n"
             embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
 
         # # Add Miscellany commands
@@ -139,14 +139,14 @@ class HELPER:
         # embed.add_field(name="‎\n:whale: __**Miscellany**__", value=_txt, inline=False)
         # return embed
 
-
-        # Add List of available thingies
-        _txt = "‎\n"
-        for _command in _available_app_commands:
-            __command = self.__discord_bot.all_commands[_command]
-            if not __command.hidden:
-                _txt += f"- **{__command.name}**\n"
-        embed.add_field(name="‎\n:bat: Available app/slash commands:", value=_txt, inline=False)
+        #
+        # # Add List of available thingies
+        # _txt = "‎\n"
+        # for _command in _available_app_commands:
+        #     __command = self.__discord_bot.all_commands[_command]
+        #     if not __command.hidden:
+        #         _txt += f"- **{__command.name}**\n"
+        # embed.add_field(name="‎\n:bat: Available app/slash commands:", value=_txt, inline=False)
         return embed
 
     @property
@@ -157,7 +157,7 @@ class HELPER:
         embed_list = []
         embed = self.__return_embed_template()
         embed_list.append(embed)
-        txt = (f"The `{self.__discord_bot.command_prefix}profile` command returns the Steam account of the user, "
+        txt = (f"The **{self.__discord_bot.command_prefix}profile** command returns the Steam account of the user, "
                f"and their current active game (if there is one).\n\nYou can also target another user to display "
                f"their profile.")
 
@@ -181,7 +181,7 @@ class HELPER:
 # 1. Link your Steam account to the Discord bot (doesn't require login nor authentication or anything like that), for more information about this step use the command `{self.__discord_bot.command_prefix}help link`.
         txt = f"""
 ```md
-1. Link your Steam account using your Vanity URL (no password nor authentication used). Use `{self.__discord_bot.command_prefix}help link` for more information.
+1. Link your Steam account using your Vanity URL (no password nor authentication used). Use {self.__discord_bot.command_prefix}help link` for more information.
 
 2. Congrats you can now use the rest of commands, such as:
 - Lobby
@@ -241,15 +241,15 @@ class HELPER:
             
             You should have copied something like this:
             
-              `https://steamcommunity.com/id/SavageBidoof/`
+              steamcommunity.com/id/**SavageBidoof**/
                 
-            From that URL, the vanity URL is `SavageBidoof`.
+            From that URL, the vanity URL is **SavageBidoof**.
                     
             Now you just need to use the link command appending the Steam vanity URL:
             
-              `{self.__discord_bot.command_prefix}link savagebidoof`
+              **{self.__discord_bot.command_prefix}link savagebidoof**
             
-            To unlink the account you can use the command `{self.__discord_bot.command_prefix}unlink`
+            To unlink the account you can use the command **{self.__discord_bot.command_prefix}unlink**
             """
 
         embed.add_field(name="", value=text, inline=False)
