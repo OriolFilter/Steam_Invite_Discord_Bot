@@ -1,4 +1,6 @@
 # import discord_rpc
+import json
+
 import requests
 from requests import Response
 from dataclasses import dataclass, asdict
@@ -6,6 +8,7 @@ from typing import Optional
 from functools import wraps
 from Classes import SteamConf
 import Errors
+
 
 # steam error codes https://partner.steamgames.com/doc/webapi_overview/responses
 
@@ -50,19 +53,19 @@ class PlayerSummary:
         return f"steam://joinlobby/{self.gameid}/{self.lobbysteamid}/{self.steamid}"
 
 
-
-
-
 def steam_api_call(method) -> dict:
     @wraps(method)
     def wrapper(self, *args, **kwargs) -> dict:
         response: requests.request = method(self, *args, **kwargs)
+        print(response.status_code)
+        print(response.json)
         if response.status_code == 200:
             return response.json()["response"]
         elif response.status_code == 403:
             raise Errors.SteamForbiddenError
         else:
             raise Errors.UnexpectedError
+
     return wrapper
 
 
@@ -78,8 +81,11 @@ class SteamApi:
 
     @steam_api_call
     def __get_id_from_vanity_url(self, vanity_url) -> requests.request:
-        return requests.get(
-            f"https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key={self.__api_key}&vanityurl={vanity_url}")
+        payload = {
+            "key":self.__api_key,
+            "vanityurl": vanity_url,
+        }
+        return requests.get(f"https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/",params=payload)
 
     def get_id_from_vanity_url(self, vanity_url) -> int:
         jresponse = self.__get_id_from_vanity_url(vanity_url)
@@ -92,8 +98,12 @@ class SteamApi:
 
     @steam_api_call
     def __player_summary(self, id) -> requests or dict:
+        payload = {
+            "key":self.__api_key,
+            "steamids": int(id),
+        }
         response: Response = requests.get(
-            f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={self.__api_key}&steamids={int(id)}")
+            f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/",params=payload)
         return response
 
     def player_summary(self, id) -> PlayerSummary:
