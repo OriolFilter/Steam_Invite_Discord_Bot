@@ -75,7 +75,7 @@ class CustomBot(commands.Bot):
         # for _command in self.all_commands['link'].walk_commands():
         #     print(_command)
 
-    async def on_command_errorr(self, ctx: Context, exception: Exception):
+    async def on_command_error(self, ctx: Context, exception: Exception):
         """
         On command error "returns" an embed based on the exception risen.
 
@@ -224,7 +224,8 @@ class CustomBot(commands.Bot):
         #         app_commands.Choice(name=topic, value=topic)
         #         for topic in topic_list if input.lower() in topic.lower()
         #     ]
-        @link.command(description=f"Links your Steam account using your Steam vanity URL. Use **{self.command_prefix}help link** for help.")
+        # @link.command(description=f"Links your Steam account specifying your Steam vanity URL. Use **{self.command_prefix}help link** for help.")
+        @link.command(description=f"Links your Steam account specifying your Steam vanity URL.")
         async def vanity(ctx: Context, vanity_url: str = None):
             if not vanity_url:
                 await ctx.reply(
@@ -237,7 +238,8 @@ class CustomBot(commands.Bot):
                                 mention_author=False,
                                 embed=self._profile(discord_id=ctx.author.id))
 
-        @link.command(description=f"Links your Steam account using your Steam account ID. Use **{self.command_prefix}help link** for help.")
+        # @link.command(description=f"Links your Steam account specifying your Steam account ID. Use **{self.command_prefix}help link** for help.")
+        @link.command(description=f"Links your Steam account specifying your Steam account ID.")
         async def steamid(ctx: Context, steam_id: int = None):
             if not steam_id:
                 await ctx.reply(
