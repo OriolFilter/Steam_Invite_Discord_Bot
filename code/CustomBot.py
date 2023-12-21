@@ -539,5 +539,4 @@ class CustomBot(commands.Bot):
         embed.set_thumbnail(
             url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
         embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=shortLobbyUrl, inline=False)
-        embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
