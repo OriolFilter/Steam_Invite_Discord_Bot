@@ -62,7 +62,7 @@ class CustomBot(commands.Bot):
         self.add_commands()
         self._link_menu_options = ['steamid', 'vanity']
 
-    async def on_command_errorr(self, ctx: Context, exception: Exception):
+    async def on_command_error(self, ctx: Context, exception: Exception):
         """
         On command error "returns" an embed based on the exception risen.
 

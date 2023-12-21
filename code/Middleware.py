@@ -46,7 +46,7 @@ class Middleware:
         return steam_id
 
     def __get_steam_summary_steam_id(self, steam_id) -> PlayerSummary:
-        return self.SteamApi.player_summary(id=steam_id)
+        return self.SteamApi.player_summary(steamid=steam_id)
 
     def __get_steam_summary_discord_id(self, discord_id) -> PlayerSummary:
         steam_id = self.get_steam_id_from_discord_id(discord_id=discord_id)
