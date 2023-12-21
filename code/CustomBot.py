@@ -182,7 +182,7 @@ class CustomBot(commands.Bot):
             """
             if not vanity_url:
                 await ctx.reply(
-                    f"You need to insert a vanity url, for further information regarding it's usage type '{self.command_prefix}vanity'.\nRemember that linking another account will overwrite the current linked one.")
+                    f"You need to insert a vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
             else:
                 #     try:
                 steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
@@ -357,7 +357,7 @@ class CustomBot(commands.Bot):
         """
 
         embed = self.__return_embed_error_template(title="Vanity URL not found",
-                                                   description=f"Vanity URL didn't match an user, please check the syntax again or use the command `{self.command_prefix}help link` if you need guidance.")
+                                                   description=f"Vanity URL didn't match an user, use the command `{self.command_prefix}help link` for help.")
         return embed
 
     @property

@@ -6,26 +6,31 @@ from discord import Embed
 from discord.ext import commands
 from discord.ext.commands import Bot
 
-_help_commands = {
+_help_commands_part1 = {
     ":tanabata_tree: __**Main Commands**__":
         [
             "lobby",
             "profile",
             "shlink",
         ],
+        ":knot: __**Account bindings**__":
+            [
+                "link",
+                "unlink"
+            ],
+}
 
-    ":knot: __**Account bindings**__":
-        [
-            "link",
-            "unlink"
-        ],
+_help_commands_part2 = {
     ":whale: __**Miscellany**__":
         [
             "invite_bot",
             "version"
         ],
-
 }
+# _miscellany_commands=[
+#             "invite_bot",
+#             "version"
+#         ],
 
 _additional_commands = {
     ":hatching_chick: Help commands": {
@@ -39,14 +44,6 @@ _additional_commands = {
 
 _available_app_commands = ["help", "link", "lobby", "profile", "shlink", "unlink"]
 _available_app_commands.sort()
-
-# HELP_DIC = {
-#     'general': txt_help_help,
-#     'link': txt_help_link,
-#     'lobby': txt_help_lobby,
-#     'profile': txt_help_profile,
-#     'usage': txt_help_usage,
-# }
 
 
 class HELPER:
@@ -102,8 +99,9 @@ class HELPER:
 
     def _general(self) -> Embed:
         embed = self.__return_embed_template()
-        # Add main commands
-        for _topic, _command_list in _help_commands.items():
+
+        # Add main commands part 1
+        for _topic, _command_list in _help_commands_part1.items():
             _command_list.sort()
             _txt = "‎\n"
             for _command in _command_list:
@@ -113,7 +111,7 @@ class HELPER:
             _txt += "‎\n"
             embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
 
-        ## Add list of extra help commands
+        # Add list help commands
         for _topic, _command_list in _additional_commands.items():
             _txt = "‎\n"
             for _command, _description in _command_list.items():
@@ -121,13 +119,34 @@ class HELPER:
             _txt += "‎\n"
             embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
 
-        ## Add List of available thingies
+        # Add main commands part 2
+        for _topic, _command_list in _help_commands_part2.items():
+            _command_list.sort()
+            _txt = "‎\n"
+            for _command in _command_list:
+                __command = self.__discord_bot.all_commands[_command]
+                if not __command.hidden:
+                    _txt += f"**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n"
+            _txt += "‎\n"
+            embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
+
+        # # Add Miscellany commands
+        # _txt = "‎\n"
+        # for _command in _miscellany_commands:
+        #     __command = self.__discord_bot.all_commands[_command]
+        #     if not __command.hidden:
+        #         _txt += f"- **{__command.name}**\n"
+        # embed.add_field(name="‎\n:whale: __**Miscellany**__", value=_txt, inline=False)
+        # return embed
+
+
+        # Add List of available thingies
         _txt = "‎\n"
         for _command in _available_app_commands:
             __command = self.__discord_bot.all_commands[_command]
             if not __command.hidden:
                 _txt += f"- **{__command.name}**\n"
-        embed.add_field(name="‎\n‎\n:bat: Available app/slash commands:", value=_txt, inline=False)
+        embed.add_field(name="‎\n:bat: Available app/slash commands:", value=_txt, inline=False)
         return embed
 
     @property
