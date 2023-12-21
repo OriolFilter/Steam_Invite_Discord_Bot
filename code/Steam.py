@@ -97,21 +97,21 @@ class SteamApi:
             raise Errors.UnexpectedError
 
     @steam_api_call
-    def __player_summary(self, id) -> requests or dict:
+    def __player_summary(self, steamid) -> requests or dict:
         payload = {
             "key": self.__api_key,
-            "steamids": int(id),
+            "steamids": int(steamid),
         }
         response: Response = requests.get(
             f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/", params=payload)
         return response
 
-    def player_summary(self, id) -> PlayerSummary:
-        result = self.__player_summary(id)['players']
+    def player_summary(self, steamid) -> PlayerSummary:
+        result = self.__player_summary(steamid)['players']
         if len(result) == 0:
             raise Errors.SteamIdUserNotFoundError
         summary = result[0]
         return PlayerSummary(**dict(summary))
 
-    def is_user_playing(self, id) -> bool:
-        return self.player_summary(id=id).is_playing
+    def is_user_playing(self, steamid) -> bool:
+        return self.player_summary(steamid=steamid).is_playing
