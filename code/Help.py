@@ -6,6 +6,15 @@ from discord import Embed
 from discord.ext import commands
 from discord.ext.commands import Bot
 
+# {
+#   "topic":
+#   {
+#      "command_with_subcommands": ["list", "of", "subcommands"],
+#      "command_without_subcommand": []
+#   },
+#   "topic2":{}
+# }
+
 _help_commands_part1 = {
     ":tanabata_tree: __**Main Commands**__":
         [
@@ -13,13 +22,17 @@ _help_commands_part1 = {
             "profile",
             "shlink",
         ],
-        ":knot: __**Account bindings**__":
-            [
-                "link",
-                "unlink"
-            ],
+    ":knot: __**Account bindings**__":
+        [
+            "link",
+            "unlink",
+        ],
+    # ":knot: __**Account bindings**__":
+    #     {
+    #         "link": {"vanity", "steamid"},
+    #         "unlink": {}
+    #     },
 }
-
 _help_commands_part2 = {
     ":whale: __**Miscellany**__":
         [
@@ -31,6 +44,14 @@ _help_commands_part2 = {
 #             "invite_bot",
 #             "version"
 #         ],
+
+# _account_binding_commands = {
+#     ":knot: __**Account bindings**__":
+#         [
+#             "link",
+#             "unlink"
+#         ],
+# }
 
 _additional_commands = {
     ":hatching_chick: Help commands": {
@@ -97,19 +118,80 @@ class HELPER:
     def general(self) -> Embed:
         return self._general()
 
+    def _manage_help_commands_dictionary(self, help_commands_dictionary: _help_commands_part1 | _help_commands_part2,
+                                         embed: Embed,
+                                         end: bool = False) -> None:
+        def __txt_add_command(command: discord.ext.commands.Command, prefix: str) -> str:
+            if prefix: prefix += " "
+            if not command.hidden:
+                return f"**{self.__discord_bot.command_prefix}{prefix}{command.name}:** {command.description}\n\n"
+            return ""
+
+        def __iterate_command_list(text: str, command_list_iterator, prefix: str) -> str:
+            # command_list.sort()
+            for command in command_list_iterator():
+                command: discord.ext.commands.Command
+                # __command = self.__discord_bot.all_commands[_command]
+                if not command.hidden:
+                    text += __txt_add_command(command=command,prefix=prefix)
+
+                # Check if command is subcommand
+                if isinstance(command, discord.ext.commands.GroupMixin):
+                    if prefix:
+                        new_prefix=f"{prefix} {command.name}"
+                    else: new_prefix=command.name
+                    text = __iterate_command_list(text=text, command_list_iterator=command.walk_commands,prefix=new_prefix)
+                    # print(f"{command} has subcommands!")
+
+                # This when printing
+                # _txt += f"**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n\n"
+            return text
+
+        for _topic, _list_of_commands in help_commands_dictionary.items():
+            _list_of_commands.sort()
+            command_list = [self.__discord_bot.all_commands[__command_name] for __command_name in _list_of_commands]
+
+            # _txt = "‎\n"
+            _txt = "‎\n" + __iterate_command_list(text="", prefix="", command_list_iterator=command_list.__iter__)
+
+            if end:
+                _txt += "\n"
+            else:
+                _txt += "‎\n"
+            embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
+
     def _general(self) -> Embed:
         embed = self.__return_embed_template()
 
+        # # Add main commands part 1
+        # for _topic, _command_list in _help_commands_part1.items():
+        #     # _command_list.sort()
+        #     _txt = "‎\n"
+        #     for _command in _command_list:
+        #         __command = self.__discord_bot.all_commands[_command]
+        #         if not __command.hidden:
+        #             _txt += f"**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n\n"
+        #     _txt += "‎\n"
+        #     embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
+
         # Add main commands part 1
-        for _topic, _command_list in _help_commands_part1.items():
-            _command_list.sort()
-            _txt = "‎\n"
-            for _command in _command_list:
-                __command = self.__discord_bot.all_commands[_command]
-                if not __command.hidden:
-                    _txt += f"**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n\n"
-            _txt += "‎\n"
-            embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
+        self._manage_help_commands_dictionary(help_commands_dictionary=_help_commands_part1, embed=embed)
+
+        # Add account binding commands
+        # ## Get commands/subcomands in list
+        # _binding_commands = []
+        # for _command in self.__discord_bot.all_commands['link'].walk_commands():
+        #     _binding_commands.append(_command)
+        #     # print(_command)
+        # _binding_commands.append(self.__discord_bot.all_commands['unlink'])
+
+        # ## Generate embed text
+        # _txt = "‎\n"
+        # for _command in _binding_commands:
+        #     if not _command.hidden:
+        #         _txt += f"**{self.__discord_bot.command_prefix}{_command.name}:**         {_command.description}\n\n"
+        # _txt += "‎\n"
+        # embed.add_field(name="‎\n:knot: __**Account bindings**__", value=_txt, inline=False)
 
         # Add list help commands
         for _topic, _command_list in _additional_commands.items():
@@ -120,15 +202,18 @@ class HELPER:
             embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
 
         # Add main commands part 2
-        for _topic, _command_list in _help_commands_part2.items():
-            _command_list.sort()
-            _txt = "‎\n"
-            for _command in _command_list:
-                __command = self.__discord_bot.all_commands[_command]
-                if not __command.hidden:
-                    _txt += f"‎\n**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n"
-            # _txt += "‎\n"
-            embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
+        self._manage_help_commands_dictionary(help_commands_dictionary=_help_commands_part2, embed=embed, end=True)
+        # for _topic, _command_list in _help_commands_part2.items():
+        #     _command_list.sort()
+        #     # _txt = ""
+        #     _txt = "‎\n"
+        #     for _command in _command_list:
+        #         __command = self.__discord_bot.all_commands[_command]
+        #         if not __command.hidden:
+        #             _txt += f"**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n\n"
+        #             # _txt += f"‎\n**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}>:(\n"
+        #     # _txt += "‎\n"
+        #     embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
 
         # # Add Miscellany commands
         # _txt = "‎\n"
@@ -171,14 +256,14 @@ class HELPER:
         return embed_list
 
     @property
-    def usage(self) -> Embed:
+    def usage(self) -> list[Embed]:
         return self._usage()
 
     def _usage(self) -> list[Embed]:
         embed_list = []
         embed = self.__return_embed_template()
         embed_list.append(embed)
-# 1. Link your Steam account to the Discord bot (doesn't require login nor authentication or anything like that), for more information about this step use the command `{self.__discord_bot.command_prefix}help link`.
+        # 1. Link your Steam account to the Discord bot (doesn't require login nor authentication or anything like that), for more information about this step use the command `{self.__discord_bot.command_prefix}help link`.
         txt = f"""
 ```md
 1. Link your Steam account using your Vanity URL (no password nor authentication used). Use {self.__discord_bot.command_prefix}help link` for more information.

@@ -50,6 +50,7 @@ class CustomBot(commands.Bot):
                 self.configuration.activity, f"Use {self.configuration.prefix}help to get a list "
                                              f"from all the available commands")[not any(self.configuration.activity)]
         ))
+        # self.helper_class.general
 
     def __init__(self, *args, **kwargs):
         self.configuration = DiscordConf()
@@ -61,8 +62,20 @@ class CustomBot(commands.Bot):
         self.helper_class = HELPER(discord_bot=self)
         self.add_commands()
         self._link_menu_options = ['steamid', 'vanity']
+        # for x,y in self.all_commands.items():
+        #     print(f'{x}:\t{y}')
+        # print('---')
+        # for x in self.walk_commands():
+        #     print(f'{x}')
+        # print('---')
+        # for x in self.commands:
+        #     print(f'{x}')
+        # for x in self.all_commands['link'].walk_commands():
+        #     print(f'{x}')
+        # for _command in self.all_commands['link'].walk_commands():
+        #     print(_command)
 
-    async def on_command_error(self, ctx: Context, exception: Exception):
+    async def on_command_errorr(self, ctx: Context, exception: Exception):
         """
         On command error "returns" an embed based on the exception risen.
 
@@ -192,7 +205,7 @@ class CustomBot(commands.Bot):
         #         #     mention_author=False)
 
         # @self.hybrid_command(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
-        @self.hybrid_group(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
+        @self.hybrid_group(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.", hidden=True)
         async def link(ctx: Context, option: str = None, input: str = None):
             """
             Use this command to display a list of options available and more!
@@ -211,11 +224,11 @@ class CustomBot(commands.Bot):
         #         app_commands.Choice(name=topic, value=topic)
         #         for topic in topic_list if input.lower() in topic.lower()
         #     ]
-        @link.command()
+        @link.command(description=f"Links your Steam account using your Steam vanity URL. Use **{self.command_prefix}help link** for help.")
         async def vanity(ctx: Context, vanity_url: str = None):
             if not vanity_url:
                 await ctx.reply(
-                    f"You need to insert a vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
+                    f"You need to insert a Steam vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
             else:
                 steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
                 middleware.set_steam_id(discord_id=ctx.author.id,
@@ -224,11 +237,11 @@ class CustomBot(commands.Bot):
                                 mention_author=False,
                                 embed=self._profile(discord_id=ctx.author.id))
 
-        @link.command()
-        async def steamid(ctx: Context, steam_id: str = None):
-            if not steamid:
+        @link.command(description=f"Links your Steam account using your Steam account ID. Use **{self.command_prefix}help link** for help.")
+        async def steamid(ctx: Context, steam_id: int = None):
+            if not steam_id:
                 await ctx.reply(
-                    f"You need to insert a vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
+                    f"You need to insert a Steam account ID, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
             else:
                 if middleware.SteamApi.player_summary(steam_id):
                     middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
