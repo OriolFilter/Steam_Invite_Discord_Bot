@@ -7,7 +7,7 @@ FROM ${BASEIMAGE}
 
 ARG BUILDDATE
 ARG VERSION="1.3"
-ARG REPOSITORY="https://github.com/OriolFilter/Steam_Invite_Discord"
+ARG REPOSITORY="https://gitea.filterhome.xyz/ofilter/Steam_Invite_Discord"
 
 LABEL "author"="Oriol Filter Anson"
 LABEL "version"="${VERSION}"
