@@ -220,7 +220,7 @@ class CustomBot(commands.Bot):
                 steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
                 middleware.set_steam_id(discord_id=ctx.author.id,
                                         steam_id=steam_id)
-                await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked ",
+                await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
                                 mention_author=False,
                                 embed=self._profile(discord_id=ctx.author.id))
                                 # f"by using the command `{self.command_prefix}profile`",
@@ -238,9 +238,9 @@ class CustomBot(commands.Bot):
             else:
                 if middleware.SteamApi.player_summary(steam_id):
                     middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
-                    await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked "
-                                    f"by using the command `{self.command_prefix}profile`",
-                                    mention_author=False)
+                    await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
+                                    mention_author=False,
+                                    embed=self._profile(discord_id=ctx.author.id))
 
         @self.hybrid_command(description="Remove your Steam account ID from the database.")
         # @self.hybrid_command(description="Use this to unlink the account and will delete the database entry.")
