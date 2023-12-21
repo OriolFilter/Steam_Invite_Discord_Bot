@@ -62,7 +62,7 @@ class CustomBot(commands.Bot):
         self.add_commands()
         self._link_menu_options = ['steamid', 'vanity']
 
-    async def on_command_error(self, ctx: Context, exception: Exception):
+    async def on_command_errorr(self, ctx: Context, exception: Exception):
         """
         On command error "returns" an embed based on the exception risen.
 
@@ -223,12 +223,6 @@ class CustomBot(commands.Bot):
                 await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
                                 mention_author=False,
                                 embed=self._profile(discord_id=ctx.author.id))
-                                # f"by using the command `{self.command_prefix}profile`",
-                                # mention_author=False)
-                # except Errors.VanityUrlNotFoundError:
-                # await ctx.reply(
-                #     "Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance",
-                #     mention_author=False)
 
         @link.command()
         async def steamid(ctx: Context, steam_id: str = None):
