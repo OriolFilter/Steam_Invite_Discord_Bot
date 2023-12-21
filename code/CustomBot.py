@@ -1,14 +1,14 @@
 import os
+
 from typing import List
 
 import DBClient
 import Errors
-import Steam
-import discord
 
 from psycopg2 import errors as DBErrors
 from psycopg2 import OperationalError
 
+import discord
 from discord import Embed
 from discord import app_commands
 from discord.ext import commands
@@ -21,7 +21,7 @@ from Classes import DiscordConf
 
 from Steam import PlayerSummary
 
-from Help import HELP_DIC
+from Help import HELPER
 
 ## Main
 
@@ -35,6 +35,7 @@ middleware: Middleware = Middleware()
 
 class CustomBot(commands.Bot):
     configuration: DiscordConf
+    helper_class: HELPER
 
     async def on_ready(self):
         print('------')
@@ -56,6 +57,7 @@ class CustomBot(commands.Bot):
         super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
                                            description=self.configuration.description,
                                            self_bot=False, intents=intents, help_command=None)
+        self.helper_class = HELPER(discord_bot=self)
         self.add_commands()
 
     async def on_command_error(self, ctx: Context, exception: Exception):
@@ -96,11 +98,11 @@ class CustomBot(commands.Bot):
         print(
             f'[ERROR] USER: {ctx.author.name} raised error {raised_exception.__class__}\n\tWith line: {raised_exception}')
         embed = None
-        for key, value in _.items():
-            if isinstance(original_err_class, key):
-                embed = value
+        for _key, _lambda_func in _.items():
+            if isinstance(original_err_class, _key):
+                embed = _lambda_func()
         if embed:
-            await ctx.reply(embed=embed(), mention_author=True)
+            await ctx.reply(embed=embed, mention_author=True)
         else:
             print(f'Caught error {original_err_class}')
             await ctx.reply("Unknown error, contact the administrator.", mention_author=True)
@@ -117,31 +119,37 @@ class CustomBot(commands.Bot):
         return commands.check(extended_check)
 
     def add_commands(self):
-        @self.hybrid_command(name="help")
+        @self.hybrid_command(name="help", description="Prints a list of commands and their description")
         async def help(ctx: Context, topic: str = None):
             """
             Use this command to display a list of options available and more!
             """
+            # await ctx.reply(embed=self.helper_class.menu(topic=topic), mention_author=False)
+            # await ctx.reply(embed=self.helper_class.menu(topic=topic), mention_author=False)
+            # await ctx.reply(self.helper_class.menu(topic=topic), mention_author=False)
+            await ctx.reply(embeds=self.helper_class.menu(topic=topic), mention_author=False)
             # print(option)
-            if topic is None:
-                topic = 'general'
-            if topic not in HELP_DIC:
-                raise commands.errors.CommandNotFound
-            await ctx.reply(HELP_DIC[topic], mention_author=False)
+            # if topic is None:
+            #     topic = 'general'
+            # if topic not in HELP_DIC:
+            #     raise commands.errors.CommandNotFound
+            # await ctx.reply(HELP_DIC[topic], mention_author=False)
 
         @help.autocomplete('topic')
         async def help_autocomplete(
                 ctx: Context,
                 input: str,
         ) -> List[app_commands.Choice[str]]:
-            topic_list = ['general', 'link', 'lobby', 'profile', 'usage']
+            topic_list = self.helper_class.menu_list
+            # print(self.helper_class.menu_list)
+            # topic_list = ['general', 'link', 'lobby', 'profile', 'usage']
             return [
                 app_commands.Choice(name=topic, value=topic)
                 for topic in topic_list if input.lower() in topic.lower()
             ]
 
-        @self.command()
         @self.is_god()
+        @self.command(hidden=True, description="Sync the commands with all the servers (Bot Owner only).")
         async def sync(ctx: Context):
             """
             Syncs the slash/app commands with the discord servers (globaly)
@@ -149,8 +157,9 @@ class CustomBot(commands.Bot):
             await self.tree.sync()
             await ctx.send("Sync!\nYou might need to reload the browser page or discord app for changes to be applied.")
 
-        @self.command()
-        async def botinvite(ctx: Context):
+        @self.command(description="Returns a link to invite this bot to your server.")
+        # async def botinvite(ctx: Context):
+        async def invite_bot(ctx: Context):
             """
             In case someone wants to add this bot to their server use the link provided by this command
             :param ctx:
@@ -160,7 +169,9 @@ class CustomBot(commands.Bot):
                 f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
                 mention_author=False)
 
-        @self.hybrid_command()
+        @self.hybrid_command(
+            description=f"Use `{self.command_prefix}link <Steam Vanity URL>` to link your Steam account.")
+            # description=f"Sets up your account providing the vanity url. If you need help setting it up use the command `{self.command_prefix}help link`.")
         async def link(ctx: Context, vanity_url: str = None):
             # https://discord-py-slash-command.readthedocs.io/en/latest/quickstart.html#modals?
             """
@@ -185,7 +196,8 @@ class CustomBot(commands.Bot):
                 #     "Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance",
                 #     mention_author=False)
 
-        @self.hybrid_command()
+        @self.hybrid_command(description="Remove your Steam account ID from the database")
+        # @self.hybrid_command(description="Use this to unlink the account and will delete the database entry.")
         async def unlink(ctx: Context):
             """
             Use this to unlink the account.
@@ -196,7 +208,8 @@ class CustomBot(commands.Bot):
                 "Successfully removed the entry (if there was one), please verify that the account is correctly unlinked "
                 f"by using the command `{self.command_prefix}profile`", mention_author=False)
 
-        @self.hybrid_command()
+        @self.hybrid_command(description="Returns the profile of the user and their active game.")
+        # @self.hybrid_command(description="Returns the profile of the user and their active game. A discord user can be mentioned to return their profile.")
         async def profile(ctx: Context, user: discord.User = None):
             """
             Returns Steam account from the user and their current open game (if they are currently playing)
@@ -216,7 +229,8 @@ class CustomBot(commands.Bot):
             embed = self._embed_player_profile(summary)
             await ctx.send(embed=embed)
 
-        @self.hybrid_command()
+        @self.hybrid_command(description="Returns the lobby of the user.")
+        # @self.hybrid_command(description="Returns the lobby of the user. A discord user can be mentioned to return their lobby. If the short link (shlink) functionality is enabled on the bot, the lobby link will be linked to a link shortener service and allow the users to click on the Steam link.")
         async def lobby(ctx: Context, user: discord.User = None):
             """
             If no user is specified, posts the caller lobby in the chat.
@@ -241,7 +255,10 @@ class CustomBot(commands.Bot):
                 embed = self._embed_player_lobby(summary)
                 await ctx.reply(embed=embed, mention_author=False)
 
-        @self.hybrid_command()
+        #
+        # @self.hybrid_command(description='Behaves like the `lobby` command, but instead of returning "steam match '
+        #                                  'link", returns the link shortener URL')
+        @self.hybrid_command(description="Behaves like the `lobby` command. Returns a short link instead of a lobby link.")
         async def shlink(ctx: Context, user: discord.User = None):
             # Add cooldown
             """
@@ -265,10 +282,10 @@ class CustomBot(commands.Bot):
                     embed = self._embed_error_no_lobby(summary)
                     await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=False)
                 else:
-                    embed = self._embed_player_lobby(summary)
+                    embed = self._embed_player_lobby_shlink(summary)
                     await ctx.reply(embed=embed, mention_author=False)
 
-        @self.command()
+        @self.command(description="Prints the current version of the bot")
         async def version(ctx: Context):
             """
             Prints the current version
@@ -290,9 +307,10 @@ class CustomBot(commands.Bot):
                       description="Discord bot intended to get lobby links from Steam users", color=0xababab)
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
-        embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=True)
+        embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=False)
+        embed.add_field(name="Repository", value=f'v{os.getenv("REPOSITORY")}', inline=False)
         # embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE", "Unknown")}', inline=True)
-        embed.set_footer(text=os.getenv("REPOSITORY"))
+        # embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
 
     def __return_embed_error_template(self, title: str, description: str) -> discord.Embed:
@@ -382,7 +400,7 @@ class CustomBot(commands.Bot):
             embed.add_field(name="User currently is not playing a game.", value=("Note that profile privacy settings "
                                                                                  "could be interfering with this."))
 
-        embed.set_footer(text="https://github.com/OriolFilter")
+        # embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
     @staticmethod
@@ -438,7 +456,7 @@ class CustomBot(commands.Bot):
                             value=("Note that profile privacy settings or visibility "
                                    "could be interfering with this."), inline=False)
 
-        embed.set_footer(text="https://github.com/OriolFilter")
+        # embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
     def _embed_player_lobby(self, player_summary: PlayerSummary) -> Embed:
@@ -447,7 +465,7 @@ class CustomBot(commands.Bot):
 
          This function won't check for anything of that.
          """
-        shortLobbyUrl:str = ""
+        shortLobbyUrl: str = ""
         message_lobby_url: str
 
         if middleware.ShlinkClient.enabled:
@@ -475,7 +493,7 @@ class CustomBot(commands.Bot):
         embed.set_thumbnail(
             url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
         embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=message_lobby_url, inline=False)
-        embed.set_footer(text="https://github.com/OriolFilter")
+        # embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
     def _embed_shlink_not_enabled(self) -> Embed:
@@ -494,7 +512,6 @@ class CustomBot(commands.Bot):
         Exactly the same as `_embed_player_lobby`, but will return the shlink URL instead of the lobby URL (as in text)
         This won't validate if the link shortener is enabled.
         """
-
         shortLobbyUrl = middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
 
         embed = Embed(title=player_summary.gameextrainfo,
