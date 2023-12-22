@@ -359,6 +359,8 @@ class HELPER:
                 Now use the following command:
                 
                   **{self.__discord_bot.command_prefix}link vanity savagebidoof**
+                  
+                If the URL contains **/profile/**, check below to link through Steam ID. 
                 ‎
                 """,
                 'image_list': ["https://i.imgur.com/CrVUxbs.png"],
@@ -381,6 +383,8 @@ class HELPER:
                 Now use the following command:
                 
                 **{self.__discord_bot.command_prefix}link steamid 76561198170583259**
+                
+                If the URL contains **/id/**, check above to link through Vanity ID.
                 ‎
                 """,
                 'image_list': ['https://i.imgur.com/QxaNM5j.png'],
