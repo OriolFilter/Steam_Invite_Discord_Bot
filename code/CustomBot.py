@@ -50,7 +50,6 @@ class CustomBot(commands.Bot):
                 self.configuration.activity, f"Use {self.configuration.prefix}help to get a list "
                                              f"from all the available commands")[not any(self.configuration.activity)]
         ))
-        self.helper_class.link
 
     def __init__(self, *args, **kwargs):
         self.configuration = DiscordConf()
