@@ -124,13 +124,13 @@ class CustomBot(commands.Bot):
     def run(self, *args, **kwargs):
         super(commands.Bot, self).run(self.configuration.token, *args, **kwargs)
 
-    def is_god(self):
-        async def extended_check(ctx: Context) -> bool:
-            if self.configuration.god_id and int(ctx.author.id) != int(self.configuration.god_id):
-                raise Errors.DiscordNotGodError
-            return True
-
-        return commands.check(extended_check)
+    # def is_god(self):
+    #     async def extended_check(ctx: Context) -> bool:
+    #         if self.configuration.god_id and int(ctx.author.id) != int(self.configuration.god_id):
+    #             raise Errors.DiscordNotGodError
+    #         return True
+    #
+    #     return commands.check(extended_check)
 
     def add_commands(self):
         @self.hybrid_command(name="help", description="Prints a list of commands and their description")
@@ -153,12 +153,14 @@ class CustomBot(commands.Bot):
                 for topic in topic_list if input.lower() in topic.lower()
             ]
 
-        @self.is_god()
         @self.command(hidden=True, description="Sync the commands with all the servers (Bot Owner only).")
+        # @self.is_god()
         async def sync(ctx: Context):
             """
             Syncs the slash/app commands with the discord servers (globaly)
             """
+            if self.configuration.god_id and int(ctx.author.id) != int(self.configuration.god_id):
+                raise Errors.DiscordNotGodError
             await self.tree.sync()
             await ctx.send("Sync!\nYou might need to reload the browser page or discord app for changes to be applied.")
 
