@@ -62,18 +62,6 @@ class CustomBot(commands.Bot):
         self.helper_class = HELPER(discord_bot=self)
         self.add_commands()
         self._link_menu_options = ['steamid', 'vanity']
-        # for x,y in self.all_commands.items():
-        #     print(f'{x}:\t{y}')
-        # print('---')
-        # for x in self.walk_commands():
-        #     print(f'{x}')
-        # print('---')
-        # for x in self.commands:
-        #     print(f'{x}')
-        # for x in self.all_commands['link'].walk_commands():
-        #     print(f'{x}')
-        # for _command in self.all_commands['link'].walk_commands():
-        #     print(_command)
 
     async def on_command_error(self, ctx: Context, exception: Exception):
         """
@@ -85,7 +73,6 @@ class CustomBot(commands.Bot):
         """
         # discord.ext.commands.errors.MissingRequiredArgument #Not used as per the moment
         # https://github.com/Rapptz/discord.py/discussions/8384
-        # SteamIdUserNotFoundError
         _: {Exception: Embed} = {
             DBErrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
             DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_no_steam_id_set,
@@ -178,31 +165,6 @@ class CustomBot(commands.Bot):
                 mention_author=False)
 
         # @self.hybrid_command(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
-        # async def link(ctx: Context, vanity_url: str = None):
-        #     """
-        #     Sets up your account providing the vanity url
-        #     :param ctx:
-        #     :param vanity_url:
-        #     :return:
-        #     """
-        #     # await ctx.send("bitch")
-        #     if not vanity_url:
-        #         await ctx.reply(
-        #             f"You need to insert a vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
-        #     else:
-        #         #     try:
-        #         steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
-        #         middleware.set_steam_id(discord_id=ctx.author.id,
-        #                                 steam_id=steam_id)
-        #         await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked "
-        #                         f"by using the command `{self.command_prefix}profile`",
-        #                         mention_author=False)
-        #         # except Errors.VanityUrlNotFoundError:
-        #         # await ctx.reply(
-        #         #     "Vanity URL couldn't be found, please check the syntax again, or use the command `help link` if you need guidance",
-        #         #     mention_author=False)
-
-        # @self.hybrid_command(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
         @self.hybrid_group(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.", hidden=True)
         async def link(ctx: Context, option: str = None, input: str = None):
             """
@@ -210,24 +172,7 @@ class CustomBot(commands.Bot):
             """
             if ctx.invoked_subcommand is None:
                 await ctx.reply(f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
-                # await ctx.reply(f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.\nThose commands are also available as **Slash (/)** commands.')
 
-
-
-            #     await ctx.reply("<<Complain placeholder>>")
-            # await ctx.author.send(embeds=self.helper_class.menu(topic=topic), mention_author=False)
-            # if not input:
-            #     await ctx.reply(
-            #         f"You need to insert a vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
-
-        # @help.autocomplete('topic')
-        # async def link_autocomplete(ctx: Context,input: str,) -> List[app_commands.Choice[str]]:
-        #     topic_list = self._link_menu_options
-        #     return [
-        #         app_commands.Choice(name=topic, value=topic)
-        #         for topic in topic_list if input.lower() in topic.lower()
-        #     ]
-        # @link.command(description=f"Links your Steam account specifying your Steam vanity URL. Use **{self.command_prefix}help link** for help.")
         @link.command(description=f"Links your Steam account specifying your Steam vanity URL.")
         async def vanity(ctx: Context, vanity_url: str = None):
             if not vanity_url:
