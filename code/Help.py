@@ -344,46 +344,47 @@ class HELPER:
         #    """
         link_dict = {
             'vanity': {
-                'text': f"""
-        Go to your profile page, right click on the background and click **copy URL**.
-            
-           If the URL contains **/id/** like this: 
-           
-              steamcommunity.com/**id**/stuff
-           
-           ie:
-           
-              steamcommunity.com/id/**SavageBidoof**/
+                'text':f"""
+                ‎
+                **To link through __Steam ID__ check the __embed from below__**
                 
-           The vanity URL is **SavageBidoof**.
+                Go to your profile page, **right click** on the background and click **copy URL**.
+                
+                If the URL contains **/id/** like this: 
+                
+                  steamcommunity.com**/id/**SavageBidoof/
                     
-           Now you just need to use the link command appending the Steam vanity URL:
-            
-              **{self.__discord_bot.command_prefix}link vanity savagebidoof**
-            
-        """,
+                The vanity URL is **SavageBidoof**.
+                        
+                Now use the following command:
+                
+                  **{self.__discord_bot.command_prefix}link vanity savagebidoof**
+                ‎
+                """,
                 'image_list': ["https://i.imgur.com/CrVUxbs.png"],
-                'title': "vanity"
+                'title': ":fried_shrimp: Link Steam vanity URL"
 
             },
             'steamid': {
-                'text': f"""
+                'text':f"""
+                ‎
+                **To link through __Steam vanity URL__ check the __embed from above__**
+                
+                Go to your profile page, **right click** on the background and click **copy URL**.
+                
                 If the URL contains **/profile/** like this: 
 
-                      steamcommunity.com/**profile**/numbers
-
-                   ie:
-
-                      steamcommunity.com/id/**76561198170583259**/
-
-                   The SteamID is **76561198170583259**.
-
-                   Now you just need to use the link command appending the Steam vanity URL:
-
-                      **{self.__discord_bot.command_prefix}link steamid 76561198170583259**
+                  steamcommunity.com**/profile/**76561198170583259/
+                
+                The SteamID is **76561198170583259**.
+                
+                Now use the following command:
+                
+                **{self.__discord_bot.command_prefix}link steamid 76561198170583259**
+                ‎
                 """,
-                'image_list': [],
-                'title': "steamid"
+                'image_list': ['https://i.imgur.com/QxaNM5j.png'],
+                'title': ":comet: Link Steam ID"
             }
         }
 
@@ -391,13 +392,13 @@ class HELPER:
         for _topic, _contents in link_dict.items():
             data = HELPER_LINK_SKEL(**_contents)
             text_embed = self.__return_embed_template()
-            text_embed.url = _n
+            text_embed.url += str(_n)
             embed_list.append(text_embed)
-            text_embed.add_field(name=data.title, value=data.text, inline=False)
+            text_embed.add_field(name=f'‎\n{data.title}', value=data.text, inline=False)
 
             for _image_url in data.image_list:
                 _image_embed = self.__return_embed_image_template
-                _image_embed.url = _n
+                _image_embed.url += str(_n)
                 _image_embed.set_image(url=_image_url)
                 embed_list.append(_image_embed)
 
