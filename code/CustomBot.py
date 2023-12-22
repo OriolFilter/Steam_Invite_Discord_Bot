@@ -50,6 +50,7 @@ class CustomBot(commands.Bot):
                 self.configuration.activity, f"Use {self.configuration.prefix}help to get a list "
                                              f"from all the available commands")[not any(self.configuration.activity)]
         ))
+        self.helper_class.link
 
     def __init__(self, *args, **kwargs):
         self.configuration = DiscordConf()
@@ -242,7 +243,7 @@ class CustomBot(commands.Bot):
 
         # @link.command(description=f"Links your Steam account specifying your Steam account ID. Use **{self.command_prefix}help link** for help.")
         @link.command(description=f"Links your Steam account specifying your Steam account ID.")
-        async def steamid(ctx: Context, steam_id: int = None):
+        async def steamid(ctx: Context, steam_id: str = None):
             if not steam_id:
                 await ctx.reply(
                     f"You need to insert a Steam account ID, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
