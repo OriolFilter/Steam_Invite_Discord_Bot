@@ -7,15 +7,6 @@ from discord import Embed
 from discord.ext import commands
 from discord.ext.commands import Bot
 
-# {
-#   "topic":
-#   {
-#      "command_with_subcommands": ["list", "of", "subcommands"],
-#      "command_without_subcommand": []
-#   },
-#   "topic2":{}
-# }
-
 _help_commands_part1 = {
     ":tanabata_tree: __**Main Commands**__":
         [
@@ -37,18 +28,7 @@ _help_commands_part2 = {
             "version"
         ],
 }
-# _miscellany_commands=[
-#             "invite_bot",
-#             "version"
-#         ],
 
-# _account_binding_commands = {
-#     ":knot: __**Account bindings**__":
-#         [
-#             "link",
-#             "unlink"
-#         ],
-# }
 
 _additional_commands = {
     ":hatching_chick: Help commands": {
@@ -60,8 +40,9 @@ _additional_commands = {
     }
 }
 
-_available_app_commands = ["help", "link", "lobby", "profile", "shlink", "unlink"]
-_available_app_commands.sort()
+# UNUSED
+# _available_app_commands = ["help", "link", "lobby", "profile", "shlink", "unlink"]
+# _available_app_commands.sort()
 
 
 @dataclass
