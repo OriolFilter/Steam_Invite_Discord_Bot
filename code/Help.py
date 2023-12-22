@@ -1,4 +1,5 @@
 # This doc is used for the help command on the discord bot.
+from dataclasses import dataclass
 from typing import List
 
 import discord.ext.commands
@@ -27,11 +28,7 @@ _help_commands_part1 = {
             "link",
             "unlink",
         ],
-    # ":knot: __**Account bindings**__":
-    #     {
-    #         "link": {"vanity", "steamid"},
-    #         "unlink": {}
-    #     },
+
 }
 _help_commands_part2 = {
     ":whale: __**Miscellany**__":
@@ -65,6 +62,13 @@ _additional_commands = {
 
 _available_app_commands = ["help", "link", "lobby", "profile", "shlink", "unlink"]
 _available_app_commands.sort()
+
+
+@dataclass
+class HELPER_LINK_SKEL:
+    title: str
+    text: str
+    image_list: list[str]
 
 
 class HELPER:
@@ -128,30 +132,24 @@ class HELPER:
             return ""
 
         def __iterate_command_list(text: str, command_list_iterator, prefix: str) -> str:
-            # command_list.sort()
             for command in command_list_iterator():
                 command: discord.ext.commands.Command
-                # __command = self.__discord_bot.all_commands[_command]
                 if not command.hidden:
-                    text += __txt_add_command(command=command,prefix=prefix)
-
+                    text += __txt_add_command(command=command, prefix=prefix)
                 # Check if command is subcommand
                 if isinstance(command, discord.ext.commands.GroupMixin):
                     if prefix:
-                        new_prefix=f"{prefix} {command.name}"
-                    else: new_prefix=command.name
-                    text = __iterate_command_list(text=text, command_list_iterator=command.walk_commands,prefix=new_prefix)
-                    # print(f"{command} has subcommands!")
-
-                # This when printing
-                # _txt += f"**{self.__discord_bot.command_prefix}{__command.name}:**         {__command.description}\n\n"
+                        new_prefix = f"{prefix} {command.name}"
+                    else:
+                        new_prefix = command.name
+                    text = __iterate_command_list(text=text, command_list_iterator=command.walk_commands,
+                                                  prefix=new_prefix)
             return text
 
         for _topic, _list_of_commands in help_commands_dictionary.items():
             _list_of_commands.sort()
             command_list = [self.__discord_bot.all_commands[__command_name] for __command_name in _list_of_commands]
 
-            # _txt = "‎\n"
             _txt = "‎\n" + __iterate_command_list(text="", prefix="", command_list_iterator=command_list.__iter__)
 
             if end:
@@ -318,31 +316,105 @@ class HELPER:
     @property
     def _link(self) -> Embed:
         embed_list = []
-        embed = self.__return_embed_template()
-        embed_list.append(embed)
+        # /embed_vanity = self.__return_embed_template()
+        # embed_steamidthats = self.__return_embed_template()
+        # embed_list.append(embed)
 
-        text = f"""
-            To get the `vanity URL` from your Steam account, go to your profile page, right click on the background and click **copy URL**.
+        # text = f"""
+        #     To get the `vanity URL` from your Steam account, go to your profile page, right click on the background and click **copy URL**.
+        #
+        #     You should have copied something like this:
+        #
+        #       steamcommunity.com/id/**SavageBidoof**/
+        #
+        #     From that URL, the vanity URL is **SavageBidoof**.
+        #
+        #     Now you just need to use the link command appending the Steam vanity URL:
+        #
+        #       **{self.__discord_bot.command_prefix}link savagebidoof**
+        #
+        #     To unlink the account you can use the command **{self.__discord_bot.command_prefix}unlink**
+        #     """
+        # text = f"""
+        #
+        #
+        #
+        #
+        #    To unlink the account you can use the command **{self.__discord_bot.command_prefix}unlink**
+        #    """
+        link_dict = {
+            'vanity': {
+                'text': f"""
+        Go to your profile page, right click on the background and click **copy URL**.
             
-            You should have copied something like this:
-            
+           If the URL contains **/id/** like this: 
+           
+              steamcommunity.com/**id**/stuff
+           
+           ie:
+           
               steamcommunity.com/id/**SavageBidoof**/
                 
-            From that URL, the vanity URL is **SavageBidoof**.
+           The vanity URL is **SavageBidoof**.
                     
-            Now you just need to use the link command appending the Steam vanity URL:
+           Now you just need to use the link command appending the Steam vanity URL:
             
-              **{self.__discord_bot.command_prefix}link savagebidoof**
+              **{self.__discord_bot.command_prefix}link vanity savagebidoof**
             
-            To unlink the account you can use the command **{self.__discord_bot.command_prefix}unlink**
-            """
+        """,
+                'image_list': ["https://i.imgur.com/CrVUxbs.png"],
+                'title': "vanity"
 
-        embed.add_field(name="", value=text, inline=False)
-        images = ["https://i.imgur.com/VHdVEj8.png", "https://i.imgur.com/7Ff5rzz.png",
-                  "https://i.imgur.com/KQfOKgt.png"]
+            },
+            'steamid': {
+                'text': f"""
+                If the URL contains **/profile/** like this: 
 
-        for _image_url in images:
-            _embed = self.__return_embed_image_template
-            _embed.set_image(url=_image_url)
-            embed_list.append(_embed)
+                      steamcommunity.com/**profile**/numbers
+
+                   ie:
+
+                      steamcommunity.com/id/**76561198170583259**/
+
+                   The SteamID is **76561198170583259**.
+
+                   Now you just need to use the link command appending the Steam vanity URL:
+
+                      **{self.__discord_bot.command_prefix}link steamid 76561198170583259**
+                """,
+                'image_list': [],
+                'title': "steamid"
+            }
+        }
+
+        _n = 0
+        for _topic, _contents in link_dict.items():
+            data = HELPER_LINK_SKEL(**_contents)
+            text_embed = self.__return_embed_template()
+            text_embed.url = _n
+            embed_list.append(text_embed)
+            text_embed.add_field(name=data.title, value=data.text, inline=False)
+
+            for _image_url in data.image_list:
+                _image_embed = self.__return_embed_image_template
+                _image_embed.url = _n
+                _image_embed.set_image(url=_image_url)
+                embed_list.append(_image_embed)
+
+            _n += 1
+
+        # text_vanity =
+
+        # text_steamid =
+
+        # embed_vanity.add_field(name="", value=text_vanity, inline=False)
+        # embed_steamidthats.add_field(name="", value=text_steamid, inline=False)
+        # images = ["https://i.imgur.com/VHdVEj8.png", "https://i.imgur.com/7Ff5rzz.png",
+        #           "https://i.imgur.com/KQfOKgt.png"]
+
+        # for _image_url in images:
+        #     _embed = self.__return_embed_image_template
+        #     _embed.set_image(url=_image_url)
+        #     embed_list.append(_embed)
+
         return embed_list
