@@ -50,7 +50,6 @@ class CustomBot(commands.Bot):
                 self.configuration.activity, f"Use {self.configuration.prefix}help to get a list "
                                              f"from all the available commands")[not any(self.configuration.activity)]
         ))
-        # self.helper_class.general
 
     def __init__(self, *args, **kwargs):
         self.configuration = DiscordConf()
@@ -95,8 +94,6 @@ class CustomBot(commands.Bot):
             Errors.SteamIdUserNotFoundError: lambda: self._embed_error_steam_id_not_found,
             Errors.DiscordNotGodError: lambda: self._embed_error_not_god_user
         }
-        # print(f" >>>- Error testing {exception.__class__}")
-        # print(f'@@@ {isinstance(exception, DBClient.DBSteamIDNotFoundError)}')
 
         raised_exception: Exception
 
@@ -130,13 +127,11 @@ class CustomBot(commands.Bot):
     def is_god(self):
         async def extended_check(ctx: Context) -> bool:
             if self.configuration.god_id and int(ctx.author.id) != int(self.configuration.god_id):
-                raise Errors.DiscordNotGodError()
+                raise Errors.DiscordNotGodError
             return True
 
         return commands.check(extended_check)
 
-    # def _link_menu(self):
-    #     pass
     def add_commands(self):
         @self.hybrid_command(name="help", description="Prints a list of commands and their description")
         async def help(ctx: Context, topic: str = None):
@@ -211,7 +206,12 @@ class CustomBot(commands.Bot):
             Use this command to display a list of options available and more!
             """
             if ctx.invoked_subcommand is None:
-                await ctx.reply("<<Complain placeholder>>")
+                await ctx.reply(f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
+                # await ctx.reply(f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.\nThose commands are also available as **Slash (/)** commands.')
+
+
+
+            #     await ctx.reply("<<Complain placeholder>>")
             # await ctx.author.send(embeds=self.helper_class.menu(topic=topic), mention_author=False)
             # if not input:
             #     await ctx.reply(
@@ -431,7 +431,6 @@ class CustomBot(commands.Bot):
         Embed used when the user is expected to be GOD (aka Bot Administrator), but it's not.
         :return:
         """
-
         embed = self.__return_embed_error_template(title="You are not GOD!.",
                                                    description=f"Only GOD is allowed to run this command.")
         return embed
