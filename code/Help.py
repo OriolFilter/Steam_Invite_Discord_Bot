@@ -264,7 +264,7 @@ class HELPER:
         # 1. Link your Steam account to the Discord bot (doesn't require login nor authentication or anything like that), for more information about this step use the command `{self.__discord_bot.command_prefix}help link`.
         txt = f"""
 ```md
-1. Link your Steam account using your Vanity URL (no password nor authentication used). Use {self.__discord_bot.command_prefix}help link` for more information.
+1. Link your Steam account using your Vanity URL or account ID. Use {self.__discord_bot.command_prefix}help link` for more information.
 
 2. Congrats you can now use the rest of commands, such as:
 - Lobby
@@ -362,7 +362,7 @@ class HELPER:
                 ‎
                 """,
                 'image_list': ["https://i.imgur.com/CrVUxbs.png"],
-                'title': ":fried_shrimp: Link Steam vanity URL"
+                'title': ":fried_shrimp: Steam vanity URL"
 
             },
             'steamid': {
@@ -384,7 +384,7 @@ class HELPER:
                 ‎
                 """,
                 'image_list': ['https://i.imgur.com/QxaNM5j.png'],
-                'title': ":comet: Link Steam ID"
+                'title': ":comet: Steam ID"
             }
         }
 
