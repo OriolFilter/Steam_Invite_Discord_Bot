@@ -245,7 +245,7 @@ class HELPER:
         # 1. Link your Steam account to the Discord bot (doesn't require login nor authentication or anything like that), for more information about this step use the command `{self.__discord_bot.command_prefix}help link`.
         txt = f"""
 ```md
-1. Link your Steam account using your Vanity URL or account ID. Use {self.__discord_bot.command_prefix}help link` for more information.
+1. Link your Steam account using your Vanity URL or account ID. Use `{self.__discord_bot.command_prefix}help link` for more information.
 
 2. Congrats you can now use the rest of commands, such as:
 - Lobby
@@ -258,7 +258,8 @@ class HELPER:
         # embed.add_field(name="", value=txt1, inline=False)
         embed.add_field(name="", value=txt, inline=False)
         # embed.add_field(name="", value=txt, inline=False)
-        images = ["https://i.imgur.com/pfSHgHL.png", "https://i.imgur.com/TULszNQ.png"]
+        images = ["https://i.imgur.com/auu1TvB.png", "https://i.imgur.com/TULszNQ.png"]
+        # images = ["https://i.imgur.com/pfSHgHL.png", "https://i.imgur.com/TULszNQ.png"]
         # images = []
         for _image_url in images:
             _embed = self.__return_embed_image_template
@@ -402,5 +403,5 @@ class HELPER:
         #     _embed = self.__return_embed_image_template
         #     _embed.set_image(url=_image_url)
         #     embed_list.append(_embed)
-
+        print(len(embed_list))
         return embed_list
