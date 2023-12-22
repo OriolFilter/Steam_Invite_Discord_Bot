@@ -403,5 +403,4 @@ class HELPER:
         #     _embed = self.__return_embed_image_template
         #     _embed.set_image(url=_image_url)
         #     embed_list.append(_embed)
-        print(len(embed_list))
         return embed_list
