@@ -109,7 +109,7 @@ class CustomBot(commands.Bot):
             await ctx.reply("Unknown error, contact the administrator.", mention_author=True)
 
     def run(self, *args, **kwargs):
-        super(commands.Bot, self).run(self.configuration.token, *args, **kwargs)
+        super(commands.Bot, self).run(self.configuration.token, *args, **kwargs,reconnect=True)
 
     # def is_god(self):
     #     async def extended_check(ctx: Context) -> bool:
