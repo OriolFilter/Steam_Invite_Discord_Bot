@@ -14,8 +14,6 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands.context import Context
 
-from functools import wraps
-
 from Middleware import Middleware
 from Classes import DiscordConf
 
@@ -23,8 +21,9 @@ from Steam import PlayerSummary
 
 from Help import HELPER
 
-## Main
+import HealthCheck
 
+## Main
 middleware: Middleware = Middleware()
 
 
@@ -37,6 +36,8 @@ class CustomBot(commands.Bot):
     configuration: DiscordConf
     helper_class: HELPER
     _link_menu_options: list[str]
+
+    # healthcheck_web:HealthCheck.HealthcheckHandler
 
     async def on_ready(self):
         print('------')
@@ -53,6 +54,8 @@ class CustomBot(commands.Bot):
 
     def __init__(self, *args, **kwargs):
         self.configuration = DiscordConf()
+        # self.healthcheck_web=HealthCheck.run()
+        HealthCheck.run(configuration=middleware.Configuration.healtcheck, discord_bot=self)
         intents = discord.Intents.default()
         intents.message_content = True
         super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
