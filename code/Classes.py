@@ -130,6 +130,19 @@ class ShlinkConf(_CONFIG):
         return self
 
 
+@dataclass
+class HealthCheckConf(_CONFIG):
+    """
+    Stores the port to host the webserver/healtcheck (8080 by default)
+    """
+    port: int = 8080  # Api key
+
+    def load_envs(self):
+        if getenv("HEALTHCHECK_PORT"):
+            self.port = int(getenv("HEALTHCHECK_PORT"))
+        return self
+
+
 # class MemcachedCli(_DBSkel):
 #     __config: MemcachedConf
 #
