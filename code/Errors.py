@@ -10,21 +10,29 @@ class NoConfigGivenError(Exception):
     """
 
 
+class DiscordNotGodError(Exception):
+    """
+    Raised when the discord user ID that executed a command, doesn't match the `GOD ID` given on the configuration.
+    Used to restrict access to users.
+    """
+
+
+
 class ShlinkError(Exception):
     """
     Failed connecting to the Shlink server or creating a short Url
     """
 
 
-class VanityUrlNotFound(Exception):
+class VanityUrlNotFoundError(Exception):
     """
     Raised when couldn't find the vanity url specified
     """
 
 
-class Forbidden(Exception):
+class SteamForbiddenError(Exception):
     """
-    Forbidden, this could be due accessing a page without permission or the api key expired/is wrong.
+    SteamForbidden, this could be due accessing a page without permission or the api key expired/is wrong.
     """
 
 
@@ -44,4 +52,3 @@ class PlayerNotPlayingError(Exception):
     """
     Raised when the player is not playing and wanted to obtain the invite link
     """
-

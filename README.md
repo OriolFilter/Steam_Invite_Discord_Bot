@@ -105,6 +105,8 @@ docker-compose up -d
 | DB_DATABASE         | steam_invite                                                       | Database used to connect                                                                                                                              |
 | SHLINK_SERVER_URL   | \<Null\>                                                           | Api key from a Shlink server. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled.          |
 | SHLINK_TOKEN        | \<Null\>                                                           | URL for the Shlink API server/service. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled. |
+| GOD_DISCORD_ID      | \<Null\>                                                           | Used for certain special commands and stuff. Aka Discord Account ID for the admin of this bot.                                                        |
+| HEALTHCHECK_PORT    | 8080                                                               | On which port you wanna run the healthcheck.                                                                                                          |
 
 ### Shlink
 
@@ -120,12 +122,67 @@ As per the moment **only API v3 is supported.**
 
 ### FAQ
 
+- Do I need to set an email or password/token from my Steam account or Log In on any way?
+
+No.
+
+The bot will only use and store "vanity URL".
+
+If you receive a message requesting further data than the vanity URL, please contact the bot administrator as there could have been a security breach.
+
 - If I change my steam name will I need to relink my account?
 
 No.
 
 When you link the account, it obtains and stores your Steam ID instead of your Steam **Name**, therefore unless you desire to link a different steam account, there is no need to relink it.
 
-- Is `Shlink` related variables 
+- Which information does this bot store from the users?
+
+It only stores:
+
+Steam vanity url and the ID from the user who submitted such account.
+
+- Is `Shlink` related variables obligatory/required if I don't want to set up the link shortener functionality?
+
+No, you can ignore them.
+
+If any from the both variables (`SHLINK_SERVER_URL` and `SHLINK_TOKEN`) is unset, the functionality won't be enabled.
+
+- Why `God` instead of `Owner` or `BotAdmin` something like that?
+
+I think it's more funny that way. 
+
+## List of commands
+
+### General usage
+
+TODO
+
+### Admin commands
+
+#### sync
+
+Used to sync the bot app/slash commands with the Discord servers.
+
+Only intended for when a new update/version has been rolled in.
+
+### Healthcheck
+
+Healthcheck path is `/healthz`
+
+Port is `8080` by **DEFAULT**, you can select yours by setting an environment variable named `HEALTHCHECK_PORT`.
+
+#### What returns
+
+> Note:\
+The status code from the request will match the numeric value specified on the server reply.
+
+The healthcheck web server will return a Json as the following:
+
+```json
+{"status_code": 200}
+```
+
+The status code can be `200` or `503`.
 
 

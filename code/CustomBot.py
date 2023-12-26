@@ -1,25 +1,40 @@
 import os
-from functools import wraps
 
-import discord
-from discord.ext import commands
-from discord import Embed
-from discord.ext.commands.context import Context
+from typing import List
 
-import Steam
-from Middleware import Middleware
-from Classes import DiscordConf
-from psycopg2 import errors as dberrors
-from psycopg2 import OperationalError
-from Steam import PlayerSummary
 import DBClient
 import Errors
 
+from psycopg2 import errors as DBErrors
+from psycopg2 import OperationalError
+
+import discord
+from discord import Embed
+from discord import app_commands
+from discord.ext import commands
+from discord.ext.commands.context import Context
+
+from Middleware import Middleware
+from Classes import DiscordConf
+
+from Steam import PlayerSummary
+
+from Help import HELPER
+
+## Main
 middleware: Middleware = Middleware()
+
+
+# https://discord.com/developers/docs/interactions/application-commands
+# https://discord-py-slash-command.readthedocs.io/en/latest/quickstart.html#modals
+# Move help to embed eventually
 
 
 class CustomBot(commands.Bot):
     configuration: DiscordConf
+    helper_class: HELPER
+    _link_menu_options: list[str]
+    __connected: bool
 
     async def on_ready(self):
         print('------')
@@ -34,45 +49,133 @@ class CustomBot(commands.Bot):
                                              f"from all the available commands")[not any(self.configuration.activity)]
         ))
 
+    @property
+    def is_connected(self) -> bool:
+        return self.__connected
+
+    def _set_as_connected(self):
+        self.__connected = True
+
+    def _set_as_disconnected(self):
+        self.__connected = False
+
+    async def on_resumed(self):
+        self._set_as_connected()
+        print("Reconnected!")
+
+    async def on_connect(self):
+        self._set_as_connected()
+        print("Connected!")
+
+    async def on_disconnect(self):
+        self._set_as_disconnected()
+        print("Disconnected!")
+
     def __init__(self, *args, **kwargs):
+        self.__connected = False
         self.configuration = DiscordConf()
         intents = discord.Intents.default()
         intents.message_content = True
         super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
                                            description=self.configuration.description,
-                                           self_bot=False, intents=intents)
+                                           self_bot=False, intents=intents, help_command=None)
+        self.helper_class = HELPER(discord_bot=self)
         self.add_commands()
+        self._link_menu_options = ['steamid', 'vanity']
 
     async def on_command_error(self, ctx: Context, exception: Exception):
+        """
+        On command error "returns" an embed based on the exception risen.
+
+        Object `_` contains is a dictionary that stores an embed for each one of the errors.
+
+        By `return` I mean that prints back to the user.
+        """
+        # discord.ext.commands.errors.MissingRequiredArgument #Not used as per the moment
+        # https://github.com/Rapptz/discord.py/discussions/8384
         _: {Exception: Embed} = {
-            dberrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
+            DBErrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
             DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_no_steam_id_set,
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
             OperationalError: lambda: self._embed_error_no_db_connection,
+            Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_not_found,
+            Errors.SteamIdUserNotFoundError: lambda: self._embed_error_steam_id_not_found,
+            Errors.DiscordNotGodError: lambda: self._embed_error_not_god_user
         }
 
-        if hasattr(exception, "original"):
-            original_err_class = exception.original
+        raised_exception: Exception
+
+        # when discord.ext.commands.errors.HybridCommandError is risen, I gotta digg 2 times down to get the error I raised (discord by itself hides it 2 layers deep)
+        if isinstance(exception, discord.ext.commands.errors.HybridCommandError):
+            _exception_layer1: Exception = exception.original
+            _exception_layer2: Exception = _exception_layer1.original  # Desired target
+            raised_exception = _exception_layer2
         else:
-            original_err_class = exception
+            raised_exception: Exception = exception
+
+        if hasattr(raised_exception, "original"):
+            original_err_class = raised_exception.original
+        else:
+            original_err_class = raised_exception
         print(
-            f'[ERROR] USER: {ctx.author.name} raised error {exception.__class__}\n\tWith line: {exception}')
+            f'[ERROR] USER: {ctx.author.name} raised error {raised_exception.__class__}\n\tWith line: {raised_exception}')
         embed = None
-        for key, value in _.items():
-            if isinstance(original_err_class, key):
-                embed = value
+        for _key, _lambda_func in _.items():
+            if isinstance(original_err_class, _key):
+                embed = _lambda_func()
         if embed:
-            await ctx.reply(embed=embed(), mention_author=True)
+            await ctx.reply(embed=embed, mention_author=True)
         else:
             print(f'Caught error {original_err_class}')
             await ctx.reply("Unknown error, contact the administrator.", mention_author=True)
 
-    def run(self, *args, **kwargs):
-        super(commands.Bot, self).run(self.configuration.token, *args, **kwargs)
+    async def run(self, *args, **kwargs):
+        await self.start(token=self.configuration.token, reconnect=True)
+        # super(commands.Bot, self).run(self.configuration.token, *args, **kwargs, reconnect=True)
+
+    # def is_god(self):
+    #     async def extended_check(ctx: Context) -> bool:
+    #         if self.configuration.god_id and int(ctx.author.id) != int(self.configuration.god_id):
+    #             raise Errors.DiscordNotGodError
+    #         return True
+    #
+    #     return commands.check(extended_check)
 
     def add_commands(self):
-        @self.command()
-        async def bot_invite(ctx):
+        @self.hybrid_command(name="help", description="Prints a list of commands and their description")
+        async def help(ctx: Context, topic: str = None):
+            """
+            Use this command to display a list of options available and more!
+            """
+            if not isinstance(ctx.channel, discord.channel.DMChannel):
+                # _command = ctx.author.send
+                await ctx.author.send(embeds=self.helper_class.menu(topic=topic), mention_author=False)
+                await ctx.reply("DM sent!", mention_author=False)
+            else:
+                await ctx.reply(embeds=self.helper_class.menu(topic=topic), mention_author=False)
+
+        @help.autocomplete('topic')
+        async def help_autocomplete(ctx: Context, input: str, ) -> List[app_commands.Choice[str]]:
+            topic_list = self.helper_class.menu_list
+            return [
+                app_commands.Choice(name=topic, value=topic)
+                for topic in topic_list if input.lower() in topic.lower()
+            ]
+
+        @self.command(hidden=True, description="Sync the commands with all the servers (Bot Owner only).")
+        # @self.is_god()
+        async def sync(ctx: Context):
+            """
+            Syncs the slash/app commands with the discord servers (globaly)
+            """
+            if self.configuration.god_id and int(ctx.author.id) != int(self.configuration.god_id):
+                raise Errors.DiscordNotGodError
+            await self.tree.sync()
+            await ctx.send("Sync!\nYou might need to reload the browser page or discord app for changes to be applied.")
+
+        @self.command(description="Returns a link to invite this bot to your server.")
+        # async def botinvite(ctx: Context):
+        async def invite_bot(ctx: Context):
             """
             In case someone wants to add this bot to their server use the link provided by this command
             :param ctx:
@@ -80,131 +183,138 @@ class CustomBot(commands.Bot):
             """
             await ctx.reply(
                 f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
-                mention_author=True)
+                mention_author=False)
 
-        @self.command()
-        async def link(ctx: Context, vanity_url: str = None):
+        # @self.hybrid_command(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
+        @self.hybrid_group(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.",
+                           hidden=True)
+        async def link(ctx: Context, option: str = None, input: str = None):
             """
-            Sets up your account providing the vanity url
-            :param ctx:
-            :param vanity_url:
-            :return:
+            Use this command to display a list of options available and more!
             """
+            if ctx.invoked_subcommand is None:
+                await ctx.reply(
+                    f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
+
+        @link.command(description=f"Links your Steam account using your Steam vanity URL.")
+        async def vanity(ctx: Context, vanity_url: str = None):
             if not vanity_url:
                 await ctx.reply(
-                    f"You need to insert a vanity url, for further information regarding it's usage type '{self.command_prefix}vanity' ")
+                    f"You need to insert a Steam vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
             else:
-                try:
-                    steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
-                    middleware.set_steam_id(discord_id=ctx.author.id,
-                                            steam_id=steam_id)
-                    await ctx.reply(f"Just linked up your account, please verify that the account is correctly linked "
-                                    f"by using the command `{self.command_prefix}profile`",
-                                    mention_author=False)
-                except Steam.VanityUrlNotFound:
-                    await ctx.reply("Vanity URL couldn't be found, please check the syntax again", mention_author=False)
+                steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
+                middleware.set_steam_id(discord_id=ctx.author.id,
+                                        steam_id=steam_id)
+                await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
+                                mention_author=False,
+                                embed=self._profile(discord_id=ctx.author.id))
 
-        @self.command()
-        async def unlink(ctx):
+        # @link.command(description=f"Links your Steam account specifying your Steam account ID. Use **{self.command_prefix}help link** for help.")
+        @link.command(description=f"Links your Steam account using your Steam account ID.")
+        async def steamid(ctx: Context, steam_id: str = None):
+            if not steam_id:
+                await ctx.reply(
+                    f"You need to insert a Steam account ID, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
+            else:
+                if middleware.SteamApi.player_summary(steam_id):
+                    middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
+                    await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
+                                    mention_author=False,
+                                    embed=self._profile(discord_id=ctx.author.id))
+
+        @self.hybrid_command(description="Unlink your Steam account.")
+        # @self.hybrid_command(description="Use this to unlink the account and will delete the database entry.")
+        async def unlink(ctx: Context):
             """
             Use this to unlink the account.
             :return:
             """
             middleware.unset_steam_id(discord_id=ctx.author.id)
-            await ctx.reply("Successfully removed the entry, please verify that the account is correctly unlinked "
-                            f"by using the command `{self.command_prefix}profile`", mention_author=False)
+            await ctx.reply(
+                "Successfully removed the entry (if there was one), please verify that the account is correctly unlinked "
+                f"by using the command `{self.command_prefix}profile`", mention_author=False)
 
-        @self.command()
+        @self.hybrid_command(
+            description=f"Posts profile of the user and their active game. Use **{self.command_prefix}help profile** for help.")
         async def profile(ctx: Context, user: discord.User = None):
             """
-            Returns Steam account from the user and their current open game (if they are currenlty playing)
+            Returns Steam account from the user and their current open game (if they are currently playing)
             :param ctx:
-            :param user:
+            :param user: User targeted on which the command "profile" will be used.
             :return:
             """
+            target_discord_id: int
             if user:
-                steam_id = middleware.get_steam_id_from_discord_id(user.id)
+                target_discord_id = user.id
             else:
-                steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
-            summary = middleware.get_steam_summary(steam_id=steam_id)
-            embed = self._embed_player_profile(summary)
-            await ctx.send(embed=embed)
+                target_discord_id = ctx.author.id
+            await ctx.send(embed=self._profile(discord_id=target_discord_id))
 
-        @self.command()
-        async def lobby(ctx: Context, *members: discord.Member):
-            # Add cooldown
+        @self.hybrid_command(
+            description=f"Posts link to the lobby. Use **{self.command_prefix}help lobby** for help.")
+        async def lobby(ctx: Context, user: discord.User = None):
             """
-            If no user is specified, posts the caller lobby in the chat, if users are specified sends the lobby url
-            to the specified user(s) DM's
+            If no user is specified, posts the caller lobby in the chat.
+            If a user is specified, it will apply the command `lobby` to them.
             :param ctx:
-            :arg: List of users
+            :arg: Target user
             :return:
             """
-            steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
+            target_discord_id: int
+            if user:
+                target_discord_id = user.id
+            else:
+                target_discord_id = ctx.author.id
+
+            steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
             summary = middleware.get_steam_summary(steam_id=steam_id)
+
             if not summary.has_lobby:
                 embed = self._embed_error_no_lobby(summary)
-                await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=True)
+                await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=False)
             else:
                 embed = self._embed_player_lobby(summary)
-                if not any(members):
-                    await ctx.reply(embed=embed, mention_author=False)
-                elif len(members) > 4:
-                    await ctx.reply("Sorry, max allowed players to invite are 4", mention_author=True)
+                await ctx.reply(embed=embed, mention_author=False)
+
+        #
+        # @self.hybrid_command(description='Behaves like the `lobby` command, but instead of returning "steam match '
+        #                                  'link", returns the link shortener URL')
+        @self.hybrid_command(
+            description=f"Behaves like the **lobby** command. Returns a short link instead of a lobby link.")
+        async def shlink(ctx: Context, user: discord.User = None):
+            # Add cooldown
+            """
+            Stands for "short link"
+            Same as `lobby` command, but will return the link shortener as text instead of the lobby url. Only works if the `shortener` functionality is enabled.
+            """
+
+            if not middleware.ShlinkClient.enabled:
+                return ctx.reply(embed=self._embed_shlink_not_enabled())
+            else:
+                target_discord_id: int
+                if user:
+                    target_discord_id = user.id
                 else:
-                    mail_list = []
-                    for member in list(set(members)):
-                        if isinstance(member, discord.Member):
-                            mail_list.append(member)
-                        else:
-                            await ctx.reply(
-                                "There was an error with the users given, ensure you @ed correctly the users ",
-                                mention_author=True)
-                    for member in mail_list:
-                        await member.send(embed=embed)
-                    await ctx.reply("Sent an invite to the specified user(s)!", mention_author=False)
+                    target_discord_id = ctx.author.id
 
-        @self.command()
-        async def vanity(ctx: Context):
-            """
-            How to use the link command, and from where to extract the vanity name
-            :param ctx:
-            :return:
-            """
-            await ctx.reply(f"ie:  `{self.command_prefix}link SavageBidoof`\nhttps://i.imgur.com/VHdVEj8.png",
-                            mention_author=False)
+                steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
+                summary = middleware.get_steam_summary(steam_id=steam_id)
 
-        # @self.command()
-        # async def profile(ctx: Context, user: discord.User = None):
-        #     """
-        #     Show your profile
-        #     :param ctx:
-        #     :param user:
-        #     :return:
-        #     """
-        #     if user:
-        #         steam_id = middleware.get_steam_id_from_discord_id(user.id)
-        #     else:
-        #         steam_id = middleware.get_steam_id_from_discord_id(ctx.author.id)
-        #     await ctx.reply(f'https://www.steamidfinder.com/signature/{steam_id}.png', mention_author=False)
+                if not summary.has_lobby:
+                    embed = self._embed_error_no_lobby(summary)
+                    await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=False)
+                else:
+                    embed = self._embed_player_lobby_shlink(summary)
+                    await ctx.reply(embed=embed, mention_author=False)
 
-        @self.command()
+        @self.command(description="Prints the current version of the bot.")
         async def version(ctx: Context):
             """
-            Prints the current version and the Build Date
+            Prints the current version
             :param ctx:
             :return:
             """
             await ctx.reply(embed=self._embed_version, mention_author=False)
-
-        @self.command()
-        async def howto(ctx: Context):
-            """
-            Example on hot to use this bot
-            """
-            await ctx.reply("Use the following image as reference, note that the prefix command might "
-                            "vary. (Also, open the image on the browser for better "
-                            "clarity...)\nhttps://i.imgur.com/liZl6fI.png")
 
     @property
     def invite_url(self) -> str:
@@ -219,8 +329,14 @@ class CustomBot(commands.Bot):
                       description="Discord bot intended to get lobby links from Steam users", color=0xababab)
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
-        embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=True)
-        embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE", "Unknown")}', inline=True)
+        embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=False)
+        embed.add_field(name="Repository", value=f'{os.getenv("REPOSITORY")}', inline=False)
+        # embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE", "Unknown")}', inline=True)
+        # embed.set_footer(text=os.getenv("REPOSITORY"))
+        return embed
+
+    def __return_embed_error_template(self, title: str, description: str) -> discord.Embed:
+        embed = Embed(title=title, description=description, color=0xff5c5c)
         embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
@@ -230,10 +346,8 @@ class CustomBot(commands.Bot):
         Embed used to tell the user command not found.
         :return:
         """
-        # Be able to enable/disable on the guild
-        # embed = Embed(title="Error", description="Specified Command not found", color=0xff5c5c)
-        embed = Embed(title="Command not found")
-        return embed
+        return self.__return_embed_error_template(title="Command not found!",
+                                                  description=f"Use `{self.command_prefix}help` to get a list of available commands!")
 
     @property
     def _embed_error_no_steam_id_set(self) -> Embed:
@@ -241,12 +355,10 @@ class CustomBot(commands.Bot):
         Embed that has a message indicating that the user has no steam_id currently linked
         :return:
         """
-        embed = Embed(title="Error",
-                      description=f"The discord user currently has no SteamID configured, to add an account use {self.command_prefix}link <vanity_url>",
-                      color=0xff5c5c)
+        embed = self.__return_embed_error_template(title="No SteamID currenlty linked",
+                                                   description=f"The discord user currently has no SteamID configured, to add an account use `{self.command_prefix}link <vanity_url>`")
         embed.add_field(name=f"What is a vanity url?",
                         value=f"To learn more regarding the vanity rul, use: `{self.command_prefix}vanity`")
-        embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
     @property
@@ -255,39 +367,41 @@ class CustomBot(commands.Bot):
         Embed used when cannot communicate to the database
         :return:
         """
-        embed = Embed(title="Error",
-                      description=f"Cannot communicate to the database, contact an administrator.",
-                      color=0xff5c5c)
-        embed.set_footer(text="https://github.com/OriolFilter")
+        embed = self.__return_embed_error_template(title="Cannot connect to the database",
+                                                   description=f"Please contact an administrator to check the infrastructure status.")
         return embed
 
-    # def __generate_embed_summary_player(self, player_summary: PlayerSummary) -> Embed:
-    #     embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0x61ff64)
-    #     embed.set_thumbnail(url=player_summary.avatarfull,)
-    #     return embed
+    @property
+    def _embed_error_vanity_url_not_found(self):
+        """
+        Embed used when the user (Steam vanity URL) is not found.
+        :return:
+        """
 
-    # def _embed_simple_player(self, player_summary: PlayerSummary) -> Embed:
-    #     """
-    #     Expand.
-    #     :param player_summary:
-    #     :return:
-    #     """
-    #     embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0x61ff64)
-    #     embed.set_thumbnail(url=player_summary.avatarfull, )
-    #     embed.set_footer(text="https://github.com/OriolFilter")
-    #     return embed
+        embed = self.__return_embed_error_template(title="Vanity URL not found",
+                                                   description=f"Vanity URL didn't match an user, use the command `{self.command_prefix}help link` for help.")
+        return embed
 
-    # def _embed_player_simple_old(self, player_summary: PlayerSummary) -> Embed:
-    #     """
-    #     Expand.
-    #     :param player_summary:
-    #     :return:
-    #     """
-    #     embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0x61ff64)
-    #     embed.set_thumbnail(url=player_summary.avatarfull, )
-    #     embed.add_field(name="Currenty playing?", value=("No", "Yes")[player_summary.is_playing])
-    #     embed.set_footer(text="https://github.com/OriolFilter")
-    #     return embed
+    @property
+    def _embed_error_steam_id_not_found(self):
+        """
+        Embed used when the user (Steam vanity URL) is not found.
+        :return:
+        """
+
+        embed = self.__return_embed_error_template(title="Steam ID not found",
+                                                   description=f"Steam ID didn't match an user, use the command `{self.command_prefix}help link` for help.")
+        return embed
+
+    @property
+    def _embed_error_not_god_user(self):
+        """
+        Embed used when the user is expected to be GOD (aka Bot Administrator), but it's not.
+        :return:
+        """
+        embed = self.__return_embed_error_template(title="You are not GOD!.",
+                                                   description=f"Only GOD is allowed to run this command.")
+        return embed
 
     def _embed_player_profile(self, player_summary: PlayerSummary) -> Embed:
         """
@@ -318,20 +432,8 @@ class CustomBot(commands.Bot):
             embed.add_field(name="User currently is not playing a game.", value=("Note that profile privacy settings "
                                                                                  "could be interfering with this."))
 
-        embed.set_footer(text="https://github.com/OriolFilter")
+        # embed.set_footer(text="https://github.com/OriolFilter")
         return embed
-
-    # def _embed_is_playing(self, player_summary: PlayerSummary) -> Embed:
-    #     """
-    #     Expand.
-    #     :param player_summary:
-    #     :return:
-    #     """
-    #     embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0x61ff64)
-    #     embed.set_thumbnail(url=player_summary.avatarfull, )
-    #     embed.add_field(name="Currently playing?", value=("No", "Yes")[player_summary.is_playing])
-    #     embed.set_footer(text="https://github.com/OriolFilter")
-    #     return embed
 
     @staticmethod
     def __return_embed_color(player_summary: PlayerSummary) -> hex:
@@ -353,6 +455,8 @@ class CustomBot(commands.Bot):
 
     def _embed_error_no_lobby(self, player_summary: PlayerSummary) -> Embed:
         """
+        This is a SOFT error (aka not actual error per se)
+
         This will be called ONLY after confirming if the user has or not has an available public lobby.
 
         Outside of this function, it will not be checked whether the user is playing something or not.
@@ -384,21 +488,8 @@ class CustomBot(commands.Bot):
                             value=("Note that profile privacy settings or visibility "
                                    "could be interfering with this."), inline=False)
 
-        embed.set_footer(text="https://github.com/OriolFilter")
+        # embed.set_footer(text="https://github.com/OriolFilter")
         return embed
-
-    # def _embed_error_no_lobby_old(self, player_summary: PlayerSummary) -> Embed:
-    #     embed = Embed(title=player_summary.personaname, url=player_summary.profileurl, color=0xfff261)
-    #     embed.set_thumbnail(url=player_summary.avatarfull, )
-    #     embed.add_field(name="User currently doesn't have an available lobby", value="--", inline=False)
-    #
-    #     embed.add_field(name="Is user playing?",
-    #                     value=f"Currently playing [{player_summary.gameextrainfo}](https://store.steampowered.com/app/{player_summary.gameid})" if player_summary.gameextrainfo else "No")
-    #
-    #
-    #
-    #     embed.set_footer(text="https://github.com/OriolFilter")
-    #     return embed
 
     def _embed_player_lobby(self, player_summary: PlayerSummary) -> Embed:
         """
@@ -406,8 +497,8 @@ class CustomBot(commands.Bot):
 
          This function won't check for anything of that.
          """
-        shortLobbyUrl = ""
-        message_lobby_url = ""
+        shortLobbyUrl: str = ""
+        message_lobby_url: str
 
         if middleware.ShlinkClient.enabled:
             try:
@@ -434,5 +525,45 @@ class CustomBot(commands.Bot):
         embed.set_thumbnail(
             url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
         embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=message_lobby_url, inline=False)
-        embed.set_footer(text="https://github.com/OriolFilter")
+        # embed.set_footer(text="https://github.com/OriolFilter")
+        return embed
+
+    def _embed_shlink_not_enabled(self) -> Embed:
+        """
+        Returns a Discord Embed used to tell the user that shlink functionality is not enabled.
+        """
+        embed = Embed(title="Shlink functionality is not enabled", description="Link shortener (shlink) functionality "
+                                                                               "is not enabled.\nReach out the bot "
+                                                                               "administrator in case you would like "
+                                                                               "for them to enable such.",
+                      color=0x8a8a8a)
+        return embed
+
+    def _embed_player_lobby_shlink(self, player_summary: PlayerSummary) -> Embed:
+        """
+        Exactly the same as `_embed_player_lobby`, but will return the shlink URL instead of the lobby URL (as in text)
+        This won't validate if the link shortener is enabled.
+        """
+        shortLobbyUrl = middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
+
+        embed = Embed(title=player_summary.gameextrainfo,
+                      url=f'https://store.steampowered.com/app/{player_summary.gameid}',
+                      color=self.__return_embed_color(player_summary=player_summary))
+
+        embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
+                         icon_url=player_summary.avatarfull)
+
+        embed.set_thumbnail(
+            url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
+        embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=shortLobbyUrl, inline=False)
+        return embed
+
+    def _profile(self, discord_id: int) -> Embed:
+        """
+        Returns a profile embed for the discord ID specified
+        :return Embed
+        """
+        steam_id = middleware.get_steam_id_from_discord_id(discord_id)
+        summary = middleware.get_steam_summary(steam_id=steam_id)
+        embed = self._embed_player_profile(summary)
         return embed

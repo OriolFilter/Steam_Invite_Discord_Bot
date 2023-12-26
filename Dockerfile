@@ -1,13 +1,13 @@
 ARG IMAGE="python"
 ARG TAG="3.11-alpine"
-ARG BASEIMAGE="${IMAGE}:${TAG:-latest}"
+ARG BASEIMAGE="${IMAGE}:${TAG}"
 
 FROM ${BASEIMAGE}
 #as build
 
 ARG BUILDDATE
-ARG VERSION="1.2"
-ARG REPOSITORY="https://github.com/OriolFilter/Steam_Invite_Discord"
+ARG VERSION="1.3"
+ARG REPOSITORY="https://gitea.filterhome.xyz/ofilter/Steam_Invite_Discord"
 
 LABEL "author"="Oriol Filter Anson"
 LABEL "version"="${VERSION}"
@@ -19,6 +19,8 @@ ENV VERSION=${VERSION}
 ENV BUILDDATE=${BUILDDATE}
 ENV REPOSITORY=${REPOSITORY}
 
+# Used for certain special commands and stuff. Aka Discord Account ID for the GOD mode.
+ENV GOD_DISCORD_ID=""
 
 ENV STEAM_TOKEN=""
 

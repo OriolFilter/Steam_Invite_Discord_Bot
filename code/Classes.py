@@ -66,12 +66,15 @@ class DiscordConf(_CONFIG):
     prefix: str = "s."
     description: str = ""
     activity: str = ""
+    god_id: int = None
 
     def load_envs(self):
         self.token = getenv("DISCORD_TOKEN", self.token)
         self.prefix = getenv("DISCORD_PREFIX", self.prefix)
         self.description = getenv("DISCORD_DESCRIPTION", self.description)
         self.activity = getenv("DISCORD_ACTIVITY", self.activity)
+        self.activity = getenv("DISCORD_ACTIVITY", self.activity)
+        self.god_id = getenv("GOD_DISCORD_ID", self.god_id)
         return self
 
 
@@ -124,6 +127,19 @@ class ShlinkConf(_CONFIG):
     def load_envs(self):
         self.url = getenv("SHLINK_SERVER_URL") or self.url
         self.token = getenv("SHLINK_TOKEN") or self.token
+        return self
+
+
+@dataclass
+class HealthCheckConf(_CONFIG):
+    """
+    Stores the port to host the webserver/healtcheck (8080 by default)
+    """
+    port: int = 8080
+
+    def load_envs(self):
+        if getenv("HEALTHCHECK_PORT"):
+            self.port = int(getenv("HEALTHCHECK_PORT"))
         return self
 
 
@@ -223,6 +239,7 @@ class Configuration:
 
     def __init__(self):
         # self.memcached = MemcachedConf()
+        self.healtcheck = HealthCheckConf()
         self.steam = SteamConf()
         self.discord = DiscordConf()
         self.database = DatabaseConf()
