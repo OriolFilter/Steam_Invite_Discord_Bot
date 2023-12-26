@@ -1,5 +1,8 @@
+import asyncio
+
 from aiohttp import web
 from Classes import HealthCheckConf
+
 from CustomBot import CustomBot
 
 
@@ -12,17 +15,19 @@ class HealthcheckHandler:
         self.__discord_bot: CustomBot = discord_bot
 
     @property
-    def is_bot_running(self) -> bool:
-        return not self.__discord_bot.is_closed()
+    def is_bot_connected(self) -> bool:
+        return self.__discord_bot.is_connected
 
     async def handle_healthcheck(self, request):
-        status_code = [503, 200][self.is_bot_running]
+        status_code = [503, 200][self.is_bot_connected]
         data = {'status_code': status_code}
         return web.json_response(data, status=status_code)
 
+    @property
+    def configuration(self):
+        return self.__configuration
 
-def run(configuration: HealthCheckConf, discord_bot: CustomBot):
-    app = web.Application()
-    handler = HealthcheckHandler(configuration=configuration, discord_bot=discord_bot)
-    app.add_routes([web.get('/', handler.handle_healthcheck)])
-    web.run_app(app, port=configuration.port)
+
+async def start_web(runner: web.AppRunner, config: HealthCheckConf):
+    await runner.setup()
+    await web.TCPSite(runner, port=config.port).start()

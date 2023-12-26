@@ -21,8 +21,6 @@ from Steam import PlayerSummary
 
 from Help import HELPER
 
-import HealthCheck
-
 ## Main
 middleware: Middleware = Middleware()
 
@@ -36,8 +34,7 @@ class CustomBot(commands.Bot):
     configuration: DiscordConf
     helper_class: HELPER
     _link_menu_options: list[str]
-
-    # healthcheck_web:HealthCheck.HealthcheckHandler
+    __connected: bool
 
     async def on_ready(self):
         print('------')
@@ -52,10 +49,31 @@ class CustomBot(commands.Bot):
                                              f"from all the available commands")[not any(self.configuration.activity)]
         ))
 
+    @property
+    def is_connected(self) -> bool:
+        return self.__connected
+
+    def _set_as_connected(self):
+        self.__connected = True
+
+    def _set_as_disconnected(self):
+        self.__connected = False
+
+    async def on_resumed(self):
+        self._set_as_connected()
+        print("Reconnected!")
+
+    async def on_connect(self):
+        self._set_as_connected()
+        print("Connected!")
+
+    async def on_disconnect(self):
+        self._set_as_disconnected()
+        print("Disconnected!")
+
     def __init__(self, *args, **kwargs):
+        self._connected = False
         self.configuration = DiscordConf()
-        # self.healthcheck_web=HealthCheck.run()
-        HealthCheck.run(configuration=middleware.Configuration.healtcheck, discord_bot=self)
         intents = discord.Intents.default()
         intents.message_content = True
         super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
@@ -111,8 +129,9 @@ class CustomBot(commands.Bot):
             print(f'Caught error {original_err_class}')
             await ctx.reply("Unknown error, contact the administrator.", mention_author=True)
 
-    def run(self, *args, **kwargs):
-        super(commands.Bot, self).run(self.configuration.token, *args, **kwargs, reconnect=True)
+    async def run(self, *args, **kwargs):
+        await self.start(token=self.configuration.token, reconnect=True)
+        # super(commands.Bot, self).run(self.configuration.token, *args, **kwargs, reconnect=True)
 
     # def is_god(self):
     #     async def extended_check(ctx: Context) -> bool:
