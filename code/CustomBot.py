@@ -72,7 +72,7 @@ class CustomBot(commands.Bot):
         print("Disconnected!")
 
     def __init__(self, *args, **kwargs):
-        self._connected = False
+        self.__connected = False
         self.configuration = DiscordConf()
         intents = discord.Intents.default()
         intents.message_content = True
