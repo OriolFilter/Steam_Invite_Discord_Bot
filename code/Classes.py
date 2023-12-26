@@ -130,6 +130,19 @@ class ShlinkConf(_CONFIG):
         return self
 
 
+@dataclass
+class HealthCheckConf(_CONFIG):
+    """
+    Stores the port to host the webserver/healtcheck (8080 by default)
+    """
+    port: int = 8080
+
+    def load_envs(self):
+        if getenv("HEALTHCHECK_PORT"):
+            self.port = int(getenv("HEALTHCHECK_PORT"))
+        return self
+
+
 # class MemcachedCli(_DBSkel):
 #     __config: MemcachedConf
 #
@@ -226,6 +239,7 @@ class Configuration:
 
     def __init__(self):
         # self.memcached = MemcachedConf()
+        self.healtcheck = HealthCheckConf()
         self.steam = SteamConf()
         self.discord = DiscordConf()
         self.database = DatabaseConf()

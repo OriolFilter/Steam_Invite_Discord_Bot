@@ -106,6 +106,7 @@ docker-compose up -d
 | SHLINK_SERVER_URL   | \<Null\>                                                           | Api key from a Shlink server. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled.          |
 | SHLINK_TOKEN        | \<Null\>                                                           | URL for the Shlink API server/service. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled. |
 | GOD_DISCORD_ID      | \<Null\>                                                           | Used for certain special commands and stuff. Aka Discord Account ID for the admin of this bot.                                                        |
+| HEALTHCHECK_PORT    | 8080                                                               | On which port you wanna run the healthcheck.                                                                                                          |
 
 ### Shlink
 
@@ -164,4 +165,20 @@ TODO
 Used to sync the bot app/slash commands with the Discord servers.
 
 Only intended for when a new update/version has been rolled in.
+
+### Healthcheck
+
+#### What returns
+
+> Note:\
+The status code from the request will match the numeric value specified on the server reply.
+
+The healthcheck web server will return a Json as the following:
+
+```json
+{"status_code": 200}
+```
+
+The status code can be `200` or `503`.
+
 

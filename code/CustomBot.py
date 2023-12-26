@@ -14,8 +14,6 @@ from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands.context import Context
 
-from functools import wraps
-
 from Middleware import Middleware
 from Classes import DiscordConf
 
@@ -24,7 +22,6 @@ from Steam import PlayerSummary
 from Help import HELPER
 
 ## Main
-
 middleware: Middleware = Middleware()
 
 
@@ -37,6 +34,7 @@ class CustomBot(commands.Bot):
     configuration: DiscordConf
     helper_class: HELPER
     _link_menu_options: list[str]
+    __connected: bool
 
     async def on_ready(self):
         print('------')
@@ -51,7 +49,30 @@ class CustomBot(commands.Bot):
                                              f"from all the available commands")[not any(self.configuration.activity)]
         ))
 
+    @property
+    def is_connected(self) -> bool:
+        return self.__connected
+
+    def _set_as_connected(self):
+        self.__connected = True
+
+    def _set_as_disconnected(self):
+        self.__connected = False
+
+    async def on_resumed(self):
+        self._set_as_connected()
+        print("Reconnected!")
+
+    async def on_connect(self):
+        self._set_as_connected()
+        print("Connected!")
+
+    async def on_disconnect(self):
+        self._set_as_disconnected()
+        print("Disconnected!")
+
     def __init__(self, *args, **kwargs):
+        self._connected = False
         self.configuration = DiscordConf()
         intents = discord.Intents.default()
         intents.message_content = True
@@ -108,8 +129,9 @@ class CustomBot(commands.Bot):
             print(f'Caught error {original_err_class}')
             await ctx.reply("Unknown error, contact the administrator.", mention_author=True)
 
-    def run(self, *args, **kwargs):
-        super(commands.Bot, self).run(self.configuration.token, *args, **kwargs,reconnect=True)
+    async def run(self, *args, **kwargs):
+        await self.start(token=self.configuration.token, reconnect=True)
+        # super(commands.Bot, self).run(self.configuration.token, *args, **kwargs, reconnect=True)
 
     # def is_god(self):
     #     async def extended_check(ctx: Context) -> bool:
@@ -164,13 +186,15 @@ class CustomBot(commands.Bot):
                 mention_author=False)
 
         # @self.hybrid_command(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
-        @self.hybrid_group(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.", hidden=True)
+        @self.hybrid_group(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.",
+                           hidden=True)
         async def link(ctx: Context, option: str = None, input: str = None):
             """
             Use this command to display a list of options available and more!
             """
             if ctx.invoked_subcommand is None:
-                await ctx.reply(f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
+                await ctx.reply(
+                    f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
 
         @link.command(description=f"Links your Steam account specifying your Steam vanity URL.")
         async def vanity(ctx: Context, vanity_url: str = None):
@@ -226,7 +250,6 @@ class CustomBot(commands.Bot):
             else:
                 target_discord_id = ctx.author.id
             await ctx.send(embed=self._profile(discord_id=target_discord_id))
-
 
         @self.hybrid_command(
             description=f"Returns the lobby of the user. Use **{self.command_prefix}help lobby** for help.")
@@ -536,7 +559,8 @@ class CustomBot(commands.Bot):
             url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
         embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=shortLobbyUrl, inline=False)
         return embed
-    def _profile(self,discord_id: int) -> Embed:
+
+    def _profile(self, discord_id: int) -> Embed:
         """
         Returns a profile embed for the discord ID specified
         :return Embed
