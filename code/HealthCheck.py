@@ -28,6 +28,10 @@ class HealthcheckHandler:
         return self.__configuration
 
 
-async def start_web(runner: web.AppRunner, config: HealthCheckConf):
+async def start_web(handler: HealthcheckHandler):
+    app = web.Application()
+    app.add_routes([web.get('/', handler.handle_healthcheck)])
+    runner = web.AppRunner(app)
     await runner.setup()
-    await web.TCPSite(runner, port=config.port).start()
+    webserver = web.TCPSite(runner, port=handler.configuration.port)
+    await webserver.start()

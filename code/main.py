@@ -6,14 +6,14 @@ import HealthCheck
 from aiohttp import web
 
 
-async def run(bot: CustomBot, runner: web.AppRunner):
+async def run(bot: CustomBot, handler: HealthCheck.HealthcheckHandler):
     """
     Starts the Hatcheck API server and passes the Web runner for async to do its thingies, passes the packed app.
 
     Starts the Discord Bot service/process
     """
 
-    await HealthCheck.start_web(runner=runner, config=middleware.Configuration.healtcheck)
+    await HealthCheck.start_web(handler=handler)
     await bot.run()
     await asyncio.Event().wait()
 
@@ -28,11 +28,7 @@ def start():
     bot = CustomBot()
     handler = HealthCheck.HealthcheckHandler(configuration=middleware.Configuration.healtcheck, discord_bot=bot)
 
-    app = web.Application()
-    app.add_routes([web.get('/', handler.handle_healthcheck)])
-    runner = web.AppRunner(app)
-
-    asyncio.run(run(bot=bot, runner=runner))
+    asyncio.run(run(bot=bot, handler=handler))
 
 
 if __name__ == '__main__':
