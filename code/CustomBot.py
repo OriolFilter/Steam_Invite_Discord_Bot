@@ -196,7 +196,7 @@ class CustomBot(commands.Bot):
                 await ctx.reply(
                     f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
 
-        @link.command(description=f"Links your Steam account specifying your Steam vanity URL.")
+        @link.command(description=f"Links your Steam account using your Steam vanity URL.")
         async def vanity(ctx: Context, vanity_url: str = None):
             if not vanity_url:
                 await ctx.reply(
@@ -210,7 +210,7 @@ class CustomBot(commands.Bot):
                                 embed=self._profile(discord_id=ctx.author.id))
 
         # @link.command(description=f"Links your Steam account specifying your Steam account ID. Use **{self.command_prefix}help link** for help.")
-        @link.command(description=f"Links your Steam account specifying your Steam account ID.")
+        @link.command(description=f"Links your Steam account using your Steam account ID.")
         async def steamid(ctx: Context, steam_id: str = None):
             if not steam_id:
                 await ctx.reply(
@@ -222,7 +222,7 @@ class CustomBot(commands.Bot):
                                     mention_author=False,
                                     embed=self._profile(discord_id=ctx.author.id))
 
-        @self.hybrid_command(description="Remove your Steam account ID from the database.")
+        @self.hybrid_command(description="Unlink your Steam account.")
         # @self.hybrid_command(description="Use this to unlink the account and will delete the database entry.")
         async def unlink(ctx: Context):
             """
@@ -235,8 +235,7 @@ class CustomBot(commands.Bot):
                 f"by using the command `{self.command_prefix}profile`", mention_author=False)
 
         @self.hybrid_command(
-            description=f"Returns the profile of the user and their active game. Use **{self.command_prefix}help profile** for help.")
-        # @self.hybrid_command(description="Returns the profile of the user and their active game. A discord user can be mentioned to return their profile.")
+            description=f"Posts profile of the user and their active game. Use **{self.command_prefix}help profile** for help.")
         async def profile(ctx: Context, user: discord.User = None):
             """
             Returns Steam account from the user and their current open game (if they are currently playing)
@@ -252,8 +251,7 @@ class CustomBot(commands.Bot):
             await ctx.send(embed=self._profile(discord_id=target_discord_id))
 
         @self.hybrid_command(
-            description=f"Returns the lobby of the user. Use **{self.command_prefix}help lobby** for help.")
-        # @self.hybrid_command(description="Returns the lobby of the user. A discord user can be mentioned to return their lobby. If the short link (shlink) functionality is enabled on the bot, the lobby link will be linked to a link shortener service and allow the users to click on the Steam link.")
+            description=f"Posts link to the lobby. Use **{self.command_prefix}help lobby** for help.")
         async def lobby(ctx: Context, user: discord.User = None):
             """
             If no user is specified, posts the caller lobby in the chat.
