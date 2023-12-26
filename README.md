@@ -168,6 +168,10 @@ Only intended for when a new update/version has been rolled in.
 
 ### Healthcheck
 
+Healthcheck path is `/healthz`
+
+Port is `8080` by **DEFAULT**, you can select yours by setting an environment variable named `HEALTHCHECK_PORT`.
+
 #### What returns
 
 > Note:\
