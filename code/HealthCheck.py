@@ -1,5 +1,3 @@
-import asyncio
-
 from aiohttp import web
 from Classes import HealthCheckConf
 
@@ -27,11 +25,10 @@ class HealthcheckHandler:
     def configuration(self):
         return self.__configuration
 
-
-async def start_web(handler: HealthcheckHandler):
-    app = web.Application()
-    app.add_routes([web.get('/', handler.handle_healthcheck)])
-    runner = web.AppRunner(app)
-    await runner.setup()
-    webserver = web.TCPSite(runner, port=handler.configuration.port)
-    await webserver.start()
+    async def start_web(self):
+        app = web.Application()
+        app.add_routes([web.get('/', self.handle_healthcheck)])
+        runner = web.AppRunner(app)
+        await runner.setup()
+        webserver = web.TCPSite(runner, port=self.configuration.port)
+        await webserver.start()
