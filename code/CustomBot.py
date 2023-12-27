@@ -441,7 +441,9 @@ class CustomBot(commands.Bot):
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
 
-        if shortLobbyUrl:
+        if middleware.ShlinkClient.enabled and shlink_as_text and shortLobbyUrl:
+            message_lobby_url = player_summary.lobby_url
+        elif shortLobbyUrl:
             message_lobby_url = f'[{[player_summary.lobby_url, shortLobbyUrl][shlink_as_text]}]({shortLobbyUrl})'
         else:
             message_lobby_url = player_summary.lobby_url
