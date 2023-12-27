@@ -1,0 +1,15 @@
+# Standalone DB
+# Used for development purposes
+services:
+  steam_invite_db:
+    image: postgres:latest
+    container_name: steam_invite_db
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: username
+      POSTGRES_DB: steam_invite
+    volumes:
+      - ./db/PG_SKEL.sql:/docker-entrypoint-initdb.d/init.sql:ro

@@ -173,3 +173,18 @@ The status code can be `200` or `503`.
 
 
 
+## Proxy
+
+Regarding running this bot behind a proxied/restricted network.
+
+### Discord
+
+This seems relevant, I didn't test.
+
+- https://discord.com/developers/docs/topics/gateway#connections
+
+- https://discord.com/developers/docs/reference#api-reference-base-url
+
+### Steam
+
+- https://partner.steamgames.com/doc/webapi_overview#addresses

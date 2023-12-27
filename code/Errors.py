@@ -17,10 +17,15 @@ class DiscordNotGodError(Exception):
     """
 
 
-
 class ShlinkError(Exception):
     """
     Failed connecting to the Shlink server or creating a short Url
+    """
+
+
+class ShlinkNotEnabledError(Exception):
+    """
+    Raised when the Shlink functionality is not enabled.
     """
 
 
@@ -33,6 +38,14 @@ class VanityUrlNotFoundError(Exception):
 class SteamForbiddenError(Exception):
     """
     SteamForbidden, this could be due accessing a page without permission or the api key expired/is wrong.
+    """
+
+
+class SteamVisibilityNotPublic(Exception):
+    """
+    Raised when the Steam visibility is not set to Public.
+
+    When the value from `communityvisibilitystate` is set to 3, means that the account is set to public visibility.
     """
 
 
