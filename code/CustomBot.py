@@ -77,7 +77,7 @@ class CustomBot(commands.Bot):
         intents = discord.Intents.default()
         intents.message_content = True
         super(commands.Bot, self).__init__(command_prefix=self.configuration.prefix,
-                                           description=self.configuration.description,
+                                           # description=self.configuration.description,
                                            self_bot=False, intents=intents, help_command=None)
         self.helper_class = HELPER(discord_bot=self)
         self.add_commands()

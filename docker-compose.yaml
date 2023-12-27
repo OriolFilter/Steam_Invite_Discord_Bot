@@ -7,18 +7,20 @@ volumes:
 
 services:
   steam_invite_discord_bot:
-    image: steam_invite_discord_bot:latest
+    image: oriolfilter/steam_invite_discord_bot:latest
     container_name: steam_invite_discord_bot
     restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
     environment:
+      SHLINK_SERVER_URL:
+      SHLINK_TOKEN:
+
       STEAM_TOKEN:
 
       DISCORD_TOKEN:
       DISCORD_PREFIX: s.
-      DISCORD_DESCRIPTION:
 
       DB_PORT: 5432
       DB_HOST: steam_invite_db
@@ -26,11 +28,12 @@ services:
       DB_PASSWORD: password
       DB_DATABASE: steam_invite
 
+      GOD_DISCORD_ID:
+
     networks:
       steam_invite_network:
     depends_on:
       - steam_invite_db
-
   steam_invite_db:
     image: postgres:latest
     container_name: steam_invite_db
