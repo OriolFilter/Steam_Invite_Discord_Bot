@@ -36,6 +36,14 @@ class SteamForbiddenError(Exception):
     """
 
 
+class SteamVisibilityNotPublic(Exception):
+    """
+    Raised when the Steam visibility is not set to Public.
+
+    When the value from `communityvisibilitystate` is set to 3, means that the account is set to public visibility.
+    """
+
+
 class UnexpectedError(Exception):
     """
     Raised when the error wasn't planned
