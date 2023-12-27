@@ -42,7 +42,19 @@ class PlayerSummary:
 
     @property
     def is_playing(self) -> bool:
-        return True if self.gameid else False
+        if self.gameid:
+            return True
+        # Could be raising the error, but I don't think there is much point (as per the moment)
+        # As per the moment, I believe it's easier/cleaner/better overall to use the `has_public_visibility` property.
+        # elif not self.has_public_visibility:
+        #     raise Errors.SteamVisibilityNotPublic
+        return False
+
+    @property
+    def has_public_visibility(self) -> bool:
+        if self.communityvisibilitystate == 3:
+            return True
+        return False
 
     @property
     def has_lobby(self) -> bool:
@@ -95,7 +107,7 @@ class SteamApi:
             raise Errors.UnexpectedError
 
     @steam_api_call
-    def __player_summary(self, steamid:str) -> requests or dict:
+    def __player_summary(self, steamid: str) -> requests or dict:
         payload = {
             "key": self.__api_key,
             "steamids": int(steamid),
@@ -104,7 +116,7 @@ class SteamApi:
             f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/", params=payload)
         return response
 
-    def player_summary(self, steamid:str) -> PlayerSummary:
+    def player_summary(self, steamid: str) -> PlayerSummary:
         result = self.__player_summary(steamid)['players']
         if len(result) == 0:
             raise Errors.SteamIdUserNotFoundError

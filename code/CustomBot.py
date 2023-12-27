@@ -100,7 +100,8 @@ class CustomBot(commands.Bot):
             OperationalError: lambda: self._embed_error_no_db_connection,
             Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_not_found,
             Errors.SteamIdUserNotFoundError: lambda: self._embed_error_steam_id_not_found,
-            Errors.DiscordNotGodError: lambda: self._embed_error_not_god_user
+            Errors.DiscordNotGodError: lambda: self._embed_error_not_god_user,
+            Errors.ShlinkNotEnabledError: lambda: self._embed_shlink_not_enabled,
         }
 
         raised_exception: Exception
@@ -269,16 +270,13 @@ class CustomBot(commands.Bot):
             steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
             summary = middleware.get_steam_summary(steam_id=steam_id)
 
-            if not summary.has_lobby:
-                embed = self._embed_error_no_lobby(summary)
-                await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=False)
+            if summary.has_lobby:
+                embed = [self._embed_player_profile(summary), self._embed_player_lobby(summary)][summary.has_lobby]
             else:
-                embed = self._embed_player_lobby(summary)
-                await ctx.reply(embed=embed, mention_author=False)
+                embed = self._embed_player_profile(summary)
 
-        #
-        # @self.hybrid_command(description='Behaves like the `lobby` command, but instead of returning "steam match '
-        #                                  'link", returns the link shortener URL')
+            await ctx.reply(mention_author=False, embed=embed)
+
         @self.hybrid_command(
             description=f"Behaves like the **lobby** command. Returns a short link instead of a lobby link.")
         async def shlink(ctx: Context, user: discord.User = None):
@@ -289,7 +287,7 @@ class CustomBot(commands.Bot):
             """
 
             if not middleware.ShlinkClient.enabled:
-                return ctx.reply(embed=self._embed_shlink_not_enabled())
+                raise Errors.ShlinkNotEnabledError
             else:
                 target_discord_id: int
                 if user:
@@ -300,12 +298,14 @@ class CustomBot(commands.Bot):
                 steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
                 summary = middleware.get_steam_summary(steam_id=steam_id)
 
-                if not summary.has_lobby:
-                    embed = self._embed_error_no_lobby(summary)
-                    await ctx.reply("The account doesn't have an open lobby!", embed=embed, mention_author=False)
+                if summary.has_lobby:
+                    embed = \
+                    [self._embed_player_profile(summary), self._embed_player_lobby(summary, shlink_as_text=False)][
+                        summary.has_lobby]
                 else:
-                    embed = self._embed_player_lobby_shlink(summary)
-                    await ctx.reply(embed=embed, mention_author=False)
+                    embed = self._embed_player_profile(summary)
+
+                await ctx.reply(mention_author=False, embed=embed)
 
         @self.command(description="Prints the current version of the bot.")
         async def version(ctx: Context):
@@ -429,10 +429,12 @@ class CustomBot(commands.Bot):
                 url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
 
         else:
-            embed.add_field(name="User currently is not playing a game.", value=("Note that profile privacy settings "
-                                                                                 "could be interfering with this."))
-
-        # embed.set_footer(text="https://github.com/OriolFilter")
+            if player_summary.has_public_visibility:
+                embed.add_field(name="User currently is not playing a game.", value="")
+            else:
+                embed.add_field(name="User activity not public",
+                                value="Since the Steam account doesn't activity set to public, I cannot see if it's "
+                                      "playing a game or not.")
         return embed
 
     @staticmethod
@@ -453,45 +455,7 @@ class CustomBot(commands.Bot):
 
         return embed_color
 
-    def _embed_error_no_lobby(self, player_summary: PlayerSummary) -> Embed:
-        """
-        This is a SOFT error (aka not actual error per se)
-
-        This will be called ONLY after confirming if the user has or not has an available public lobby.
-
-        Outside of this function, it will not be checked whether the user is playing something or not.
-        """
-
-        embed = Embed(title=f'{player_summary.personaname} Steam Profile', url=player_summary.profileurl,
-                      color=self.__return_embed_color(player_summary=player_summary))
-
-        embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
-                         icon_url=player_summary.avatarfull)
-
-        if player_summary.is_playing:
-
-            game_title = player_summary.gameextrainfo
-
-            embed.add_field(name="Currently playing:",
-                            value=f'[{game_title}](https://store.steampowered.com/app/{player_summary.gameid})',
-                            inline=False)
-
-            embed.add_field(name="Public lobby currently not available",
-                            value=f'Note that profile privacy settings or visibility could be interfering with this.',
-                            inline=False)
-
-            embed.set_thumbnail(
-                url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
-
-        else:
-            embed.add_field(name="User currently is not playing a game.",
-                            value=("Note that profile privacy settings or visibility "
-                                   "could be interfering with this."), inline=False)
-
-        # embed.set_footer(text="https://github.com/OriolFilter")
-        return embed
-
-    def _embed_player_lobby(self, player_summary: PlayerSummary) -> Embed:
+    def _embed_player_lobby(self, player_summary: PlayerSummary, shlink_as_text=False) -> Embed:
         """
          This will be called ONLY after confirming the user has an available public lobby.
 
@@ -499,13 +463,12 @@ class CustomBot(commands.Bot):
          """
         shortLobbyUrl: str = ""
         message_lobby_url: str
-
         if middleware.ShlinkClient.enabled:
             try:
                 shortLobbyUrl = middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
             except Errors.ShlinkError:
                 print(f"Failed generating a short link for URL: {player_summary.lobby_url}")
-            else:
+            except Errors as e:
                 print(f"Some error occurred while generating a short link for URL: {player_summary.lobby_url}")
 
         embed = Embed(title=player_summary.gameextrainfo,
@@ -515,17 +478,14 @@ class CustomBot(commands.Bot):
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
 
-        print(f">>> {shortLobbyUrl}")
         if shortLobbyUrl:
-            message_lobby_url = f'[{player_summary.lobby_url}]({shortLobbyUrl})'
+            message_lobby_url = f'[{[player_summary.lobby_url, shortLobbyUrl][shlink_as_text]}]({shortLobbyUrl})'
         else:
             message_lobby_url = player_summary.lobby_url
-        print(f">>> {message_lobby_url}")
 
         embed.set_thumbnail(
             url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
         embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=message_lobby_url, inline=False)
-        # embed.set_footer(text="https://github.com/OriolFilter")
         return embed
 
     def _embed_shlink_not_enabled(self) -> Embed:
@@ -537,25 +497,6 @@ class CustomBot(commands.Bot):
                                                                                "administrator in case you would like "
                                                                                "for them to enable such.",
                       color=0x8a8a8a)
-        return embed
-
-    def _embed_player_lobby_shlink(self, player_summary: PlayerSummary) -> Embed:
-        """
-        Exactly the same as `_embed_player_lobby`, but will return the shlink URL instead of the lobby URL (as in text)
-        This won't validate if the link shortener is enabled.
-        """
-        shortLobbyUrl = middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
-
-        embed = Embed(title=player_summary.gameextrainfo,
-                      url=f'https://store.steampowered.com/app/{player_summary.gameid}',
-                      color=self.__return_embed_color(player_summary=player_summary))
-
-        embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
-                         icon_url=player_summary.avatarfull)
-
-        embed.set_thumbnail(
-            url=f'https://cdn.cloudflare.steamstatic.com/steam/apps/{player_summary.gameid}/capsule_231x87.jpg')
-        embed.add_field(name=f'{player_summary.personaname}\'s lobby', value=shortLobbyUrl, inline=False)
         return embed
 
     def _profile(self, discord_id: int) -> Embed:
