@@ -444,7 +444,7 @@ class CustomBot(commands.Bot):
                          icon_url=player_summary.avatarfull)
 
         if middleware.ShlinkClient.enabled and shlink_as_text and shortLobbyUrl:
-            message_lobby_url = player_summary.lobby_url
+            message_lobby_url = shortLobbyUrl
         elif shortLobbyUrl:
             message_lobby_url = f'[{[player_summary.lobby_url, shortLobbyUrl][shlink_as_text]}]({shortLobbyUrl})'
         else:
