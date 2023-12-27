@@ -44,10 +44,6 @@ class PlayerSummary:
     def is_playing(self) -> bool:
         if self.gameid:
             return True
-        # Could be raising the error, but I don't think there is much point (as per the moment)
-        # As per the moment, I believe it's easier/cleaner/better overall to use the `has_public_visibility` property.
-        # elif not self.has_public_visibility:
-        #     raise Errors.SteamVisibilityNotPublic
         return False
 
     @property
