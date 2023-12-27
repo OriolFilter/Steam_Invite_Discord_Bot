@@ -6,7 +6,7 @@ FROM ${BASEIMAGE}
 #as build
 
 ARG BUILDDATE
-ARG VERSION="1.3"
+ARG VERSION="1.3-extra"
 ARG REPOSITORY="https://gitea.filterhome.xyz/ofilter/Steam_Invite_Discord"
 
 LABEL "author"="Oriol Filter Anson"
