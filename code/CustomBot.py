@@ -395,9 +395,9 @@ class CustomBot(commands.Bot):
             if player_summary.has_public_visibility:
                 embed.add_field(name="User currently is not playing a game.", value="")
             else:
-                embed.add_field(name="User activity not public",
-                                value="Since the Steam account doesn't activity set to public, I cannot see if it's "
-                                      "playing a game or not.")
+                embed.add_field(name=":detective: User activity is not public!",
+                                value="Steam user account has visibility set to non-public.\n"
+                                      "I cannot gather data that way.")
         return embed
 
     @staticmethod
@@ -415,6 +415,8 @@ class CustomBot(commands.Bot):
             embed_color = 0xff1abb
         elif player_summary.is_playing:
             embed_color = 0x61ff64
+        elif not player_summary.has_public_visibility:
+            embed_color = 0x786464
 
         return embed_color
 
