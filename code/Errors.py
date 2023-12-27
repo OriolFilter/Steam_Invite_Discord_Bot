@@ -17,10 +17,15 @@ class DiscordNotGodError(Exception):
     """
 
 
-
 class ShlinkError(Exception):
     """
     Failed connecting to the Shlink server or creating a short Url
+    """
+
+
+class ShlinkNotEnabledError(Exception):
+    """
+    Raised when the Shlink functionality is not enabled.
     """
 
 
