@@ -257,6 +257,7 @@ class CustomBot(commands.Bot):
             """
             If no user is specified, posts the caller lobby in the chat.
             If a user is specified, it will apply the command `lobby` to them.
+            If not a lobby available, will use the profile embed
             :param ctx:
             :arg: Target user
             :return:
@@ -280,10 +281,10 @@ class CustomBot(commands.Bot):
         @self.hybrid_command(
             description=f"Behaves like the **lobby** command. Returns a short link instead of a lobby link.")
         async def shlink(ctx: Context, user: discord.User = None):
-            # Add cooldown
             """
-            Stands for "short link"
-            Same as `lobby` command, but will return the link shortener as text instead of the lobby url. Only works if the `shortener` functionality is enabled.
+            Stands for "short link".
+            Same as `lobby` command, but will return the link shortener as text instead of the lobby url.
+            Only works if the `shortener` functionality is enabled.
             """
 
             if not middleware.ShlinkClient.enabled:
@@ -295,17 +296,17 @@ class CustomBot(commands.Bot):
                 else:
                     target_discord_id = ctx.author.id
 
-                steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
-                summary = middleware.get_steam_summary(steam_id=steam_id)
+            steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
+            summary = middleware.get_steam_summary(steam_id=steam_id)
 
-                if summary.has_lobby:
-                    embed = \
+            if summary.has_lobby:
+                embed = \
                     [self._embed_player_profile(summary), self._embed_player_lobby(summary, shlink_as_text=False)][
                         summary.has_lobby]
-                else:
-                    embed = self._embed_player_profile(summary)
+            else:
+                embed = self._embed_player_profile(summary)
 
-                await ctx.reply(mention_author=False, embed=embed)
+            await ctx.reply(mention_author=False, embed=embed)
 
         @self.command(description="Prints the current version of the bot.")
         async def version(ctx: Context):
