@@ -397,7 +397,7 @@ class CustomBot(commands.Bot):
             else:
                 embed.add_field(name=":detective: User activity is not public!",
                                 value="Steam user account has visibility set to non-public.\n"
-                                      "I cannot gather data that way.")
+                                      "I check things that way.")
         return embed
 
     @staticmethod
