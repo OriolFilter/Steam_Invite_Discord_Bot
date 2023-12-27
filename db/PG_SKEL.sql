@@ -15,8 +15,8 @@ as $$
     end;
 $$;
 
-create trigger check_values_update after insert on relationships for each row execute procedure trigger_set_last_update_now();
-create trigger check_values_update after update on relationships for each row execute procedure trigger_set_last_update_now();
+create trigger check_values_update_after_insert after insert on relationships for each row execute procedure trigger_set_last_update_now();
+create trigger check_values_update_after_update after update on relationships for each row execute procedure trigger_set_last_update_now();
 
 create or replace function func_discord_id_exists(arg_discord_id varchar(18))
 returns bool
