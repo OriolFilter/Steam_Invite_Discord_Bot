@@ -11,7 +11,10 @@ returns Trigger
 language plpgsql
 as $$
     begin
-        update relationships as rel set last_update=now() where new.id=rel.id;
+        IF NEW.last_update = OLD.last_update THEN
+            NEW.last_update = NOW();
+        END IF;
+        RETURN NEW;
     end;
 $$;
 
