@@ -255,58 +255,20 @@ class CustomBot(commands.Bot):
             description=f"Posts link to the lobby. Use **{self.command_prefix}help lobby** for help.")
         async def lobby(ctx: Context, user: discord.User = None):
             """
-            If no user is specified, posts the caller lobby in the chat.
-            If a user is specified, it will apply the command `lobby` to them.
-            If not a lobby available, will use the profile embed
-            :param ctx:
-            :arg: Target user
-            :return:
+
             """
-            target_discord_id: int
-            if user:
-                target_discord_id = user.id
-            else:
-                target_discord_id = ctx.author.id
-
-            steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
-            summary = middleware.get_steam_summary(steam_id=steam_id)
-
-            if summary.has_lobby:
-                embed = [self._embed_player_profile(summary), self._embed_player_lobby(summary)][summary.has_lobby]
-            else:
-                embed = self._embed_player_profile(summary)
-
-            await ctx.reply(mention_author=False, embed=embed)
+            await self._lobby(ctx=ctx, user=user)
 
         @self.hybrid_command(
             description=f"Behaves like the **lobby** command. Returns a short link instead of a lobby link.")
         async def shlink(ctx: Context, user: discord.User = None):
             """
             Stands for "short link".
-            Same as `lobby` command, but will return the link shortener as text instead of the lobby url.
-            Only works if the `shortener` functionality is enabled.
+            Raise `ShlinkNotEnabledError` if Shlink functionality is enabled.
             """
-
             if not middleware.ShlinkClient.enabled:
                 raise Errors.ShlinkNotEnabledError
-            else:
-                target_discord_id: int
-                if user:
-                    target_discord_id = user.id
-                else:
-                    target_discord_id = ctx.author.id
-
-            steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
-            summary = middleware.get_steam_summary(steam_id=steam_id)
-
-            if summary.has_lobby:
-                embed = \
-                    [self._embed_player_profile(summary), self._embed_player_lobby(summary, shlink_as_text=False)][
-                        summary.has_lobby]
-            else:
-                embed = self._embed_player_profile(summary)
-
-            await ctx.reply(mention_author=False, embed=embed)
+            await self._lobby(ctx=ctx, user=user, shlink_as_text=True)
 
         @self.command(description="Prints the current version of the bot.")
         async def version(ctx: Context):
@@ -456,7 +418,7 @@ class CustomBot(commands.Bot):
 
         return embed_color
 
-    def _embed_player_lobby(self, player_summary: PlayerSummary, shlink_as_text=False) -> Embed:
+    def _embed_player_lobby(self, player_summary: PlayerSummary, shlink_as_text: bool) -> Embed:
         """
          This will be called ONLY after confirming the user has an available public lobby.
 
@@ -509,3 +471,29 @@ class CustomBot(commands.Bot):
         summary = middleware.get_steam_summary(steam_id=steam_id)
         embed = self._embed_player_profile(summary)
         return embed
+
+    async def _lobby(self, ctx: Context, user: discord.User = None, shlink_as_text=False):
+        """
+        This function unifies `lobby` and `shlink` commands.
+        If no user is specified, uses the Steam account linked to the user that called this command.
+        If a user is specified, it will target instead the user mentioned.
+        If not a lobby available, will use the profile embed instead.
+        """
+        target_discord_id: int
+        if user:
+            target_discord_id = user.id
+        else:
+            target_discord_id = ctx.author.id
+
+        steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
+        summary = middleware.get_steam_summary(steam_id=steam_id)
+
+        if summary.has_lobby:
+            embed = [
+                self._embed_player_profile(summary),
+                self._embed_player_lobby(summary, shlink_as_text=shlink_as_text)
+            ][summary.has_lobby]
+        else:
+            embed = self._embed_player_profile(summary)
+
+        await ctx.reply(mention_author=False, embed=embed)
