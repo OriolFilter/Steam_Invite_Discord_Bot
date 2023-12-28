@@ -217,11 +217,16 @@ class CustomBot(commands.Bot):
                 await ctx.reply(
                     f"You need to insert a Steam account ID, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
             else:
-                if middleware.SteamApi.player_summary(steam_id):
-                    middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
-                    await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
-                                    mention_author=False,
-                                    embed=self._profile(discord_id=ctx.author.id))
+                try:
+                    steam_id = int(steam_id)
+                except ValueError:
+                    await ctx.reply("Steam ID is expected to have **ONLY** numbers", mention_author=False)
+                else:
+                    if middleware.SteamApi.player_summary(steam_id):
+                        middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
+                        await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
+                                        mention_author=False,
+                                        embed=self._profile(discord_id=ctx.author.id))
 
         @self.hybrid_command(description="Unlink your Steam account.")
         # @self.hybrid_command(description="Use this to unlink the account and will delete the database entry.")
@@ -296,13 +301,11 @@ class CustomBot(commands.Bot):
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
         embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=False)
         embed.add_field(name="Repository", value=f'{os.getenv("REPOSITORY")}', inline=False)
-        # embed.add_field(name="Build Date", value=f'{os.getenv("BUILDDATE", "Unknown")}', inline=True)
-        # embed.set_footer(text=os.getenv("REPOSITORY"))
         return embed
 
     def __return_embed_error_template(self, title: str, description: str) -> discord.Embed:
         embed = Embed(title=title, description=description, color=0xff5c5c)
-        embed.set_footer(text="https://github.com/OriolFilter")
+        embed.set_footer(text=f'{os.getenv("REPOSITORY")}/issues')
         return embed
 
     @property
@@ -343,8 +346,12 @@ class CustomBot(commands.Bot):
         :return:
         """
 
-        embed = self.__return_embed_error_template(title="Vanity URL name not found",
-                                                   description=f"Vanity URL name didn't match an user, use the command `{self.command_prefix}help link` for help.")
+        embed = self.__return_embed_error_template(
+            title=f"Vanity URL name not found, use the command `{self.command_prefix}help link` for help.",
+            description=f"‎\nIf you have an URL like:\n\n"
+                        "  \- steamcommunity.com/id/**SavageBidoof**/\n\n"
+                        f"The vanity URL **__name__** is **savagebidoof**, then you would execute:\n\n"
+                        f" \- **{self.command_prefix}link vanity __savagebidoof__**\n\n‎")
         return embed
 
     @property
@@ -353,9 +360,9 @@ class CustomBot(commands.Bot):
         Embed used when the user (Steam ID) is not found.
         :return:
         """
-
-        embed = self.__return_embed_error_template(title="Steam ID not found",
-                                                   description=f"Steam ID didn't match an user, use the command `{self.command_prefix}help link` for help.")
+        embed = self.__return_embed_error_template(
+            title="Steam ID not found, use the command `{self.command_prefix}help link` for help.",
+            description=f"Steam ID didn't match an user, use the command `{self.command_prefix}help link` for help.")
         return embed
 
     @property
