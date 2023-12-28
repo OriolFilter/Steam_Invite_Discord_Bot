@@ -2,15 +2,13 @@ import os
 
 from typing import List
 
-import DBClient
 import Errors
 
 from psycopg2 import errors as DBErrors
 from psycopg2 import OperationalError
 
 import discord
-from discord import Embed
-from discord import app_commands
+from discord import Embed, app_commands
 from discord.ext import commands
 from discord.ext.commands.context import Context
 
