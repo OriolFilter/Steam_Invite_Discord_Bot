@@ -4,7 +4,7 @@ import json
 import requests
 from requests import Response
 from dataclasses import dataclass, asdict
-from typing import Optional
+from typing import Optional, Callable
 from functools import wraps
 from Classes import SteamConf
 import Errors
@@ -61,7 +61,7 @@ class PlayerSummary:
         return f"steam://joinlobby/{self.gameid}/{self.lobbysteamid}/{self.steamid}"
 
 
-def steam_api_call(method) -> dict:
+def steam_api_call(method) -> Callable:
     @wraps(method)
     def wrapper(self, *args, **kwargs) -> dict:
         response: requests.request = method(self, *args, **kwargs)
@@ -86,15 +86,15 @@ class SteamApi:
         return self.__configuration.token
 
     @steam_api_call
-    def __get_id_from_vanity_url(self, vanity_url) -> requests.request:
+    def __get_id_from_vanity_url_name(self, vanity_url_name) -> requests.request:
         payload = {
             "key": self.__api_key,
-            "vanityurl": vanity_url,
+            "vanityurl": vanity_url_name,
         }
         return requests.get(f"https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/", params=payload)
 
-    def get_id_from_vanity_url(self, vanity_url) -> int:
-        jresponse = self.__get_id_from_vanity_url(vanity_url)
+    def get_id_from_vanity_url_name(self, vanity_url_name) -> int:
+        jresponse = self.__get_id_from_vanity_url_name(vanity_url_name)
         if jresponse["success"] == 1:
             return jresponse["steamid"]
         elif jresponse["success"] == 42:

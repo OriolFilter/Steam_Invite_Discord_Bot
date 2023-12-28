@@ -334,15 +334,15 @@ class HELPER:
                 
                 If the URL contains **/id/** like this: 
                 
-                  steamcommunity.com**/id/**SavageBidoof/
+                 \- steamcommunity.com**/id/**SavageBidoof/
                     
-                The vanity URL is **SavageBidoof**.
+                The vanity URL name is **SavageBidoof**.
                         
                 Now use the following command:
                 
-                  **{self.__discord_bot.command_prefix}link vanity savagebidoof**
+                 \- **{self.__discord_bot.command_prefix}link vanity savagebidoof**
                   
-                If the URL contains **/profile/**, check below to link through Steam ID. 
+                If the URL contains **/profile/**, check __below__ to link through **Steam ID**. 
                 ‎
                 """,
                 'image_list': ["https://i.imgur.com/CrVUxbs.png"],
@@ -352,21 +352,21 @@ class HELPER:
             'steamid': {
                 'text':f"""
                 ‎
-                **To link through __Steam vanity URL__ check the __embed from above__**
+                **To link through __Steam vanity URL name__ check the __embed from above__**
                 
                 Go to your profile page, **right click** on the background and click **copy URL**.
                 
                 If the URL contains **/profile/** like this: 
 
-                  steamcommunity.com**/profile/**76561198170583259/
+                 \- steamcommunity.com**/profile/**76561198170583259/
                 
                 The SteamID is **76561198170583259**.
                 
                 Now use the following command:
                 
-                **{self.__discord_bot.command_prefix}link steamid 76561198170583259**
+                 \- **{self.__discord_bot.command_prefix}link steamid 76561198170583259**
                 
-                If the URL contains **/id/**, check above to link through Vanity ID.
+                If the URL contains **/id/**, check __above__ to link through **Vanity URL name**.
                 ‎
                 """,
                 'image_list': ['https://i.imgur.com/QxaNM5j.png'],

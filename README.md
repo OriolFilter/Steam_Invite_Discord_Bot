@@ -4,7 +4,18 @@
 
 Discord bot that posts your Steam lobbies for others to join.
 
-### FAQ
+## Invite the bot
+
+Use the following link to invite the "official" bot.
+
+- https://discord.com/oauth2/authorize?client_id=981672056145993759&permissions=84032&scope=bot
+
+If you want to test/try/invite the development/testing bot, use this other link:
+
+- https://discord.com/oauth2/authorize?client_id=793623507384139843&permissions=84032&scope=bot
+
+
+## FAQ
 
 - Do I need to set an email or password/token from my Steam account or Log In on any way?
 

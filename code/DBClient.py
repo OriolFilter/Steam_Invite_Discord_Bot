@@ -5,12 +5,6 @@ import psycopg2
 import Errors
 
 
-class DBSteamIDNotFoundError(Exception):
-    """
-    Raised if database returns no SteamID
-    """
-
-
 class DBClient:
     __config: _DatabaseConf
     __client: psycopg2.connect
@@ -33,7 +27,7 @@ class DBClient:
                 database=self.__config.database,
             )
         except psycopg2.Error as e:
-            print(f"Error connecting to the MySqlServer: {e}")
+            print(f"Error connecting to the DB: {e}")
             raise e
 
     def _dbquery(method):
@@ -85,12 +79,11 @@ class DBClient:
                     steam_id = row[0]
             return steam_id
         except psycopg2.errors.NoDataFound:
-            raise DBSteamIDNotFoundError
+            raise Errors.DBSteamIDNotFoundError
 
     def get_steam_id(self, discord_id) -> str:
         steam_id = self.__get_steam_id(discord_id=discord_id)
         return steam_id
-
 
 # class doomyDBClient:
 #   """
