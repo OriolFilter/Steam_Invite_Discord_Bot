@@ -27,7 +27,7 @@ class DBClient:
                 database=self.__config.database,
             )
         except psycopg2.Error as e:
-            print(f"Error connecting to the MySqlServer: {e}")
+            print(f"Error connecting to the DB: {e}")
             raise e
 
     def _dbquery(method):
