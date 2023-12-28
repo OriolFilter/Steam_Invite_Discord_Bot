@@ -100,7 +100,7 @@ class CustomBot(commands.Bot):
             OperationalError: lambda: self._embed_error_no_db_connection,
             Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_name_not_found,
             Errors.SteamIdUserNotFoundError: lambda: self._embed_error_steam_id_not_found,
-            Errors.DiscordNotGodError: lambda: self._embed_error_not_god_user,
+            Errors.DiscordNotGodError: lambda: self._embed_error_user_not_god,
             Errors.ShlinkNotEnabledError: lambda: self._embed_shlink_not_enabled,
         }
 
@@ -359,7 +359,7 @@ class CustomBot(commands.Bot):
         return embed
 
     @property
-    def _embed_error_not_god_user(self):
+    def _embed_error_user_not_god(self):
         """
         Embed used when the user is expected to be GOD (aka Bot Administrator), but it's not.
         :return:
