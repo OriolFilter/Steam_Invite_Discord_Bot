@@ -96,7 +96,7 @@ class CustomBot(commands.Bot):
         _: {Exception: Embed} = {
             OperationalError: lambda: self._embed_error_no_db_connection,
             DBErrors.NoDataFound: lambda: self._embed_error_steam_id_not_set,
-            DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_steam_id_not_set,
+            Errors.DBSteamIDNotFoundError: lambda: self._embed_error_steam_id_not_set,
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
             Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_name_not_found,
             Errors.SteamIdUserNotFoundError: lambda: self._embed_error_steam_id_not_found,
