@@ -94,10 +94,10 @@ class CustomBot(commands.Bot):
         # discord.ext.commands.errors.MissingRequiredArgument #Not used as per the moment
         # https://github.com/Rapptz/discord.py/discussions/8384
         _: {Exception: Embed} = {
+            OperationalError: lambda: self._embed_error_no_db_connection,
             DBErrors.NoDataFound: lambda: self._embed_error_steam_id_not_set,
             DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_steam_id_not_set,
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
-            OperationalError: lambda: self._embed_error_no_db_connection,
             Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_name_not_found,
             Errors.SteamIdUserNotFoundError: lambda: self._embed_error_steam_id_not_found,
             Errors.DiscordNotGodError: lambda: self._embed_error_user_not_god,
