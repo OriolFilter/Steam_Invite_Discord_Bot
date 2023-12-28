@@ -5,10 +5,7 @@ import psycopg2
 import Errors
 
 
-class DBSteamIDNotFoundError(Exception):
-    """
-    Raised if database returns no SteamID
-    """
+
 
 
 class DBClient:
@@ -85,7 +82,7 @@ class DBClient:
                     steam_id = row[0]
             return steam_id
         except psycopg2.errors.NoDataFound:
-            raise DBSteamIDNotFoundError
+            raise Errors.DBSteamIDNotFoundError
 
     def get_steam_id(self, discord_id) -> str:
         steam_id = self.__get_steam_id(discord_id=discord_id)

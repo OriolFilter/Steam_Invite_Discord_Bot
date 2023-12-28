@@ -65,3 +65,8 @@ class PlayerNotPlayingError(Exception):
     """
     Raised when the player is not playing and wanted to obtain the invite link
     """
+
+class DBSteamIDNotFoundError(Exception):
+    """
+    Raised if database returns no SteamID
+    """
