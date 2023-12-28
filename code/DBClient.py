@@ -21,17 +21,17 @@ class DBClient:
 
     @property
     def _connection(self):
-        try:
-            return psycopg2.connect(
-                user=self.__config.username,
-                password=self.__config.password,
-                host=self.__config.host,
-                port=self.__config.port,
-                database=self.__config.database,
-            )
-        except psycopg2.Error as e:
-            print(f"Error connecting to the MySqlServer: {e}")
-            raise e
+        # try:
+        return psycopg2.connect(
+            user=self.__config.username,
+            password=self.__config.password,
+            host=self.__config.host,
+            port=self.__config.port,
+            database=self.__config.database,
+        )
+        # except psycopg2.Error as e:
+        #     print(f"Error connecting to the MySqlServer: {e}")
+        #     raise e
 
     def _dbquery(method):
         @wraps(method)
