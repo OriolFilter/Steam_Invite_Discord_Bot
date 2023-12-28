@@ -94,8 +94,8 @@ class CustomBot(commands.Bot):
         # discord.ext.commands.errors.MissingRequiredArgument #Not used as per the moment
         # https://github.com/Rapptz/discord.py/discussions/8384
         _: {Exception: Embed} = {
-            DBErrors.NoDataFound: lambda: self._embed_error_no_steam_id_set,
-            DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_no_steam_id_set,
+            DBErrors.NoDataFound: lambda: self._embed_error_steam_id_not_set,
+            DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_steam_id_not_set,
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
             OperationalError: lambda: self._embed_error_no_db_connection,
             Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_name_not_found,
@@ -315,7 +315,7 @@ class CustomBot(commands.Bot):
                                                   description=f"Use `{self.command_prefix}help` to get a list of available commands!")
 
     @property
-    def _embed_error_no_steam_id_set(self) -> Embed:
+    def _embed_error_steam_id_not_set(self) -> Embed:
         """
         Embed that has a message indicating that the user has no steam_id currently linked
         :return:
