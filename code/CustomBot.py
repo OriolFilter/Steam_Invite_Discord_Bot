@@ -98,7 +98,7 @@ class CustomBot(commands.Bot):
             DBClient.DBSteamIDNotFoundError: lambda: self._embed_error_no_steam_id_set,
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
             OperationalError: lambda: self._embed_error_no_db_connection,
-            Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_not_found,
+            Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_name_not_found,
             Errors.SteamIdUserNotFoundError: lambda: self._embed_error_steam_id_not_found,
             Errors.DiscordNotGodError: lambda: self._embed_error_not_god_user,
             Errors.ShlinkNotEnabledError: lambda: self._embed_shlink_not_enabled,
@@ -195,15 +195,15 @@ class CustomBot(commands.Bot):
             """
             if ctx.invoked_subcommand is None:
                 await ctx.reply(
-                    f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
+                    f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url name>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
 
-        @link.command(description=f"Links your Steam account using your Steam vanity URL.")
-        async def vanity(ctx: Context, vanity_url: str = None):
-            if not vanity_url:
+        @link.command(description=f"Links your Steam account using your Steam vanity URL name.")
+        async def vanity(ctx: Context, vanity_url_name: str = None):
+            if not vanity_url_name:
                 await ctx.reply(
-                    f"You need to insert a Steam vanity url, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
+                    f"You need to insert a Steam vanity url name, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
             else:
-                steam_id = middleware.SteamApi.get_id_from_vanity_url(vanity_url)
+                steam_id = middleware.SteamApi.get_id_from_vanity_url_name(vanity_url_name)
                 middleware.set_steam_id(discord_id=ctx.author.id,
                                         steam_id=steam_id)
                 await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
@@ -255,7 +255,8 @@ class CustomBot(commands.Bot):
             description=f"Posts link to the lobby. Use **{self.command_prefix}help lobby** for help.")
         async def lobby(ctx: Context, user: discord.User = None):
             """
-
+            Posts the link of a lobby.
+            Everything is passed down to self._lobby, who will handle all the decisions/actions.
             """
             await self._lobby(ctx=ctx, user=user)
 
@@ -265,6 +266,7 @@ class CustomBot(commands.Bot):
             """
             Stands for "short link".
             Raise `ShlinkNotEnabledError` if Shlink functionality is enabled.
+            Everything is passed down to self._lobby, who will handle all the decisions/actions.
             """
             if not middleware.ShlinkClient.enabled:
                 raise Errors.ShlinkNotEnabledError
@@ -319,8 +321,8 @@ class CustomBot(commands.Bot):
         :return:
         """
         embed = self.__return_embed_error_template(title="No SteamID currenlty linked",
-                                                   description=f"The discord user currently has no SteamID configured, to add an account use `{self.command_prefix}link <vanity_url>`")
-        embed.add_field(name=f"What is a vanity url?",
+                                                   description=f"The discord user currently has no SteamID configured, to add an account use `{self.command_prefix}link <vanity_url_name>`")
+        embed.add_field(name=f"What is a vanity url name?",
                         value=f"To learn more regarding the vanity rul, use: `{self.command_prefix}vanity`")
         return embed
 
@@ -335,20 +337,20 @@ class CustomBot(commands.Bot):
         return embed
 
     @property
-    def _embed_error_vanity_url_not_found(self):
+    def _embed_error_vanity_url_name_not_found(self):
         """
-        Embed used when the user (Steam vanity URL) is not found.
+        Embed used when the user (Steam vanity URL name) is not found.
         :return:
         """
 
-        embed = self.__return_embed_error_template(title="Vanity URL not found",
-                                                   description=f"Vanity URL didn't match an user, use the command `{self.command_prefix}help link` for help.")
+        embed = self.__return_embed_error_template(title="Vanity URL name not found",
+                                                   description=f"Vanity URL name didn't match an user, use the command `{self.command_prefix}help link` for help.")
         return embed
 
     @property
     def _embed_error_steam_id_not_found(self):
         """
-        Embed used when the user (Steam vanity URL) is not found.
+        Embed used when the user (Steam ID) is not found.
         :return:
         """
 
