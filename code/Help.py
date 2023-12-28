@@ -257,10 +257,9 @@ class HELPER:
         # txt2="2. Congrats you can now use the rest of commands, such as:\n* Lobby\n* Profile\n* Shlink"
         # embed.add_field(name="", value=txt1, inline=False)
         embed.add_field(name="", value=txt, inline=False)
-        # embed.add_field(name="", value=txt, inline=False)
+
         images = ["https://i.imgur.com/auu1TvB.png", "https://i.imgur.com/TULszNQ.png"]
-        # images = ["https://i.imgur.com/pfSHgHL.png", "https://i.imgur.com/TULszNQ.png"]
-        # images = []
+
         for _image_url in images:
             _embed = self.__return_embed_image_template
             _embed.set_image(url=_image_url)
@@ -276,10 +275,7 @@ class HELPER:
         embed_list = []
         embed = self.__return_embed_template()
         embed_list.append(embed)
-        # The `lobby` command returns the Steam account of the user, their current active game, and their lobby (if there is one).
-        # **{self.__discord_bot.command_prefix}lobby**: Post a link  to the lobby (if one is open)
-        #
-        # **{self.__discord_bot.command_prefix}shlink**: Post a link  to the lobby (if one is open), the link is shorten.
+
         txt = f"If you haven't linked your Steam account use the command **{self.__discord_bot.command_prefix}help link** to get help on that.\n\nOnce you have linked your steam account through you can use commands such **{self.__discord_bot.command_prefix}lobby** or **{self.__discord_bot.command_prefix}shlink** to post a lobby.\n\nYou can select another user to post their lobby."
 
         embed.add_field(name="", value=txt, inline=False)
@@ -298,32 +294,6 @@ class HELPER:
     @property
     def _link(self) -> Embed:
         embed_list = []
-        # /embed_vanity = self.__return_embed_template()
-        # embed_steamidthats = self.__return_embed_template()
-        # embed_list.append(embed)
-
-        # text = f"""
-        #     To get the `vanity URL` from your Steam account, go to your profile page, right click on the background and click **copy URL**.
-        #
-        #     You should have copied something like this:
-        #
-        #       steamcommunity.com/id/**SavageBidoof**/
-        #
-        #     From that URL, the vanity URL is **SavageBidoof**.
-        #
-        #     Now you just need to use the link command appending the Steam vanity URL:
-        #
-        #       **{self.__discord_bot.command_prefix}link savagebidoof**
-        #
-        #     To unlink the account you can use the command **{self.__discord_bot.command_prefix}unlink**
-        #     """
-        # text = f"""
-        #
-        #
-        #
-        #
-        #    To unlink the account you can use the command **{self.__discord_bot.command_prefix}unlink**
-        #    """
         link_dict = {
             'vanity': {
                 'text':f"""
@@ -389,18 +359,4 @@ class HELPER:
                 embed_list.append(_image_embed)
 
             _n += 1
-
-        # text_vanity =
-
-        # text_steamid =
-
-        # embed_vanity.add_field(name="", value=text_vanity, inline=False)
-        # embed_steamidthats.add_field(name="", value=text_steamid, inline=False)
-        # images = ["https://i.imgur.com/VHdVEj8.png", "https://i.imgur.com/7Ff5rzz.png",
-        #           "https://i.imgur.com/KQfOKgt.png"]
-
-        # for _image_url in images:
-        #     _embed = self.__return_embed_image_template
-        #     _embed.set_image(url=_image_url)
-        #     embed_list.append(_embed)
         return embed_list
