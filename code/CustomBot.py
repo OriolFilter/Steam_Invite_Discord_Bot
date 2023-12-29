@@ -349,7 +349,7 @@ class CustomBot(commands.Bot):
             description=f"‎\nIf you have an URL like:\n\n"
                         "  \- steamcommunity.com/id/**SavageBidoof**/\n\n"
                         f"The vanity URL **__name__** is **savagebidoof**, then you would execute:\n\n"
-                        f" \- **{self.command_prefix}link vanity __savagebidoof__**\n\n‎")
+                        f" \- **{self.command_prefix}link vanity __savagebidoof__**")
         return embed
 
     @property
