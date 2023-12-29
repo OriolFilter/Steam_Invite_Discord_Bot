@@ -359,7 +359,7 @@ class CustomBot(commands.Bot):
         :return:
         """
         embed = self.__return_embed_error_template(
-            title="Steam ID not found, use the command `{self.command_prefix}help link` for help.",
+            title=f"Steam ID not found, use the command `{self.command_prefix}help link` for help.",
             description=f"Steam ID didn't match an user, use the command `{self.command_prefix}help link` for help.")
         return embed
 
