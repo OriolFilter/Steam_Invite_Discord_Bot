@@ -193,7 +193,7 @@ class CustomBot(commands.Bot):
             """
             if ctx.invoked_subcommand is None:
                 await ctx.reply(
-                    f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url name>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
+                    f'You need to specify which method to linking wanna use, either **{self.command_prefix} vanity <vanity url name>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
 
         @link.command(description=f"Links your Steam account using your Steam vanity URL name.")
         async def vanity(ctx: Context, vanity_url_name: str = None):
@@ -349,7 +349,7 @@ class CustomBot(commands.Bot):
             description=f"‎\nIf you have an URL like:\n\n"
                         "  \- steamcommunity.com/id/**SavageBidoof**/\n\n"
                         f"The vanity URL **__name__** is **savagebidoof**, then you would execute:\n\n"
-                        f" \- **{self.command_prefix}link vanity __savagebidoof__**\n\n‎")
+                        f" \- **{self.command_prefix}link vanity __savagebidoof__**")
         return embed
 
     @property
@@ -359,7 +359,7 @@ class CustomBot(commands.Bot):
         :return:
         """
         embed = self.__return_embed_error_template(
-            title="Steam ID not found, use the command `{self.command_prefix}help link` for help.",
+            title=f"Steam ID not found, use the command `{self.command_prefix}help link` for help.",
             description=f"Steam ID didn't match an user, use the command `{self.command_prefix}help link` for help.")
         return embed
 
