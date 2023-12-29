@@ -193,7 +193,7 @@ class CustomBot(commands.Bot):
             """
             if ctx.invoked_subcommand is None:
                 await ctx.reply(
-                    f'You need to specify which method to link wanna use, either **{self.command_prefix} vanity <vanity url name>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
+                    f'You need to specify which method to linking wanna use, either **{self.command_prefix} vanity <vanity url name>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
 
         @link.command(description=f"Links your Steam account using your Steam vanity URL name.")
         async def vanity(ctx: Context, vanity_url_name: str = None):
