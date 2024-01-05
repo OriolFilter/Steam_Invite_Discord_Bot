@@ -6,7 +6,7 @@ FROM ${BASEIMAGE}
 #as build
 
 ARG BUILDDATE
-ARG VERSION="1.3-extra"
+ARG VERSION="1.4"
 ARG REPOSITORY="https://github.com/OriolFilter/Steam_Lobby_Discord_Bot"
 
 LABEL "author"="Oriol Filter Anson"
