@@ -98,6 +98,7 @@ class CustomBot(commands.Bot):
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
             Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_name_not_found,
             Errors.SteamIdUserNotFoundError: lambda: self._embed_error_steam_id_not_found,
+            Errors.SteamIdNotInteger: lambda: self._embed_error_steamid_not_int,
             Errors.DiscordNotGodError: lambda: self._embed_error_user_not_god,
             Errors.ShlinkNotEnabledError: lambda: self._embed_shlink_not_enabled,
         }
@@ -218,13 +219,16 @@ class CustomBot(commands.Bot):
                 try:
                     steam_id = int(steam_id)
                 except ValueError:
-                    await ctx.reply("Steam ID is expected to have **ONLY** numbers", mention_author=False)
+                    raise Errors.SteamIdNotInteger
+                    # await ctx.reply("Steam ID is expected to have **ONLY** numbers", mention_author=False)
+                    # await ctx.reply("Steam ID is expected to have **ONLY** numbers", mention_author=False)
                 else:
                     if middleware.SteamApi.player_summary(steam_id):
                         middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
-                        await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
-                                        mention_author=False,
-                                        embed=self._profile(discord_id=ctx.author.id))
+                        await ctx.reply(
+                            "Just linked up your account, please verify that the account linked is correct.",
+                            mention_author=False,
+                            embed=self._profile(discord_id=ctx.author.id))
 
         @self.hybrid_command(description="Unlink your Steam account.")
         # @self.hybrid_command(description="Use this to unlink the account and will delete the database entry.")
@@ -361,6 +365,24 @@ class CustomBot(commands.Bot):
         embed = self.__return_embed_error_template(
             title=f"Steam ID not found, use the command `{self.command_prefix}help link` for help.",
             description=f"Steam ID didn't match an user, use the command `{self.command_prefix}help link` for help.")
+        return embed
+
+    @property
+    def _embed_error_steamid_not_int(self):
+        """
+        Embed used when the user tried to link through steam ID and specified a string instead of an integer.
+        :return:
+        """
+
+        embed = self.__return_embed_error_template(
+            title=f"Steam ID is expected to contain ONLY numbers, use the command `{self.command_prefix}help link` for help.",
+            description=f"‎\nIf you have an URL like:\n\n"
+                        "  \- steamcommunity.com/profile/**76561198170583259**/\n\n"
+                        f"The **__Steam ID__** is **76561198170583259**, then you would execute:\n\n"
+                        f" \- **{self.command_prefix}link vanity __savagebidoof__**\n\n"
+                        f"If you have an URL like:\n\n"
+                        "  \- steamcommunity.com/**id**/SavageBidoof/\n\n"
+                        f"Use the command **__{self.command_prefix}link vanity__** instead.\n")
         return embed
 
     @property

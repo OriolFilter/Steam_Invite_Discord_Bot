@@ -55,6 +55,12 @@ class UnexpectedError(Exception):
     """
 
 
+class SteamIdNotInteger(Exception):
+    """
+    Raised when the user tried to link through steam ID and specified a string instead of an integer.
+    """
+
+
 class SteamIdUserNotFoundError(Exception):
     """
     Raised when couldn't find a user by the given SteamId
@@ -65,6 +71,7 @@ class PlayerNotPlayingError(Exception):
     """
     Raised when the player is not playing and wanted to obtain the invite link
     """
+
 
 class DBSteamIDNotFoundError(Exception):
     """
