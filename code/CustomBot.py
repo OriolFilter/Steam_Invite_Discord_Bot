@@ -400,7 +400,7 @@ class CustomBot(commands.Bot):
 
         else:
             if player_summary.has_public_visibility:
-                embed.add_field(name="User currently is not playing a game.", value="")
+                embed.add_field(name="User is not currently playing a game.", value="")
             else:
                 embed.add_field(name=":detective: User activity is not public!",
                                 value="Steam user account has visibility set to non-public.\n"
