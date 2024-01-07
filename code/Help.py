@@ -176,7 +176,7 @@ class HELPER:
         for _topic, _command_list in _additional_commands.items():
             _txt = "‎\n"
             for _command, _description in _command_list.items():
-                _txt += f"**{self.__discord_bot.command_prefix}{_command}:**         {_description}\n\n"
+                _txt += f"**{self.__discord_bot.command_prefix}{_command}:** {_description}\n\n"
             _txt += "‎\n"
             embed.add_field(name=f"‎\n{_topic}", value=_txt, inline=False)
 
