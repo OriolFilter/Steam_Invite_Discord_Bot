@@ -300,19 +300,19 @@ class CustomBot(commands.Bot):
         """
         Returns an embed object with the GitHub Repo
         """
-        embed = Embed(title="Github Repository", url=self.middleware.Configuration.repo.repository,
+        embed = Embed(title="Github Repository", url=self.middleware.Configuration.project.repository,
                       description="Discord bot intended to get lobby links from Steam users", color=0xababab)
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
-        embed.add_field(name="Version", value=self.middleware.Configuration.repo.version, inline=False)
-        if self.middleware.Configuration.repo.repository:
-            embed.add_field(name="Repository", value=self.middleware.Configuration.repo.repository, inline=False)
+        embed.add_field(name="Version", value=self.middleware.Configuration.project.version, inline=False)
+        if self.middleware.Configuration.project.repository:
+            embed.add_field(name="Repository", value=self.middleware.Configuration.project.repository, inline=False)
         return embed
 
     def __return_embed_error_template(self, title: str, description: str) -> discord.Embed:
         embed = Embed(title=title, description=description, color=0xff5c5c)
-        if self.middleware.Configuration.repo.issues:
-            embed.set_footer(text=self.middleware.Configuration.repo.issues)
+        if self.middleware.Configuration.project.issues:
+            embed.set_footer(text=self.middleware.Configuration.project.issues)
         return embed
 
     @property

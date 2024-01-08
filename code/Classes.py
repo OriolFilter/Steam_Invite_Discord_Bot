@@ -141,7 +141,7 @@ class HealthCheckConf(_CONFIG):
 
 
 @dataclass
-class RepoConf(_CONFIG):
+class ProjectConf(_CONFIG):
     """
     Git Repo related configs.
 
@@ -278,7 +278,7 @@ class Configuration:
     discord: DiscordConf
     database: DatabaseConf
     shlink: ShlinkConf
-    repo: RepoConf
+    project: ProjectConf
 
     def __init__(self):
         # self.memcached = MemcachedConf()
@@ -287,4 +287,4 @@ class Configuration:
         self.discord = DiscordConf()
         self.database = DatabaseConf()
         self.shlink = ShlinkConf()
-        self.repo = RepoConf()
+        self.project = ProjectConf()

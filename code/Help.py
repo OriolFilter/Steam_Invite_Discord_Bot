@@ -7,6 +7,8 @@ from discord import Embed
 from discord.ext import commands
 from discord.ext.commands import Bot
 
+# from CustomBot import CustomBot as Bot
+
 _help_commands_part1 = {
     ":tanabata_tree: __**Main Commands**__":
         [
@@ -29,7 +31,6 @@ _help_commands_part2 = {
         ],
 }
 
-
 _additional_commands = {
     ":hatching_chick: Help commands": {
         "help": "Prints a list of commands and their description.",
@@ -39,6 +40,7 @@ _additional_commands = {
         "help usage": "Example on how to use this bot/Commands and stuff (sort of functionalities).",
     }
 }
+
 
 # UNUSED
 # _available_app_commands = ["help", "link", "lobby", "profile", "shlink", "unlink"]
@@ -107,7 +109,8 @@ class HELPER:
                                          embed: Embed,
                                          end: bool = False) -> None:
         def __txt_add_command(command: discord.ext.commands.Command, prefix: str) -> str:
-            if prefix: prefix += " "
+            if prefix:
+                prefix += " "
             if not command.hidden:
                 return f"**{self.__discord_bot.command_prefix}{prefix}{command.name}:** {command.description}\n\n"
             return ""
@@ -141,6 +144,11 @@ class HELPER:
 
     def _general(self) -> Embed:
         embed = self.__return_embed_template()
+        _relevant_links = {
+            "Wiki": self.__discord_bot.middleware.Configuration.project.wiki,
+            "Issues": self.__discord_bot.middleware.Configuration.project.issues,
+            "Repository": self.__discord_bot.middleware.Configuration.project.wiki,
+        }
 
         # # Add main commands part 1
         # for _topic, _command_list in _help_commands_part1.items():
@@ -211,6 +219,16 @@ class HELPER:
         #     if not __command.hidden:
         #         _txt += f"- **{__command.name}**\n"
         # embed.add_field(name="‎\n:bat: Available app/slash commands:", value=_txt, inline=False)
+
+        # Add Relevant links
+        _txt = "‎\n"
+        for _topic, _url in _relevant_links.items():
+            if _url:
+                _txt += f"- **[{_topic}]({_url})**\n"
+        if _txt != "‎\n":
+            embed.add_field(name="‎\n‎\n‎\n:man_mage: __**Relevant links**__", value=_txt, inline=False)
+        # return embed
+
         return embed
 
     @property
@@ -271,8 +289,8 @@ class HELPER:
         return self._lobby
 
     @property
-    def _lobby(self) -> Embed:
-        embed_list = []
+    def _lobby(self) -> [Embed]:
+        embed_list: [Embed] = []
         embed = self.__return_embed_template()
         embed_list.append(embed)
 
@@ -296,7 +314,7 @@ class HELPER:
         embed_list = []
         link_dict = {
             'vanity': {
-                'text':f"""
+                'text': f"""
                 ‎
                 **To link through __Steam ID__ check the __embed from below__**
                 
@@ -320,7 +338,7 @@ class HELPER:
 
             },
             'steamid': {
-                'text':f"""
+                'text': f"""
                 ‎
                 **To link through __Steam vanity URL name__ check the __embed from above__**
                 

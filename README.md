@@ -150,9 +150,9 @@ Attaching to steam_invite_db, steam_invite_discord_bot
 | SHLINK_SERVER_URL | \<Null\>                                                           | Api key from a Shlink server. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled.          |
 | SHLINK_TOKEN      | \<Null\>                                                           | URL for the Shlink API server/service. Not required. If both `SHLINK_SERVER_URL` and `SHLINK_TOKEN` are configured, it will be automatically enabled. |
 | HEALTHCHECK_PORT  | 8080                                                               | On which port you wanna run the healthcheck.                                                                                                          |
-| REPOSITORY        | https://github.com/OriolFilter/Steam_Lobby_Discord_Bot             | Link to the repository                                                                                                                                |
-| ISSUES            | \<Null\>                                                           | Link to the external wiki, if empty will use `${REPOSITORY}/wiki`                                                                                     |
-| WIKI              | \<Null\>                                                           | Link to the external wiki, if empty will use `${REPOSITORY}/issues`                                                                                   |
+| REPOSITORY        | https://github.com/OriolFilter/Steam_Lobby_Discord_Bot             | Link to the repository. Requieres to start with "http" or "https"                                                                                     |
+| ISSUES            | \<Null\>                                                           | Link to the external wiki, if empty will use `${REPOSITORY}/wiki`. Requieres to start with "http" or "https"                                          |
+| WIKI              | \<Null\>                                                           | Link to the external wiki, if empty will use `${REPOSITORY}/issues`. Requieres to start with "http" or "https"                                        |
 
 ### Shlink
 
