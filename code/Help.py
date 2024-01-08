@@ -147,7 +147,7 @@ class HELPER:
         _relevant_links = {
             "Wiki": self.__discord_bot.middleware.Configuration.project.wiki,
             "Issues": self.__discord_bot.middleware.Configuration.project.issues,
-            "Repository": self.__discord_bot.middleware.Configuration.project.wiki,
+            "Repository": self.__discord_bot.middleware.Configuration.project.repository,
         }
 
         # # Add main commands part 1
@@ -226,7 +226,7 @@ class HELPER:
             if _url:
                 _txt += f"- **[{_topic}]({_url})**\n"
         if _txt != "‎\n":
-            embed.add_field(name="‎\n‎\n‎\n:man_mage: __**Relevant links**__", value=_txt, inline=False)
+            embed.add_field(name="‎\n‎\n:man_mage: __**Relevant links**__", value=_txt, inline=False)
         # return embed
 
         return embed
