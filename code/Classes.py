@@ -165,6 +165,7 @@ class RepoConf(_CONFIG):
     @property
     def repository(self) -> str | None:
         return self._repository
+
     @property
     def version(self) -> str:
         return self._version or "???"
