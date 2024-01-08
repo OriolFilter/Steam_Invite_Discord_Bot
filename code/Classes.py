@@ -1,8 +1,5 @@
 from dataclasses import dataclass, asdict
 from os import getenv
-from functools import wraps
-import Errors
-import psycopg2
 
 
 # import mariadb
@@ -143,6 +140,50 @@ class HealthCheckConf(_CONFIG):
         return self
 
 
+@dataclass
+class RepoConf(_CONFIG):
+    """
+    Git Repo related configs.
+
+    _repo: URL to repository page
+    _wiki: URL to wiki page
+    _issues: URL to issues page
+    _version: Version of the bot running.
+    """
+    _repository: str = None
+    _wiki: str = None
+    _issues: str = None
+    _version: str = ""
+
+    def load_envs(self):
+        self._repository = getenv("REPOSITORY", self._repository)
+        self._wiki = getenv("WIKI", self._wiki)
+        self._issues = getenv("ISSUES", self._wiki)
+        self._version = getenv("VERSION", self._version)
+        return self
+
+    @property
+    def repository(self) -> str | None:
+        return self._repository
+    @property
+    def version(self) -> str:
+        return self._version or "???"
+
+    @property
+    def issues(self) -> str | None:
+        if self.repository and not self._issues:
+            return f'{self.repository}/issues'
+        else:
+            return self._issues
+
+    @property
+    def wiki(self) -> str | None:
+        if self.repository and not self._wiki:
+            return f'{self.repository}/wiki'
+        else:
+            return self._issues
+
+
 # class MemcachedCli(_DBSkel):
 #     __config: MemcachedConf
 #
@@ -236,6 +277,7 @@ class Configuration:
     discord: DiscordConf
     database: DatabaseConf
     shlink: ShlinkConf
+    repo: RepoConf
 
     def __init__(self):
         # self.memcached = MemcachedConf()
@@ -244,3 +286,4 @@ class Configuration:
         self.discord = DiscordConf()
         self.database = DatabaseConf()
         self.shlink = ShlinkConf()
+        self.repo = RepoConf()
