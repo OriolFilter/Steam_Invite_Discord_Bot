@@ -153,7 +153,7 @@ class RepoConf(_CONFIG):
     _repository: str = None
     _wiki: str = None
     _issues: str = None
-    _version: str = ""
+    _version: str = None
 
     def load_envs(self):
         self._repository = getenv("REPOSITORY", self._repository)
