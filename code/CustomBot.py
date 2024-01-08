@@ -19,8 +19,9 @@ from Steam import PlayerSummary
 
 from Help import HELPER
 
+
 ## Main
-middleware: Middleware = Middleware()
+# self.middleware: Middleware = Middleware()
 
 
 # https://discord.com/developers/docs/interactions/application-commands
@@ -30,6 +31,7 @@ middleware: Middleware = Middleware()
 
 class CustomBot(commands.Bot):
     configuration: DiscordConf
+    middleware: Middleware
     helper_class: HELPER
     _link_menu_options: list[str]
     __connected: bool
@@ -69,7 +71,8 @@ class CustomBot(commands.Bot):
         self._set_as_disconnected()
         print("Disconnected!")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, middleware: Middleware, *args, **kwargs):
+        self.middleware = middleware
         self.__connected = False
         self.configuration = DiscordConf()
         intents = discord.Intents.default()
@@ -202,8 +205,8 @@ class CustomBot(commands.Bot):
                 await ctx.reply(
                     f"You need to insert a Steam vanity url name, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
             else:
-                steam_id = middleware.SteamApi.get_id_from_vanity_url_name(vanity_url_name)
-                middleware.set_steam_id(discord_id=ctx.author.id,
+                steam_id = self.middleware.SteamApi.get_id_from_vanity_url_name(vanity_url_name)
+                self.middleware.set_steam_id(discord_id=ctx.author.id,
                                         steam_id=steam_id)
                 await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
                                 mention_author=False,
@@ -223,8 +226,8 @@ class CustomBot(commands.Bot):
                     # await ctx.reply("Steam ID is expected to have **ONLY** numbers", mention_author=False)
                     # await ctx.reply("Steam ID is expected to have **ONLY** numbers", mention_author=False)
                 else:
-                    if middleware.SteamApi.player_summary(steam_id):
-                        middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
+                    if self.middleware.SteamApi.player_summary(steam_id):
+                        self.middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
                         await ctx.reply(
                             "Just linked up your account, please verify that the account linked is correct.",
                             mention_author=False,
@@ -237,7 +240,7 @@ class CustomBot(commands.Bot):
             Use this to unlink the account.
             :return:
             """
-            middleware.unset_steam_id(discord_id=ctx.author.id)
+            self.middleware.unset_steam_id(discord_id=ctx.author.id)
             await ctx.reply(
                 "Successfully removed the entry (if there was one), please verify that the account is correctly unlinked "
                 f"by using the command `{self.command_prefix}profile`", mention_author=False)
@@ -275,7 +278,7 @@ class CustomBot(commands.Bot):
             Raise `ShlinkNotEnabledError` if Shlink functionality is enabled.
             Everything is passed down to self._lobby, who will handle all the decisions/actions.
             """
-            if not middleware.ShlinkClient.enabled:
+            if not self.middleware.ShlinkClient.enabled:
                 raise Errors.ShlinkNotEnabledError
             await self._lobby(ctx=ctx, user=user, shlink_as_text=True)
 
@@ -297,19 +300,19 @@ class CustomBot(commands.Bot):
         """
         Returns an embed object with the GitHub Repo
         """
-        embed = Embed(title="Github Repository", url=middleware.Configuration.repo.repository,
+        embed = Embed(title="Github Repository", url=self.middleware.Configuration.repo.repository,
                       description="Discord bot intended to get lobby links from Steam users", color=0xababab)
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
-        embed.add_field(name="Version", value=middleware.Configuration.repo.version, inline=False)
-        if middleware.Configuration.repo.repository:
-            embed.add_field(name="Repository", value=middleware.Configuration.repo.repository, inline=False)
+        embed.add_field(name="Version", value=self.middleware.Configuration.repo.version, inline=False)
+        if self.middleware.Configuration.repo.repository:
+            embed.add_field(name="Repository", value=self.middleware.Configuration.repo.repository, inline=False)
         return embed
 
     def __return_embed_error_template(self, title: str, description: str) -> discord.Embed:
         embed = Embed(title=title, description=description, color=0xff5c5c)
-        if middleware.Configuration.repo.issues:
-            embed.set_footer(text=middleware.Configuration.repo.issues)
+        if self.middleware.Configuration.repo.issues:
+            embed.set_footer(text=self.middleware.Configuration.repo.issues)
         return embed
 
     @property
@@ -459,9 +462,9 @@ class CustomBot(commands.Bot):
          """
         shortLobbyUrl: str = ""
         message_lobby_url: str
-        if middleware.ShlinkClient.enabled:
+        if self.middleware.ShlinkClient.enabled:
             try:
-                shortLobbyUrl = middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
+                shortLobbyUrl = self.middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
             except Errors.ShlinkError:
                 print(f"Failed generating a short link for URL: {player_summary.lobby_url}")
             except Errors as e:
@@ -474,7 +477,7 @@ class CustomBot(commands.Bot):
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
 
-        if middleware.ShlinkClient.enabled and shlink_as_text and shortLobbyUrl:
+        if self.middleware.ShlinkClient.enabled and shlink_as_text and shortLobbyUrl:
             message_lobby_url = shortLobbyUrl
         elif shortLobbyUrl:
             message_lobby_url = f'[{[player_summary.lobby_url, shortLobbyUrl][shlink_as_text]}]({shortLobbyUrl})'
@@ -502,8 +505,8 @@ class CustomBot(commands.Bot):
         Returns a profile embed for the discord ID specified
         :return Embed
         """
-        steam_id = middleware.get_steam_id_from_discord_id(discord_id)
-        summary = middleware.get_steam_summary(steam_id=steam_id)
+        steam_id = self.middleware.get_steam_id_from_discord_id(discord_id)
+        summary = self.middleware.get_steam_summary(steam_id=steam_id)
         embed = self._embed_player_profile(summary)
         return embed
 
@@ -520,8 +523,8 @@ class CustomBot(commands.Bot):
         else:
             target_discord_id = ctx.author.id
 
-        steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
-        summary = middleware.get_steam_summary(steam_id=steam_id)
+        steam_id = self.middleware.get_steam_id_from_discord_id(target_discord_id)
+        summary = self.middleware.get_steam_summary(steam_id=steam_id)
 
         if summary.has_lobby:
             embed = [
