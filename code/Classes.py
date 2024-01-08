@@ -158,7 +158,7 @@ class ProjectConf(_CONFIG):
     def load_envs(self):
         self._repository = getenv("REPOSITORY", self._repository)
         self._wiki = getenv("WIKI", self._wiki)
-        self._issues = getenv("ISSUES", self._wiki)
+        self._issues = getenv("ISSUES", self._issues)
         self._version = getenv("VERSION", self._version)
         return self
 
@@ -182,7 +182,7 @@ class ProjectConf(_CONFIG):
         if self.repository and not self._wiki:
             return f'{self.repository}/wiki'
         else:
-            return self._issues
+            return self._wiki
 
 
 # class MemcachedCli(_DBSkel):
