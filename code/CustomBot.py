@@ -84,7 +84,7 @@ class CustomBot(commands.Bot):
         self.add_commands()
         self._link_menu_options = ['steamid', 'vanity']
 
-    async def on_command_error(self, ctx: Context, exception: Exception):
+    async def on_command_errorr(self, ctx: Context, exception: Exception):
         """
         On command error "returns" an embed based on the exception risen.
 
@@ -407,7 +407,6 @@ class CustomBot(commands.Bot):
         :param player_summary:
         :return:
         """
-
         embed = Embed(title=f'{player_summary.personaname} Steam Profile', url=player_summary.profileurl,
                       color=self.__return_embed_color(player_summary=player_summary))
 
@@ -467,8 +466,8 @@ class CustomBot(commands.Bot):
                 shortLobbyUrl = self.middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
             except Errors.ShlinkError:
                 print(f"Failed generating a short link for URL: {player_summary.lobby_url}")
-            except Errors as e:
-                print(f"Some error occurred while generating a short link for URL: {player_summary.lobby_url}")
+            except Exception as e:
+                print(f"Some error occurred while generating a short link for URL: {player_summary.lobby_url}\n\tError: {e}")
 
         embed = Embed(title=player_summary.gameextrainfo,
                       url=f'https://store.steampowered.com/app/{player_summary.gameid}',
@@ -533,5 +532,4 @@ class CustomBot(commands.Bot):
             ][summary.has_lobby]
         else:
             embed = self._embed_player_profile(summary)
-
         await ctx.reply(mention_author=False, embed=embed)

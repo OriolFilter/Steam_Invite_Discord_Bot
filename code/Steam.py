@@ -21,22 +21,27 @@ class PlayerSummary:
     avatarhash: Optional[str] = None
     commentpermission: Optional[str] = None
     communityvisibilitystate: Optional[str] = None
-    gameextrainfo: Optional[str] = None
     lobbysteamid: Optional[str] = None
-    gameid: Optional[int] = None
-    gameserverip: Optional[str] = None
     lastlogoff: Optional[int] = None
-    loccityid: Optional[int] = None
-    loccountrycode: Optional[str] = None
-    locstatecode: Optional[int] = None
     personaname: Optional[str] = None
     personastate: Optional[str] = None
     personastateflags: Optional[str] = None
-    primaryclanid: Optional[int] = None
     profilestate: Optional[str] = None
     profileurl: Optional[str] = None
+
+    # Private Data
     realname: Optional[str] = None
+    primaryclanid: Optional[int] = None
     timecreated: Optional[int] = None
+    gameid: Optional[int] = None
+    gameserverip: Optional[str] = None
+    gameserversteamid: Optional[int] = None
+    gameextrainfo: Optional[str] = None
+    cityid: Optional[int] = None
+    loccityid: Optional[int] = None
+    loccountrycode: Optional[str] = None
+    locstatecode: Optional[int] = None
+
 
     def __dict__(self):
         return asdict(self)
