@@ -97,7 +97,7 @@ class DatabaseConf(_CONFIG):
         self.port = getenv("DB_PORT") or self.port
         self.username = getenv("DB_USERNAME") or self.username
         self.password = getenv("DB_PASSWORD") or self.password
-        self.database = getenv("DB_DATABASE") or self.password
+        self.database = getenv("DB_DATABASE") or self.database
         return self
 
 
