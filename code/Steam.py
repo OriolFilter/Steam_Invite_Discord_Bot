@@ -24,6 +24,7 @@ class PlayerSummary:
     gameextrainfo: Optional[str] = None
     lobbysteamid: Optional[str] = None
     gameid: Optional[int] = None
+    gameserverip: Optional[str] = None
     lastlogoff: Optional[int] = None
     loccityid: Optional[int] = None
     loccountrycode: Optional[str] = None
