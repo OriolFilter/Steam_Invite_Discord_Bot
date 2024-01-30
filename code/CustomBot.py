@@ -19,8 +19,9 @@ from Steam import PlayerSummary
 
 from Help import HELPER
 
+
 ## Main
-middleware: Middleware = Middleware()
+# self.middleware: Middleware = Middleware()
 
 
 # https://discord.com/developers/docs/interactions/application-commands
@@ -30,6 +31,7 @@ middleware: Middleware = Middleware()
 
 class CustomBot(commands.Bot):
     configuration: DiscordConf
+    middleware: Middleware
     helper_class: HELPER
     _link_menu_options: list[str]
     __connected: bool
@@ -69,7 +71,8 @@ class CustomBot(commands.Bot):
         self._set_as_disconnected()
         print("Disconnected!")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, middleware: Middleware, *args, **kwargs):
+        self.middleware = middleware
         self.__connected = False
         self.configuration = DiscordConf()
         intents = discord.Intents.default()
@@ -81,7 +84,7 @@ class CustomBot(commands.Bot):
         self.add_commands()
         self._link_menu_options = ['steamid', 'vanity']
 
-    async def on_command_error(self, ctx: Context, exception: Exception):
+    async def on_command_errorr(self, ctx: Context, exception: Exception):
         """
         On command error "returns" an embed based on the exception risen.
 
@@ -98,6 +101,7 @@ class CustomBot(commands.Bot):
             commands.errors.CommandNotFound: lambda: self._embed_error_command_not_found,
             Errors.VanityUrlNotFoundError: lambda: self._embed_error_vanity_url_name_not_found,
             Errors.SteamIdUserNotFoundError: lambda: self._embed_error_steam_id_not_found,
+            Errors.SteamIdNotInteger: lambda: self._embed_error_steamid_not_int,
             Errors.DiscordNotGodError: lambda: self._embed_error_user_not_god,
             Errors.ShlinkNotEnabledError: lambda: self._embed_shlink_not_enabled,
         }
@@ -201,8 +205,8 @@ class CustomBot(commands.Bot):
                 await ctx.reply(
                     f"You need to insert a Steam vanity url name, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
             else:
-                steam_id = middleware.SteamApi.get_id_from_vanity_url_name(vanity_url_name)
-                middleware.set_steam_id(discord_id=ctx.author.id,
+                steam_id = self.middleware.SteamApi.get_id_from_vanity_url_name(vanity_url_name)
+                self.middleware.set_steam_id(discord_id=ctx.author.id,
                                         steam_id=steam_id)
                 await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
                                 mention_author=False,
@@ -218,13 +222,16 @@ class CustomBot(commands.Bot):
                 try:
                     steam_id = int(steam_id)
                 except ValueError:
-                    await ctx.reply("Steam ID is expected to have **ONLY** numbers", mention_author=False)
+                    raise Errors.SteamIdNotInteger
+                    # await ctx.reply("Steam ID is expected to have **ONLY** numbers", mention_author=False)
+                    # await ctx.reply("Steam ID is expected to have **ONLY** numbers", mention_author=False)
                 else:
-                    if middleware.SteamApi.player_summary(steam_id):
-                        middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
-                        await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
-                                        mention_author=False,
-                                        embed=self._profile(discord_id=ctx.author.id))
+                    if self.middleware.SteamApi.player_summary(steam_id):
+                        self.middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
+                        await ctx.reply(
+                            "Just linked up your account, please verify that the account linked is correct.",
+                            mention_author=False,
+                            embed=self._profile(discord_id=ctx.author.id))
 
         @self.hybrid_command(description="Unlink your Steam account.")
         # @self.hybrid_command(description="Use this to unlink the account and will delete the database entry.")
@@ -233,7 +240,7 @@ class CustomBot(commands.Bot):
             Use this to unlink the account.
             :return:
             """
-            middleware.unset_steam_id(discord_id=ctx.author.id)
+            self.middleware.unset_steam_id(discord_id=ctx.author.id)
             await ctx.reply(
                 "Successfully removed the entry (if there was one), please verify that the account is correctly unlinked "
                 f"by using the command `{self.command_prefix}profile`", mention_author=False)
@@ -271,7 +278,7 @@ class CustomBot(commands.Bot):
             Raise `ShlinkNotEnabledError` if Shlink functionality is enabled.
             Everything is passed down to self._lobby, who will handle all the decisions/actions.
             """
-            if not middleware.ShlinkClient.enabled:
+            if not self.middleware.ShlinkClient.enabled:
                 raise Errors.ShlinkNotEnabledError
             await self._lobby(ctx=ctx, user=user, shlink_as_text=True)
 
@@ -293,17 +300,19 @@ class CustomBot(commands.Bot):
         """
         Returns an embed object with the GitHub Repo
         """
-        embed = Embed(title="Github Repository", url=os.getenv("REPOSITORY"),
+        embed = Embed(title="Github Repository", url=self.middleware.Configuration.project.repository,
                       description="Discord bot intended to get lobby links from Steam users", color=0xababab)
         embed.set_author(name="OriolFilter", url="https://github.com/OriolFilter",
                          icon_url="https://avatars.githubusercontent.com/u/55088942?v=4")
-        embed.add_field(name="Version", value=f'v{os.getenv("VERSION")}', inline=False)
-        embed.add_field(name="Repository", value=f'{os.getenv("REPOSITORY")}', inline=False)
+        embed.add_field(name="Version", value=self.middleware.Configuration.project.version, inline=False)
+        if self.middleware.Configuration.project.repository:
+            embed.add_field(name="Repository", value=self.middleware.Configuration.project.repository, inline=False)
         return embed
 
     def __return_embed_error_template(self, title: str, description: str) -> discord.Embed:
         embed = Embed(title=title, description=description, color=0xff5c5c)
-        embed.set_footer(text=f'{os.getenv("REPOSITORY")}/issues')
+        if self.middleware.Configuration.project.issues:
+            embed.set_footer(text=self.middleware.Configuration.project.issues)
         return embed
 
     @property
@@ -364,6 +373,24 @@ class CustomBot(commands.Bot):
         return embed
 
     @property
+    def _embed_error_steamid_not_int(self):
+        """
+        Embed used when the user tried to link through steam ID and specified a string instead of an integer.
+        :return:
+        """
+
+        embed = self.__return_embed_error_template(
+            title=f"Steam ID is expected to contain ONLY numbers, use the command `{self.command_prefix}help link` for help.",
+            description=f"‎\nIf you have an URL like:\n\n"
+                        "  \- steamcommunity.com/profile/**76561198170583259**/\n\n"
+                        f"The **__Steam ID__** is **76561198170583259**, then you would execute:\n\n"
+                        f" \- **{self.command_prefix}link vanity __savagebidoof__**\n\n"
+                        f"If you have an URL like:\n\n"
+                        "  \- steamcommunity.com/**id**/SavageBidoof/\n\n"
+                        f"Use the command **__{self.command_prefix}link vanity__** instead.\n")
+        return embed
+
+    @property
     def _embed_error_user_not_god(self):
         """
         Embed used when the user is expected to be GOD (aka Bot Administrator), but it's not.
@@ -380,7 +407,6 @@ class CustomBot(commands.Bot):
         :param player_summary:
         :return:
         """
-
         embed = Embed(title=f'{player_summary.personaname} Steam Profile', url=player_summary.profileurl,
                       color=self.__return_embed_color(player_summary=player_summary))
 
@@ -400,7 +426,7 @@ class CustomBot(commands.Bot):
 
         else:
             if player_summary.has_public_visibility:
-                embed.add_field(name="User currently is not playing a game.", value="")
+                embed.add_field(name="User is not currently playing a game.", value="")
             else:
                 embed.add_field(name=":detective: User activity is not public!",
                                 value="Steam user account has visibility set to non-public.\n"
@@ -435,13 +461,13 @@ class CustomBot(commands.Bot):
          """
         shortLobbyUrl: str = ""
         message_lobby_url: str
-        if middleware.ShlinkClient.enabled:
+        if self.middleware.ShlinkClient.enabled:
             try:
-                shortLobbyUrl = middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
+                shortLobbyUrl = self.middleware.ShlinkClient.shorten(longurl=player_summary.lobby_url)
             except Errors.ShlinkError:
                 print(f"Failed generating a short link for URL: {player_summary.lobby_url}")
-            except Errors as e:
-                print(f"Some error occurred while generating a short link for URL: {player_summary.lobby_url}")
+            except Exception as e:
+                print(f"Some error occurred while generating a short link for URL: {player_summary.lobby_url}\n\tError: {e}")
 
         embed = Embed(title=player_summary.gameextrainfo,
                       url=f'https://store.steampowered.com/app/{player_summary.gameid}',
@@ -450,7 +476,7 @@ class CustomBot(commands.Bot):
         embed.set_author(name=player_summary.personaname, url=player_summary.profileurl,
                          icon_url=player_summary.avatarfull)
 
-        if middleware.ShlinkClient.enabled and shlink_as_text and shortLobbyUrl:
+        if self.middleware.ShlinkClient.enabled and shlink_as_text and shortLobbyUrl:
             message_lobby_url = shortLobbyUrl
         elif shortLobbyUrl:
             message_lobby_url = f'[{[player_summary.lobby_url, shortLobbyUrl][shlink_as_text]}]({shortLobbyUrl})'
@@ -478,8 +504,8 @@ class CustomBot(commands.Bot):
         Returns a profile embed for the discord ID specified
         :return Embed
         """
-        steam_id = middleware.get_steam_id_from_discord_id(discord_id)
-        summary = middleware.get_steam_summary(steam_id=steam_id)
+        steam_id = self.middleware.get_steam_id_from_discord_id(discord_id)
+        summary = self.middleware.get_steam_summary(steam_id=steam_id)
         embed = self._embed_player_profile(summary)
         return embed
 
@@ -496,8 +522,8 @@ class CustomBot(commands.Bot):
         else:
             target_discord_id = ctx.author.id
 
-        steam_id = middleware.get_steam_id_from_discord_id(target_discord_id)
-        summary = middleware.get_steam_summary(steam_id=steam_id)
+        steam_id = self.middleware.get_steam_id_from_discord_id(target_discord_id)
+        summary = self.middleware.get_steam_summary(steam_id=steam_id)
 
         if summary.has_lobby:
             embed = [
@@ -506,5 +532,4 @@ class CustomBot(commands.Bot):
             ][summary.has_lobby]
         else:
             embed = self._embed_player_profile(summary)
-
         await ctx.reply(mention_author=False, embed=embed)

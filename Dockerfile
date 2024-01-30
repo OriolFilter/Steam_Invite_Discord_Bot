@@ -6,8 +6,9 @@ FROM ${BASEIMAGE}
 #as build
 
 ARG BUILDDATE
-ARG VERSION="1.3-extra"
+ARG VERSION="1.4"
 ARG REPOSITORY="https://github.com/OriolFilter/Steam_Lobby_Discord_Bot"
+ARG WIKI="https://github.com/OriolFilter/Steam_Lobby_Discord_Bot/wiki"
 
 LABEL "author"="Oriol Filter Anson"
 LABEL "version"="${VERSION}"
@@ -18,6 +19,7 @@ LABEL "build_date"="${BUILDDATE}"
 ENV VERSION=${VERSION}
 ENV BUILDDATE=${BUILDDATE}
 ENV REPOSITORY=${REPOSITORY}
+ENV WIKI=${WIKI}
 
 # Used for certain special commands and stuff. Aka Discord Account ID for the GOD mode.
 ENV GOD_DISCORD_ID=""

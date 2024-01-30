@@ -1,6 +1,8 @@
 import asyncio
 
-from CustomBot import CustomBot, middleware
+from CustomBot import CustomBot
+
+from Middleware import Middleware
 
 from HealthCheck import HealthcheckHandler
 
@@ -13,7 +15,8 @@ async def main():
 
     Starts Web server and Discord Server
     """
-    bot = CustomBot()
+    middleware = Middleware()
+    bot = CustomBot(middleware=middleware)
     handler = HealthcheckHandler(configuration=middleware.Configuration.healtcheck, discord_bot=bot)
 
     await handler.start_web()

@@ -42,7 +42,6 @@ class ShlinkClient:
                 "steam-lobby"
             ],
         }
-
         api_response = requests.post(f'{self.__config.url}/rest/v3/short-urls', headers=headers,
                                      data=json.dumps(payload))
 
