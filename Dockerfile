@@ -51,6 +51,8 @@ RUN apk add build-base postgresql-dev libpq
 
 WORKDIR /tmp
 ADD ./requirements.txt /tmp
+RUN pip3 install -U git+https://github.com/Rapptz/discord.py
+
 RUN pip3 install -r /tmp/requirements.txt --user
 
 ADD ./code /main
