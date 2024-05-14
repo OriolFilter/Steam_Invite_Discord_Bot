@@ -145,6 +145,7 @@ class CustomBot(commands.Bot):
     #     return commands.check(extended_check)
 
     def add_commands(self):
+
         @self.hybrid_command(name="help", description="Prints a list of commands and their description")
         async def help(ctx: Context, topic: str = None):
             """
@@ -176,17 +177,30 @@ class CustomBot(commands.Bot):
             await self.tree.sync()
             await ctx.send("Sync!\nYou might need to reload the browser page or discord app for changes to be applied.")
 
+        # @app_commands.command()
+        # @app_commands.allowed_installs(guilds=False, users=True)
+        # @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
         @self.command(description="Returns a link to invite this bot to your server.")
         # async def botinvite(ctx: Context):
         async def invite_bot(ctx: Context):
             """
-            In case someone wants to add this bot to their server use the link provided by this command
+            In case someone wants to add this bot to their server or discord account, use the link provided by this command
             :param ctx:
             :return:
             """
             await ctx.reply(
-                f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032&scope=bot',
+                f'https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=84032',
                 mention_author=False)
+
+        # @self.tree.command()
+        # @app_commands.allowed_installs(guilds=True, users=True) # users only, no guilds for install
+        # @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True) # all allowed
+        # async def hello(interaction: discord.Interaction) -> None:
+        #     # await interaction.send("test")
+        #     await interaction.response.send_message(f"Hello {interaction.user.mention}!")
+        #     await interaction.followup.send("hi")
+        #     await interaction.message.reply("test1")
+        #     await interaction.response.send_message(f"Hello2!")
 
         # @self.hybrid_command(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.")
         @self.hybrid_group(description=f"Links your steam account. Use **{self.command_prefix}help link** for help.",
@@ -199,25 +213,31 @@ class CustomBot(commands.Bot):
                 await ctx.reply(
                     f'You need to specify which method to linking wanna use, either **{self.command_prefix} vanity <vanity url name>** or **{self.command_prefix}link steamid <steam id>**.\nUse **{self.command_prefix}help link** to get help regarding how to link your account.')
 
-        @link.command(description=f"Links your Steam account using your Steam vanity URL name.")
-        async def vanity(ctx: Context, vanity_url_name: str = None):
+        @self.tree.command(description=f"Links your Steam account using your Steam vanity URL name.")
+        @app_commands.allowed_installs(guilds=True, users=True)
+        @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+        async def vanity(interaction: discord.Interaction, vanity_url_name: str = None):
             if not vanity_url_name:
-                await ctx.reply(
-                    f"You need to insert a Steam vanity url name, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
+                await interaction.response.send_message(
+                    f"You need to insert a Steam vanity url name, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.",
+                    silent=True)
             else:
                 steam_id = self.middleware.SteamApi.get_id_from_vanity_url_name(vanity_url_name)
-                self.middleware.set_steam_id(discord_id=ctx.author.id,
-                                        steam_id=steam_id)
-                await ctx.reply("Just linked up your account, please verify that the account linked is correct.",
-                                mention_author=False,
-                                embed=self._profile(discord_id=ctx.author.id))
+                self.middleware.set_steam_id(discord_id=interaction.user.id,
+                                             steam_id=steam_id)
+                await interaction.response.send_message(
+                    "Just linked up your account, please verify that the account linked is correct.",
+                    embed=self._profile(discord_id=interaction.user.id), silent=True)
 
         # @link.command(description=f"Links your Steam account specifying your Steam account ID. Use **{self.command_prefix}help link** for help.")
-        @link.command(description=f"Links your Steam account using your Steam account ID.")
-        async def steamid(ctx: Context, steam_id: str = None):
+        @self.tree.command(description=f"Links your Steam account using your Steam account ID.")
+        @app_commands.allowed_installs(guilds=True, users=True)
+        @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+        async def steamid(interaction: discord.Interaction, steam_id: str = None):
             if not steam_id:
-                await ctx.reply(
-                    f"You need to insert a Steam account ID, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.")
+                await interaction.response.send_message(
+                    f"You need to insert a Steam account ID, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.",
+                    silent=True)
             else:
                 try:
                     steam_id = int(steam_id)
@@ -227,27 +247,33 @@ class CustomBot(commands.Bot):
                     # await ctx.reply("Steam ID is expected to have **ONLY** numbers", mention_author=False)
                 else:
                     if self.middleware.SteamApi.player_summary(steam_id):
-                        self.middleware.set_steam_id(discord_id=ctx.author.id, steam_id=steam_id)
-                        await ctx.reply(
+                        self.middleware.set_steam_id(discord_id=interaction.user.id, steam_id=steam_id)
+                        await interaction.response.send_message(
                             "Just linked up your account, please verify that the account linked is correct.",
-                            mention_author=False,
-                            embed=self._profile(discord_id=ctx.author.id))
+                            embed=self._profile(discord_id=interaction.user.id),
+                            silent=True)
 
-        @self.hybrid_command(description="Unlink your Steam account.")
-        # @self.hybrid_command(description="Use this to unlink the account and will delete the database entry.")
-        async def unlink(ctx: Context):
+        @self.tree.command(description="Unlink your Steam account.")
+        @app_commands.allowed_installs(guilds=True, users=True)
+        @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+        async def unlink(interaction: discord.Interaction):
             """
             Use this to unlink the account.
             :return:
             """
-            self.middleware.unset_steam_id(discord_id=ctx.author.id)
-            await ctx.reply(
+            self.middleware.unset_steam_id(discord_id=interaction.user.id)
+            await interaction.response.send_message(
                 "Successfully removed the entry (if there was one), please verify that the account is correctly unlinked "
-                f"by using the command `{self.command_prefix}profile`", mention_author=False)
+                f"by using the command `{self.command_prefix}profile`", silent=True)
 
-        @self.hybrid_command(
+        # @self.hybrid_command(
+        #     description=)
+
+        @self.tree.command(
             description=f"Posts profile of the user and their active game. Use **{self.command_prefix}help profile** for help.")
-        async def profile(ctx: Context, user: discord.User = None):
+        @app_commands.allowed_installs(guilds=True, users=True)
+        @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+        async def profile(interaction: discord.Interaction, user: discord.User = None):
             """
             Returns Steam account from the user and their current open game (if they are currently playing)
             :param ctx:
@@ -258,21 +284,26 @@ class CustomBot(commands.Bot):
             if user:
                 target_discord_id = user.id
             else:
-                target_discord_id = ctx.author.id
-            await ctx.send(embed=self._profile(discord_id=target_discord_id))
+                target_discord_id = interaction.user.id
+                # target_discord_id = ctx.author.id
+            await interaction.response.send_message(embed=self._profile(discord_id=target_discord_id))
 
-        @self.hybrid_command(
+        @self.tree.command(
             description=f"Posts link to the lobby. Use **{self.command_prefix}help lobby** for help.")
-        async def lobby(ctx: Context, user: discord.User = None):
+        @app_commands.allowed_installs(guilds=True, users=True)
+        @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+        async def lobby(interaction: discord.Interaction, user: discord.User = None):
             """
             Posts the link of a lobby.
             Everything is passed down to self._lobby, who will handle all the decisions/actions.
             """
-            await self._lobby(ctx=ctx, user=user)
+            await self._lobby(interaction=interaction, user=user)
 
-        @self.hybrid_command(
+        @self.tree.command(
             description=f"Behaves like the **lobby** command. Returns a short link instead of a lobby link.")
-        async def shlink(ctx: Context, user: discord.User = None):
+        @app_commands.allowed_installs(guilds=True, users=True)
+        @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+        async def shlink(interaction: discord.Interaction, user: discord.User = None):
             """
             Stands for "short link".
             Raise `ShlinkNotEnabledError` if Shlink functionality is enabled.
@@ -280,7 +311,7 @@ class CustomBot(commands.Bot):
             """
             if not self.middleware.ShlinkClient.enabled:
                 raise Errors.ShlinkNotEnabledError
-            await self._lobby(ctx=ctx, user=user, shlink_as_text=True)
+            await self._lobby(interaction=interaction, user=user, shlink_as_text=True)
 
         @self.command(description="Prints the current version of the bot.")
         async def version(ctx: Context):
@@ -467,7 +498,8 @@ class CustomBot(commands.Bot):
             except Errors.ShlinkError:
                 print(f"Failed generating a short link for URL: {player_summary.lobby_url}")
             except Exception as e:
-                print(f"Some error occurred while generating a short link for URL: {player_summary.lobby_url}\n\tError: {e}")
+                print(
+                    f"Some error occurred while generating a short link for URL: {player_summary.lobby_url}\n\tError: {e}")
 
         embed = Embed(title=player_summary.gameextrainfo,
                       url=f'https://store.steampowered.com/app/{player_summary.gameid}',
@@ -509,7 +541,7 @@ class CustomBot(commands.Bot):
         embed = self._embed_player_profile(summary)
         return embed
 
-    async def _lobby(self, ctx: Context, user: discord.User = None, shlink_as_text=False):
+    async def _lobby(self, interaction: discord.Interaction, user: discord.User = None, shlink_as_text=False):
         """
         This function unifies `lobby` and `shlink` commands.
         If no user is specified, uses the Steam account linked to the user that called this command.
@@ -520,7 +552,7 @@ class CustomBot(commands.Bot):
         if user:
             target_discord_id = user.id
         else:
-            target_discord_id = ctx.author.id
+            target_discord_id = interaction.user.id
 
         steam_id = self.middleware.get_steam_id_from_discord_id(target_discord_id)
         summary = self.middleware.get_steam_summary(steam_id=steam_id)
@@ -532,4 +564,4 @@ class CustomBot(commands.Bot):
             ][summary.has_lobby]
         else:
             embed = self._embed_player_profile(summary)
-        await ctx.reply(mention_author=False, embed=embed)
+        await interaction.response.send_message(embed=embed)
