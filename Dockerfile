@@ -5,7 +5,7 @@ ARG BASEIMAGE="${IMAGE}:${TAG}"
 FROM ${BASEIMAGE}
 
 ARG BUILDDATE
-ARG VERSION="1.5"
+ARG VERSION="dev-1.6-user-installable-app"
 ARG REPOSITORY="https://github.com/OriolFilter/Steam_Lobby_Discord_Bot"
 ARG WIKI="https://github.com/OriolFilter/Steam_Lobby_Discord_Bot/wiki"
 
