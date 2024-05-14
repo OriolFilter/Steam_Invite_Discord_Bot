@@ -269,11 +269,13 @@ class CustomBot(commands.Bot):
         # @self.hybrid_command(
         #     description=)
 
-        @self.tree.command(
+        # @self.tree.command(
+        #     description=f"Posts profile of the user and their active game. Use **{self.command_prefix}help profile** for help.")
+        # @app_commands.allowed_installs(guilds=True, users=True)
+        # @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
+        @self.hybrid_command(
             description=f"Posts profile of the user and their active game. Use **{self.command_prefix}help profile** for help.")
-        @app_commands.allowed_installs(guilds=True, users=True)
-        @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-        async def profile(interaction: discord.Interaction, user: discord.User = None):
+        async def profile(ctx: Context, user: discord.User = None):
             """
             Returns Steam account from the user and their current open game (if they are currently playing)
             :param ctx:
@@ -284,9 +286,8 @@ class CustomBot(commands.Bot):
             if user:
                 target_discord_id = user.id
             else:
-                target_discord_id = interaction.user.id
-                # target_discord_id = ctx.author.id
-            await interaction.response.send_message(embed=self._profile(discord_id=target_discord_id))
+                target_discord_id = ctx.author.id
+            await ctx.send(embed=self._profile(discord_id=target_discord_id))
 
         @self.tree.command(
             description=f"Posts link to the lobby. Use **{self.command_prefix}help lobby** for help.")
