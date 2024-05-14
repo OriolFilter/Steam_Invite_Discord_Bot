@@ -3,10 +3,9 @@ ARG TAG="3.11-alpine"
 ARG BASEIMAGE="${IMAGE}:${TAG}"
 
 FROM ${BASEIMAGE}
-#as build
 
 ARG BUILDDATE
-ARG VERSION="1.4"
+ARG VERSION="dev-1.6-user-installable-app"
 ARG REPOSITORY="https://github.com/OriolFilter/Steam_Lobby_Discord_Bot"
 ARG WIKI="https://github.com/OriolFilter/Steam_Lobby_Discord_Bot/wiki"
 
@@ -52,6 +51,8 @@ RUN apk add build-base postgresql-dev libpq
 
 WORKDIR /tmp
 ADD ./requirements.txt /tmp
+RUN pip3 install -U git+https://github.com/Rapptz/discord.py
+
 RUN pip3 install -r /tmp/requirements.txt --user
 
 ADD ./code /main
