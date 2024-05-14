@@ -220,14 +220,14 @@ class CustomBot(commands.Bot):
             if not vanity_url_name:
                 await interaction.response.send_message(
                     f"You need to insert a Steam vanity url name, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.",
-                    silent=True)
+                    ephemeral=True)
             else:
                 steam_id = self.middleware.SteamApi.get_id_from_vanity_url_name(vanity_url_name)
                 self.middleware.set_steam_id(discord_id=interaction.user.id,
                                              steam_id=steam_id)
                 await interaction.response.send_message(
                     "Just linked up your account, please verify that the account linked is correct.",
-                    embed=self._profile(discord_id=interaction.user.id), silent=True)
+                    embed=self._profile(discord_id=interaction.user.id), ephemeral=True)
 
         # @link.command(description=f"Links your Steam account specifying your Steam account ID. Use **{self.command_prefix}help link** for help.")
         @self.tree.command(description=f"Links your Steam account using your Steam account ID.")
@@ -237,7 +237,7 @@ class CustomBot(commands.Bot):
             if not steam_id:
                 await interaction.response.send_message(
                     f"You need to insert a Steam account ID, use `{self.command_prefix}help link` for help.\nRemember that linking another account will overwrite the current linked one.",
-                    silent=True)
+                    ephemeral=True)
             else:
                 try:
                     steam_id = int(steam_id)
@@ -251,7 +251,7 @@ class CustomBot(commands.Bot):
                         await interaction.response.send_message(
                             "Just linked up your account, please verify that the account linked is correct.",
                             embed=self._profile(discord_id=interaction.user.id),
-                            silent=True)
+                            ephemeral=True)
 
         @self.tree.command(description="Unlink your Steam account.")
         @app_commands.allowed_installs(guilds=True, users=True)
@@ -264,7 +264,7 @@ class CustomBot(commands.Bot):
             self.middleware.unset_steam_id(discord_id=interaction.user.id)
             await interaction.response.send_message(
                 "Successfully removed the entry (if there was one), please verify that the account is correctly unlinked "
-                f"by using the command `{self.command_prefix}profile`", silent=True)
+                f"by using the command `{self.command_prefix}profile`", ephemeral=True)
 
         # @self.hybrid_command(
         #     description=)
